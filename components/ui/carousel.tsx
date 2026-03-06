@@ -36,7 +36,7 @@ export default function Carousel() {
     };
 
     return (
-        <div id="controls-carousel" className="relative w-full">
+        <div id="controls-carousel" className="relative w-full ">
             {/* Carousel wrapper */}
             <div className="relative h-64 overflow-hidden md:h-128">
                 {carouselItems.map((item, index) => (
@@ -49,6 +49,29 @@ export default function Carousel() {
                             className="absolute left-1/2 top-1/2 block h-full w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                             alt={`Carousel item ${index + 1}`}
                         />
+
+                        {/* Gradient layer to keep text readable on top of photos */}
+                        <div className="absolute inset-0 bg-linear-to-r from-black/65 via-black/30 to-transparent" />
+
+                        <div className="absolute inset-0 z-10 flex items-center">
+                            <div className="w-full px-6 md:px-16 lg:px-24">
+                                <div className="max-w-xl text-white">
+                                    <h2 className="text-3xl font-bold leading-tight md:text-5xl">
+                                        A dedicated team to grow your company
+                                    </h2>
+                                    <p className="mt-4 text-sm text-white/90 md:text-lg">
+                                        Lorem ipsum dolor sit amet consectetur adipiscing elit mattis sit
+                                        phasellus mollis sit aliquam sit nullam neque ultrices.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className="mt-8 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:text-base"
+                                    >
+                                        Explore Collections -&gt;
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
