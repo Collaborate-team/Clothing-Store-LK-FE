@@ -1,25 +1,52 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 const carouselItems = [
-    "/docs/images/carousel/carousel-1.svg",
-    "/docs/images/carousel/carousel-2.svg",
-    "/docs/images/carousel/carousel-3.svg",
-    "/docs/images/carousel/carousel-4.svg",
-    "/docs/images/carousel/carousel-5.svg",
+    "/images/carousel/carousel-1.jpg",
+    "/images/carousel/carousel-2.jpg",
+    "/images/carousel/carousel-3.jpg",
+    "/images/carousel/carousel-4.jpg",
+    "/images/carousel/carousel-5.jpg",
 ];
 
 export default function Carousel() {
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setActiveIndex((currentIndex) =>
+                currentIndex === carouselItems.length - 1 ? 0 : currentIndex + 1,
+            );
+        }, 3000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const goToPrevious = () => {
+        setActiveIndex((currentIndex) =>
+            currentIndex === 0 ? carouselItems.length - 1 : currentIndex - 1,
+        );
+    };
+
+    const goToNext = () => {
+        setActiveIndex((currentIndex) =>
+            currentIndex === carouselItems.length - 1 ? 0 : currentIndex + 1,
+        );
+    };
+
     return (
-        <div id="controls-carousel" className="relative w-full" data-carousel="static">
+        <div id="controls-carousel" className="relative w-full">
             {/* Carousel wrapper */}
-            <div className="relative h-56 overflow-hidden rounded-base md:h-96">
+            <div className="relative h-64 overflow-hidden md:h-128">
                 {carouselItems.map((item, index) => (
                     <div
                         key={item}
-                        className="hidden duration-700 ease-in-out"
-                        data-carousel-item={index === 1 ? "active" : ""}
+                        className={`${index === activeIndex ? "block" : "hidden"} duration-700 ease-in-out`}
                     >
                         <img
                             src={item}
-                            className="absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2"
+                            className="absolute left-1/2 top-1/2 block h-full w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                             alt={`Carousel item ${index + 1}`}
                         />
                     </div>
@@ -30,7 +57,8 @@ export default function Carousel() {
             <button
                 type="button"
                 className="absolute inset-s-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 group focus:outline-none"
-                data-carousel-prev
+                onClick={goToPrevious}
+                aria-label="Show previous slide"
             >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-base bg-white/30 group-hover:bg-white/50 group-focus:outline-none group-focus:ring-4 group-focus:ring-white dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
                     <svg
@@ -57,7 +85,8 @@ export default function Carousel() {
             <button
                 type="button"
                 className="absolute inset-e-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 group focus:outline-none"
-                data-carousel-next
+                onClick={goToNext}
+                aria-label="Show next slide"
             >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-base bg-white/30 group-hover:bg-white/50 group-focus:outline-none group-focus:ring-4 group-focus:ring-white dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
                     <svg
