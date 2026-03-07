@@ -164,9 +164,6 @@ const ProductCategoryList = () => {
 
                 {/* Footer */}
                 <div className="mt-20 flex flex-col items-center gap-4 border-t border-[#A37B5C]/10 pt-12 pb-24">
-                   <div className="flex justify-between w-full text-[11px] font-bold text-[#A37B5C]/60 tracking-widest uppercase mb-12">
-                        <span>{filteredProducts.length} Pieces</span>
-                   </div>
                     <button className="text-[12px] font-bold text-[#A37B5C] underline underline-offset-[10px] decoration-[#A37B5C]/30 hover:decoration-[#A37B5C] transition-all cursor-pointer tracking-widest uppercase">
                         Show More
                     </button>
