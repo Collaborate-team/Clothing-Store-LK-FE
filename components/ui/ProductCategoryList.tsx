@@ -101,7 +101,7 @@ const ProductCategoryList = () => {
         }
     ];
 
-    const tabs = ["All Items", "Women", "Men", "Accessories", "Sale"];
+    const tabs = ["All Items", "Men", "Women", "Accessories", "Sale"];
 
     const filteredProducts = activeTab === "All Items" 
         ? products 
