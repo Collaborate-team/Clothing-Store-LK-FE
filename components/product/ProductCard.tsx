@@ -52,27 +52,27 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-grow p-4">
-        <h3 className="text-[15px] font-medium text-[#2D261E] mb-1 line-clamp-1">
+      <div className="flex flex-col flex-grow p-2.5 min-[400px]:p-4">
+        <h3 className="text-[14px] min-[400px]:text-[15px] font-medium text-[#2D261E] mb-0.5 min-[400px]:mb-1 line-clamp-1">
           {title}
         </h3>
-        <p className="text-[13px] text-[#2D261E]/60 mb-4 line-clamp-1">
+        <p className="text-[12px] min-[400px]:text-[13px] text-[#2D261E]/60 mb-2 min-[400px]:mb-4 line-clamp-1">
           {description}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-4">
+        <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-[400px]:gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-[16px] font-bold text-[#2D261E]">
+            <span className="text-[14px] sm:text-[16px] font-bold text-[#2D261E]">
               Rs {price}
             </span>
             {originalPrice && (
-              <span className="text-[13px] text-[#2D261E]/30 line-through">
+              <span className="text-[11px] sm:text-[13px] text-[#2D261E]/30 line-through">
                 Rs {originalPrice}
               </span>
             )}
           </div>
           
-          <button className="bg-[#2D261E] text-white text-[11px] font-bold tracking-widest px-5 py-2.5 rounded hover:bg-[#40372D] transition-colors cursor-pointer uppercase">
+          <button className="w-full sm:w-auto bg-[#2D261E] text-white text-[10px] sm:text-[11px] font-bold tracking-widest px-3 sm:px-5 py-2 sm:py-2.5 rounded hover:bg-[#40372D] transition-colors cursor-pointer uppercase">
             Add to Cart
           </button>
         </div>

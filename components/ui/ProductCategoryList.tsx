@@ -141,7 +141,7 @@ const ProductCategoryList = () => {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 min-h-[400px]">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10 min-h-[400px]">
                     {filteredProducts.length > 0 ? (
                         filteredProducts.map((product) => (
                             <div key={product.id} className="animate-fade-in">
