@@ -15,6 +15,43 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@keyframes grow-x {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-grow-x {
+  animation: grow-x 0.4s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-fade-in-down {
+  animation: fade-in 0.5s ease-out forwards;
+  /* Assuming this is the intended animation for fade-in-down */
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

@@ -1,39 +1,180 @@
-import Image from 'next/image'
-import cardimage from '../../public/images/images.jpeg'
+"use client";
 
-function ProductCategoryList() {
-  return (
-    <div>
+import { useState } from 'react';
+import ProductCard from '../product/ProductCard';
+import producyImage from '../../public/images/images.jpeg'
 
-<div className="w-full max-w-sm bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs">
-    <button type="button" className="cursor-pointer">
-        <Image className="rounded-base mb-6" src={cardimage} alt="product image" />
-    </button>
-    <div>
-        <div className="flex items-center space-x-3 mb-6">
-            <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                <svg className="w-5 h-5 text-fg-yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/></svg>
-                <svg className="w-5 h-5 text-fg-yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/></svg>
-                <svg className="w-5 h-5 text-fg-yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/></svg>
-                <svg className="w-5 h-5 text-fg-yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/></svg>
-                <svg className="w-5 h-5 text-fg-yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/></svg>
+const ProductCategoryList = () => {
+    const [activeTab, setActiveTab] = useState("All Items");
+
+    const products = [
+        {
+            id: 1,
+            title: "Linen Wrap Dress",
+            description: "Natural / S-XL",
+            price: "128.00",
+            category: "Women",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 2,
+            title: "Silk Slip Blouse",
+            description: "Ivory / XS-L",
+            price: "96.00",
+            category: "Women",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 3,
+            title: "Tailored Linen Coat",
+            description: "Sand / XS-XL",
+            price: "245.00",
+            category: "Women",
+            badge: "NEW" as const,
+            imageUrl: producyImage
+        },
+        {
+            id: 4,
+            title: "Wide Leg Trousers",
+            description: "Ecru / 6-16",
+            price: "112.00",
+            category: "Women",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 5,
+            title: "Cotton Knit Cardigan",
+            description: "Oat / One Size",
+            price: "74.00",
+            originalPrice: "98.00",
+            category: "Sale",
+            badge: "SALE" as const,
+            imageUrl: producyImage
+        },
+        {
+            id: 6,
+            title: "Merino Turtleneck",
+            description: "Charcoal / XS-L",
+            price: "135.00",
+            category: "Men",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 7,
+            title: "Oversized Blazer",
+            description: "Stone / 6-14",
+            price: "198.00",
+            category: "Women",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 8,
+            title: "Pleated Midi Skirt",
+            description: "Blush / 6-16",
+            price: "89.00",
+            category: "Women",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 9,
+            title: "Classic Cotton Shirt",
+            description: "White / M-XXL",
+            price: "85.00",
+            category: "Men",
+            badge: undefined,
+            imageUrl: producyImage
+        },
+        {
+            id: 10,
+            title: "Leather Handbag",
+            description: "Tan / Genuine Leather",
+            price: "210.00",
+            category: "Accessories",
+            badge: "NEW" as const,
+            imageUrl: producyImage
+        }
+    ];
+
+    const tabs = ["All Items", "Women", "Men", "Accessories", "Sale"];
+
+    const filteredProducts = activeTab === "All Items" 
+        ? products 
+        : products.filter(p => p.category === activeTab);
+
+    return (
+        <div className="bg-black min-h-screen text-white py-16 px-4 md:px-8 lg:px-12 font-sans">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-16">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 tracking-tight animate-fade-in-down">
+                        New Season Collection
+                    </h1>
+                    <p className="text-[#A37B5C] italic text-sm md:text-md max-w-lg mx-auto mb-10 opacity-80 animate-fade-in-up">
+                        Thoughtfully made pieces for the modern wardrobe — crafted to last
+                    </p>
+                    
+                    {/* Tabs */}
+                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 border-b border-[#A37B5C]/20 pb-4 mb-16 relative">
+                        {tabs.map((tab) => (
+                            <button 
+                                key={tab} 
+                                onClick={() => setActiveTab(tab)}
+                                className={`text-[12px] font-bold tracking-[0.1em] transition-all duration-300 cursor-pointer uppercase relative pb-4 ${
+                                    activeTab === tab 
+                                    ? "text-white" 
+                                    : "text-white/40 hover:text-white"
+                                }`}
+                            >
+                                {tab}
+                                {activeTab === tab && (
+                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#A37B5C] animate-grow-x"></span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 min-h-[400px]">
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                            <div key={product.id} className="animate-fade-in">
+                                <ProductCard
+                                    title={product.title}
+                                    description={product.description}
+                                    price={product.price}
+                                    originalPrice={product.originalPrice}
+                                    badge={product.badge}
+                                    imageUrl={product.imageUrl}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 text-center text-white/40 italic">
+                            No items found in this category.
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="mt-20 flex flex-col items-center gap-4 border-t border-[#A37B5C]/10 pt-12 pb-24">
+                   <div className="flex justify-between w-full text-[11px] font-bold text-[#A37B5C]/60 tracking-widest uppercase mb-12">
+                        <span>{filteredProducts.length} Pieces</span>
+                   </div>
+                    <button className="text-[12px] font-bold text-[#A37B5C] underline underline-offset-[10px] decoration-[#A37B5C]/30 hover:decoration-[#A37B5C] transition-all cursor-pointer tracking-widest uppercase">
+                        Show More
+                    </button>
+                </div>
             </div>
-            <span className="bg-brand-softer border border-brand-subtle text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded-sm">4.8 out of 5</span>
         </div>
-        <button type="button" className="cursor-pointer text-left">
-            <h5 className="text-xl text-heading font-semibold tracking-tight">Apple Watch Series 7 GPS, Aluminium Case, Starlight</h5>
-        </button>
-        <div className="flex items-center justify-between mt-6">
-            <span className="text-3xl font-extrabold text-heading">$599</span>
-            <button type="button" className="inline-flex items-center  text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none">
-                <svg className="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"/></svg>
-                Add to cart
-            </button>
-        </div>
-    </div>
-</div>
-</div>
-  )
-}
+    );
+};
 
-export default ProductCategoryList
+export default ProductCategoryList;
+
