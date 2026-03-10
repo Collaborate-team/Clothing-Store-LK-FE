@@ -38,7 +38,7 @@ export default function Carousel() {
     return (
         <div id="controls-carousel" className="relative w-full ">
             {/* Carousel wrapper */}
-            <div className="relative h-64 overflow-hidden md:h-128">
+            <div className="relative h-screen overflow-hidden">
                 {carouselItems.map((item, index) => (
                     <div
                         key={item}
