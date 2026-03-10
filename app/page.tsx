@@ -1,6 +1,7 @@
 import ProductCategoryList from "@/components/ui/ProductCategoryList"
 import BrandLogoList from "@/components/common/BrandLogoList";
 import Footer from "@/components/common/Footer";
+import ContactUsForm from "@/components/pages/ContactUsForm";
 
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
             <BrandLogoList />
             <ProductCategoryList />
             <Footer />
+            <ContactUsForm />
         </main>
     );
 }

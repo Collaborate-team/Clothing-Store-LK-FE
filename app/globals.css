@@ -75,12 +75,14 @@ body {
   }
 }
 
-.animate-marquee {
+@utility animate-marquee {
   display: flex;
   width: max-content;
   animation: marquee 40s linear infinite;
 }
 
-.pause-on-hover:hover .animate-marquee {
-  animation-play-state: paused;
+@utility pause-on-hover {
+  &:hover .animate-marquee {
+    animation-play-state: paused;
+  }
 }
