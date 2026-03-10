@@ -19,7 +19,6 @@ export default function Carousel() {
                 currentIndex === carouselItems.length - 1 ? 0 : currentIndex + 1,
             );
         }, 3000);
-
         return () => clearInterval(intervalId);
     }, []);
 
@@ -36,7 +35,7 @@ export default function Carousel() {
     };
 
     return (
-        <div id="controls-carousel" className="relative w-full ">
+        <div id="controls-carousel" className="relative w-full">
             {/* Carousel wrapper */}
             <div className="relative h-screen overflow-hidden">
                 {carouselItems.map((item, index) => (
@@ -50,9 +49,10 @@ export default function Carousel() {
                             alt={`Carousel item ${index + 1}`}
                         />
 
-                        {/* Gradient layer to keep text readable on top of photos */}
+                        {/* Gradient overlay */}
                         <div className="absolute inset-0 bg-linear-to-r from-black/65 via-black/30 to-transparent" />
 
+                        {/* Text content */}
                         <div className="absolute inset-0 z-10 flex items-center">
                             <div className="w-full px-6 md:px-16 lg:px-24">
                                 <div className="max-w-xl text-white">
@@ -67,7 +67,7 @@ export default function Carousel() {
                                         type="button"
                                         className="mt-8 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:text-base"
                                     >
-                                        Explore Collections -&gt;
+                                        Explore Collections →
                                     </button>
                                 </div>
                             </div>
@@ -76,14 +76,14 @@ export default function Carousel() {
                 ))}
             </div>
 
-            {/* Slider controls */}
+            {/* Previous button */}
             <button
                 type="button"
                 className="absolute inset-s-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 group focus:outline-none"
                 onClick={goToPrevious}
                 aria-label="Show previous slide"
             >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-base bg-white/30 group-hover:bg-white/50 group-focus:outline-none group-focus:ring-4 group-focus:ring-white dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white">
                     <svg
                         className="h-5 w-5 text-white rtl:rotate-180"
                         aria-hidden="true"
@@ -93,25 +93,20 @@ export default function Carousel() {
                         fill="none"
                         viewBox="0 0 24 24"
                     >
-                        <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m15 19-7-7 7-7"
-                        />
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 19-7-7 7-7" />
                     </svg>
                     <span className="sr-only">Previous</span>
                 </span>
             </button>
 
+            {/* Next button */}
             <button
                 type="button"
                 className="absolute inset-e-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 group focus:outline-none"
                 onClick={goToNext}
                 aria-label="Show next slide"
             >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-base bg-white/30 group-hover:bg-white/50 group-focus:outline-none group-focus:ring-4 group-focus:ring-white dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60 dark:group-focus:ring-gray-800/70">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white">
                     <svg
                         className="h-5 w-5 text-white rtl:rotate-180"
                         aria-hidden="true"
@@ -121,13 +116,7 @@ export default function Carousel() {
                         fill="none"
                         viewBox="0 0 24 24"
                     >
-                        <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m9 5 7 7-7 7"
-                        />
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m9 5 7 7-7 7" />
                     </svg>
                     <span className="sr-only">Next</span>
                 </span>
