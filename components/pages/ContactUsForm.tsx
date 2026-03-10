@@ -33,14 +33,14 @@ export default function ContactUsForm() {
   };
 
   return (
-    <section id="contact-us" className="w-full bg-white text-black">
+    <section id="contact-us" className="w-full bg-white text-black flex flex-col overflow-hidden">
       {/* ── Hero Section ── */}
-      <div className="relative overflow-hidden bg-black py-20 sm:py-28 md:py-36 lg:py-40 flex flex-col items-center justify-center text-center px-5"> 
-        <p className="relative text-[10px] sm:text-[11px] uppercase tracking-[0.35em] text-white/50 mb-5 font-light">
+      <div className="relative overflow-hidden bg-black flex-[0_0_auto] flex flex-col items-center justify-center text-center px-5 pt-16 pb-24 sm:pt-20 sm:pb-32 md:pt-24 md:pb-20"> 
+        <p className="relative text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-white/50 mb-2 font-light">
           Get In Touch
         </p>
         <h1
-          className="relative text-[clamp(28px,6vw,64px)] font-light leading-[1.15] text-white"
+          className="relative text-[clamp(35px,4vw,65px)] font-light leading-tight text-white mb-0"
           style={{
             fontFamily:
               "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
@@ -55,7 +55,7 @@ export default function ContactUsForm() {
       </div>
 
       {/* ── Main Content ── */}
-      <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 px-5 sm:px-8 md:px-12 py-16 sm:py-20 md:py-24">
+      <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 px-5 sm:px-8 md:px-12 pt-4 sm:pt-6 md:pt-8 pb-16 sm:pb-20 md:pb-24">
         {/* ── LEFT: Contact Details ── */}
         <div>
           <p className="text-[10px] uppercase tracking-[0.3em] text-black/40 font-medium mb-3">
@@ -105,6 +105,7 @@ export default function ContactUsForm() {
               primary="14 Linen Lane, Colombo 03"
               secondary="Sri Lanka · Ground Floor"
             />
+
             {/* Email */}
             <ContactCard
               icon={
@@ -148,30 +149,6 @@ export default function ContactUsForm() {
               secondary="Mon – Sat, 9am – 6pm"
             />
           </div>
-
-          {/* Store Hours */}
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-black/40 font-medium mb-4">
-              Store Hours
-            </p>
-            <div className="border-t border-black/10">
-              {[
-                { day: "Monday – Friday", hours: "9:00 am – 7:00 pm" },
-                { day: "Saturday", hours: "10:00 am – 6:00 pm" },
-                { day: "Sunday", hours: "11:00 am – 4:00 pm" },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between py-3.5 border-b border-black/10 text-[13px] sm:text-[14px]"
-                >
-                  <span className="text-black/70 font-light">{item.day}</span>
-                  <span className="text-black font-medium tracking-wide">
-                    {item.hours}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* ── RIGHT: Contact Form ── */}
@@ -192,20 +169,7 @@ export default function ContactUsForm() {
 
           {/* Inquiry Type Pills */}
           <div className="flex flex-wrap gap-2.5 mb-8">
-            {inquiryTypes.map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setSelectedType(type)}
-                className={`px-4 py-2 text-[10px] tracking-[0.15em] font-medium border cursor-pointer transition-all duration-200 ${
-                  selectedType === type
-                    ? "bg-black text-white border-black"
-                    : "bg-transparent text-black/60 border-black/20 hover:border-black/50 hover:text-black"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+           
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -245,15 +209,6 @@ export default function ContactUsForm() {
                 onChange={handleChange}
               />
             </div>
-
-            {/* Subject */}
-            <InputField
-              label="Subject"
-              name="subject"
-              placeholder="How can we help?"
-              value={formData.subject}
-              onChange={handleChange}
-            />
 
             {/* Message */}
             <div>
