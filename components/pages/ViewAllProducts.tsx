@@ -15,8 +15,10 @@ const MOCK_PRODUCTS = [
     colors: ['BLACK', 'BROWN'],
     productType: 'POLO',
     rating: 4,
-    size: ['Small', 'Medium'],
+    size: ['S', 'M'],
     image: producyImage,
+    width:'200px',
+    heught:"500px",
     hoverImage: producyImage,
     badge: 'NEW' as const,
   },
@@ -31,6 +33,8 @@ const MOCK_PRODUCTS = [
     rating: 5,
     size: ['Medium', 'Large'],
     image: producyImage,
+    width:'200px',
+    heught:"500px",
     hoverImage: producyImage,
   },
   {
@@ -364,6 +368,7 @@ export default function ViewAllProducts() {
                    price={product.price}
                    imageUrl={product.image}
                    badge={product.badge}
+                   sizes={product.size}
                  />
                </div>
              ))}

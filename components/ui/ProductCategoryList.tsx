@@ -11,93 +11,103 @@ const ProductCategoryList = () => {
         {
             id: 1,
             title: "Linen Wrap Dress",
-            description: "Natural / S-XL",
+            description: "Natural",
             price: "128.00",
             category: "Women",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["S", "M", "L", "XL"]
         },
         {
             id: 2,
             title: "Silk Slip Blouse",
-            description: "Ivory / XS-L",
+            description: "Ivory",
             price: "96.00",
             category: "Women",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["XS", "S", "M", "L"]
         },
         {
             id: 3,
             title: "Tailored Linen Coat",
-            description: "Sand / XS-XL",
+            description: "Sand",
             price: "245.00",
             category: "Women",
             badge: "NEW" as const,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["XS", "S", "M", "L", "XL"]
         },
         {
             id: 4,
             title: "Wide Leg Trousers",
-            description: "Ecru / 6-16",
+            description: "Ecru",
             price: "112.00",
             category: "Women",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["6", "8", "10", "12", "14", "16"]
         },
         {
             id: 5,
             title: "Cotton Knit Cardigan",
-            description: "Oat / One Size",
+            description: "Oat",
             price: "74.00",
             originalPrice: "98.00",
             category: "Sale",
             badge: "SALE" as const,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["One Size"]
         },
         {
             id: 6,
             title: "Merino Turtleneck",
-            description: "Charcoal / XS-L",
+            description: "Charcoal",
             price: "135.00",
             category: "Men",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["XS", "S", "M", "L"]
         },
         {
             id: 7,
             title: "Oversized Blazer",
-            description: "Stone / 6-14",
+            description: "Stone",
             price: "198.00",
             category: "Women",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["6", "8", "10", "12", "14"]
         },
         {
             id: 8,
             title: "Pleated Midi Skirt",
-            description: "Blush / 6-16",
+            description: "Blush",
             price: "89.00",
             category: "Women",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["6", "8", "10", "12", "14", "16"]
         },
         {
             id: 9,
             title: "Classic Cotton Shirt",
-            description: "White / M-XXL",
+            description: "White",
             price: "85.00",
             category: "Men",
             badge: undefined,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["M", "L", "XL", "XXL"]
         },
         {
             id: 10,
             title: "Leather Handbag",
-            description: "Tan / Genuine Leather",
+            description: "Tan",
             price: "210.00",
             category: "Accessories",
             badge: "NEW" as const,
-            imageUrl: producyImage
+            imageUrl: producyImage,
+            sizes: ["Genuine Leather"]
         }
     ];
 
@@ -152,6 +162,7 @@ const ProductCategoryList = () => {
                                     originalPrice={product.originalPrice}
                                     badge={product.badge}
                                     imageUrl={product.imageUrl}
+                                    sizes={product.sizes}
                                 />
                             </div>
                         ))

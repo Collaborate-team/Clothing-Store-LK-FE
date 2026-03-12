@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
 
 interface ProductCardProps {
@@ -9,6 +9,7 @@ interface ProductCardProps {
   imageUrl?: string | StaticImageData;
   badge?: 'NEW' | 'SALE';
   isFavorite?: boolean;
+  sizes?: string[];
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -19,7 +20,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   imageUrl,
   badge,
   isFavorite = false,
+  sizes,
 }) => {
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
   return (
     <div className="bg-white rounded-sm flex flex-col h-full relative group transition-all duration-300 hover:shadow-2xl overflow-hidden">
       {/* Badge (NEW/SALE) */}
@@ -59,6 +63,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <p className="text-[12px] min-[400px]:text-[13px] text-[#2D261E]/60 mb-2 min-[400px]:mb-4 line-clamp-1">
           {description}
         </p>
+
+        {sizes && sizes.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3 min-[400px]:mb-4">
+            {sizes.map((size) => (
+              <button 
+                key={size} 
+                onClick={() => setSelectedSize(size === selectedSize ? null : size)}
+                className={`text-[9px] min-[400px]:text-[10px] px-2.5 py-1 border rounded-sm uppercase font-bold tracking-tight transition-all duration-200 cursor-pointer ${
+                  selectedSize === size 
+                    ? 'bg-[#2D261E] text-white border-[#2D261E]' 
+                    : 'bg-white text-[#2D261E]/50 border-[#2D261E]/10 hover:border-[#2D261E]/30 hover:text-[#2D261E]'
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-[400px]:gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
