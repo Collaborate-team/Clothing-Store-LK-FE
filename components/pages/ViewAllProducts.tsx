@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Grid, List, Star } from 'lucide-react';
+import { ChevronUp, ChevronDown, Grid, List, Star, Filter, X } from 'lucide-react';
 import ProductCard from '../product/ProductCard';
 import producyImage from '../../public/images/images.jpeg';
 
@@ -151,6 +151,7 @@ export default function ViewAllProducts() {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 20000 });
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortOption, setSortOption] = useState("Featured");
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => ({ ...prev, [title]: !prev[title] }));
@@ -196,125 +197,165 @@ export default function ViewAllProducts() {
   return (
     <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-10 lg:py-16 flex flex-col lg:flex-row gap-10">
       
+      {/* MOBILE OVERLAY */}
+      {isMobileFiltersOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-[100] lg:hidden backdrop-blur-sm transition-opacity duration-300"
+          onClick={() => setIsMobileFiltersOpen(false)}
+        />
+      )}
+
       {/* LEFT SIDEBAR - FILTERS */}
-      <aside className="w-full lg:w-64 flex-shrink-0 flex flex-col gap-6">
-        {FILTER_SECTIONS.map((section, idx) => {
-          const isOpen = openSections[section.title];
-          
-          return (
-            <div key={idx} className="border-b border-gray-800 pb-6 last:border-0 last:pb-0">
-              <button 
-                onClick={() => toggleSection(section.title)}
-                className="flex items-center justify-between w-full text-left font-semibold text-sm mb-4 tracking-wide text-white"
-              >
-                {section.title}
-                {isOpen ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
-              </button>
-              
-              {isOpen && (
-                <div className="flex flex-col gap-3">
-                  
-                  {/* CHECKBOX TYPE (Size, Product Type, Color) */}
-                  {section.type === 'checkbox' && section.options?.map((opt, i) => {
-                    const isChecked = (filters[section.id as keyof typeof filters] as any[]).includes(opt);
+      <aside className={`fixed inset-y-0 left-0 z-[101] w-72 bg-black border-r border-gray-800 p-6 overflow-y-auto transform transition-transform duration-300 lg:static lg:w-64 lg:p-0 lg:border-0 lg:bg-transparent lg:translate-x-0 ${isMobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between lg:hidden mb-8 border-b border-gray-800 pb-4">
+          <h2 className="text-xl font-bold tracking-tight text-white uppercase flex items-center gap-2">
+            <Filter size={18} />
+            Filters
+          </h2>
+          <button 
+            onClick={() => setIsMobileFiltersOpen(false)}
+            className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {FILTER_SECTIONS.map((section, idx) => {
+            const isOpen = openSections[section.title];
+            
+            return (
+              <div key={idx} className="border-b border-gray-800 pb-6 last:border-0 last:pb-0">
+                <button 
+                  onClick={() => toggleSection(section.title)}
+                  className="flex items-center justify-between w-full text-left font-semibold text-sm mb-4 tracking-wide text-white group"
+                >
+                  <span className="group-hover:text-[#A37B5C] transition-colors">{section.title}</span>
+                  {isOpen ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+                </button>
+                
+                {isOpen && (
+                  <div className="flex flex-col gap-3 animate-fade-in">
                     
-                    return (
-                       <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                         <div className="relative flex items-center justify-center w-4 h-4 border border-gray-600 rounded group-hover:border-gray-400 transition-colors">
-                           <input 
-                             type="checkbox" 
-                             checked={isChecked}
-                             onChange={() => handleCheckboxChange(section.id as keyof typeof filters, opt)}
-                             className="peer appearance-none w-full h-full checked:bg-blue-600 checked:border-blue-600 rounded transition-colors" 
-                           />
-                           <svg className={`absolute w-2.5 h-2.5 text-white pointer-events-none ${isChecked ? 'opacity-100' : 'opacity-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                           </svg>
-                         </div>
-                         <span className="text-xs text-gray-400 tracking-wider group-hover:text-white uppercase">
-                            {opt}
-                         </span>
-                       </label>
-                    );
-                  })}
-
-                  {/* PRICE RANGE TYPE */}
-                  {section.type === 'range' && (
-                    <div className="flex flex-col gap-4 mt-2">
-                       <div className="flex items-center justify-between gap-4 mt-2">
-                          <div className="flex flex-col gap-1 w-full">
-                            <span className="text-[10px] text-gray-400">Min (Rs)</span>
-                            <div className="relative">
-                               <input 
-                                 type="number" 
-                                 value={priceRange.min}
-                                 onChange={(e) => handlePriceChange(e, 'min')}
-                                 className="w-full bg-transparent border border-gray-700 text-white text-xs py-1.5 px-2 outline-none focus:border-gray-500" 
-                               />
-                            </div>
+                    {/* CHECKBOX TYPE (Size, Product Type, Color) */}
+                    {section.type === 'checkbox' && section.options?.map((opt, i) => {
+                      const isChecked = (filters[section.id as keyof typeof filters] as any[]).includes(opt);
+                      
+                      return (
+                        <label key={i} className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`relative flex items-center justify-center w-4 h-4 border rounded transition-all duration-200 ${isChecked ? 'bg-[#2D261E] border-[#2D261E]' : 'border-gray-600 group-hover:border-gray-400'}`}>
+                            <input 
+                              type="checkbox" 
+                              checked={isChecked}
+                              onChange={() => handleCheckboxChange(section.id as keyof typeof filters, opt)}
+                              className="sr-only" 
+                            />
+                            {isChecked && (
+                              <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
                           </div>
-                          <div className="flex flex-col gap-1 w-full">
-                            <span className="text-[10px] text-gray-400">Max (Rs)</span>
-                            <div className="relative">
-                               <input 
-                                 type="number" 
-                                 value={priceRange.max}
-                                 onChange={(e) => handlePriceChange(e, 'max')}
-                                 className="w-full bg-transparent border border-gray-700 text-white text-xs py-1.5 px-2 outline-none focus:border-gray-500" 
-                               />
+                          <span className={`text-[11px] tracking-wider uppercase transition-colors ${isChecked ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                              {opt}
+                          </span>
+                        </label>
+                      );
+                    })}
+
+                    {/* PRICE RANGE TYPE */}
+                    {section.type === 'range' && (
+                      <div className="flex flex-col gap-4 mt-2">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex flex-col gap-1.5 w-full">
+                              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Min (Rs)</span>
+                              <div className="relative">
+                                <input 
+                                  type="number" 
+                                  value={priceRange.min}
+                                  onChange={(e) => handlePriceChange(e, 'min')}
+                                  className="w-full bg-black/50 border border-gray-800 text-white text-[11px] py-2 px-3 outline-none focus:border-[#A37B5C] transition-colors rounded-sm" 
+                                />
+                              </div>
                             </div>
+                            <div className="flex flex-col gap-1.5 w-full">
+                              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Max (Rs)</span>
+                              <div className="relative">
+                                <input 
+                                  type="number" 
+                                  value={priceRange.max}
+                                  onChange={(e) => handlePriceChange(e, 'max')}
+                                  className="w-full bg-black/50 border border-gray-800 text-white text-[11px] py-2 px-3 outline-none focus:border-[#A37B5C] transition-colors rounded-sm" 
+                                />
+                              </div>
+                            </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* RATING TYPE */}
+                    {section.type === 'rating' && section.options?.map((opt, i) => {
+                      const numericOpt = Number(opt);
+                      const isChecked = filters.rating.includes(numericOpt);
+
+                      return (
+                        <label key={i} className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`relative flex items-center justify-center w-4 h-4 border rounded transition-all duration-200 ${isChecked ? 'bg-[#2D261E] border-[#2D261E]' : 'border-gray-600 group-hover:border-gray-400'}`}>
+                            <input 
+                              type="checkbox" 
+                              checked={isChecked}
+                              onChange={() => handleCheckboxChange('rating', numericOpt)}
+                              className="sr-only" 
+                            />
+                            {isChecked && (
+                              <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
                           </div>
-                       </div>
-                    </div>
-                  )}
-
-                  {/* RATING TYPE */}
-                  {section.type === 'rating' && section.options?.map((opt, i) => {
-                    const numericOpt = Number(opt);
-                    const isChecked = filters.rating.includes(numericOpt);
-
-                    return (
-                      <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                        <div className="relative flex items-center justify-center w-4 h-4 border border-gray-600 rounded group-hover:border-gray-400 transition-colors flex-shrink-0">
-                          <input 
-                            type="checkbox" 
-                            checked={isChecked}
-                            onChange={() => handleCheckboxChange('rating', numericOpt)}
-                            className="peer appearance-none w-full h-full checked:bg-blue-600 checked:border-blue-600 rounded transition-colors" 
-                          />
-                          <svg className={`absolute w-2.5 h-2.5 text-white pointer-events-none ${isChecked ? 'opacity-100' : 'opacity-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <div className="flex gap-0.5">
-                          {[...Array(5)].map((_, starIdx) => {
-                            const isFilled = starIdx < numericOpt;
-                            return (
-                              <Star 
-                                key={starIdx} 
-                                size={14} 
-                                fill={isFilled ? '#F59E0B' : '#4B5563'} 
-                                color={isFilled ? '#F59E0B' : '#4B5563'}
-                              />
-                            );
-                          })}
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                          <div className="flex gap-0.5">
+                            {[...Array(5)].map((_, starIdx) => {
+                              const isFilled = starIdx < numericOpt;
+                              return (
+                                <Star 
+                                  key={starIdx} 
+                                  size={13} 
+                                  fill={isFilled ? '#A37B5C' : 'transparent'} 
+                                  color={isFilled ? '#A37B5C' : '#4B5563'}
+                                  strokeWidth={1.5}
+                                />
+                              );
+                            })}
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </aside>
 
       {/* RIGHT MAIN AREA - PRODUCTS */}
       <section className="flex-1 flex flex-col">
         {/* TOP BAR */}
-        <div className="flex flex-col md:flex-row items-center border border-gray-800 py-3 px-4 md:px-6 mb-8 justify-between text-xs tracking-wider uppercase font-semibold text-gray-400 gap-4 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
-          <div>
-            {filteredProducts.length} ITEMS FOUND
+        <div className="flex flex-col sm:flex-row items-center border border-gray-800 py-3 px-4 md:px-6 mb-8 justify-between text-xs tracking-wider uppercase font-semibold text-gray-400 gap-4 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+            <button 
+              onClick={() => setIsMobileFiltersOpen(true)}
+              className="lg:hidden flex items-center gap-2 bg-white text-black px-4 py-2 rounded-sm font-bold active:scale-95 transition-transform"
+            >
+              <Filter size={14} />
+              Filters
+            </button>
+            <span className="hidden sm:inline-block border-l border-gray-800 pl-4">
+              {filteredProducts.length} ITEMS FOUND
+            </span>
+            <span className="sm:hidden font-bold text-[10px]">
+              {filteredProducts.length} ITEMS
+            </span>
           </div>
           <div className="flex items-center gap-6">
 
@@ -357,28 +398,27 @@ export default function ViewAllProducts() {
           </div>
         </div>
 
-        {/* PRODUCTS GRID USING ProductCard Component */}
-        {filteredProducts.length > 0 ? (
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-             {filteredProducts.map((product) => (
-               <div key={product.id}>
-                 <ProductCard 
-                   title={product.title}
-                   description={product.description}
-                   price={product.price}
-                   imageUrl={product.image}
-                   badge={product.badge}
-                   sizes={product.size}
-                 />
-               </div>
-             ))}
-           </div>
-        ) : (
-           <div className="flex-1 flex flex-col items-center justify-center py-20 text-gray-500">
-              <span className="text-xl font-medium mb-2">No products found</span>
-              <p className="text-sm">Try adjusting your filters to see more results.</p>
-           </div>
-        )}
+        {/* PRODUCTS GRID */}
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10 min-h-[400px]">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <div key={product.id} className="animate-fade-in">
+                <ProductCard
+                  title={product.title}
+                  description={product.description}
+                  price={product.price}
+                  imageUrl={product.image}
+                  badge={product.badge}
+                  sizes={product.size}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center text-white/40 italic">
+              No items found in this category.
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
