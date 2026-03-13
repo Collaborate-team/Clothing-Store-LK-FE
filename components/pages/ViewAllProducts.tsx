@@ -320,8 +320,8 @@ export default function ViewAllProducts() {
                                 <Star 
                                   key={starIdx} 
                                   size={13} 
-                                  fill={isFilled ? '#A37B5C' : 'transparent'} 
-                                  color={isFilled ? '#A37B5C' : '#4B5563'}
+                                  fill={isFilled ? '#f5b62dff' : 'transparent'} 
+                                  color={isFilled ? '#f5b62dff' : '#f1f4f7ff'}
                                   strokeWidth={1.5}
                                 />
                               );
