@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
+import { Heart, ShoppingBag } from 'lucide-react';
 
 interface ProductCardProps {
   title: string;
@@ -25,55 +28,65 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   return (
-    <div className="bg-white rounded-sm flex flex-col h-full relative group transition-all duration-300 hover:shadow-2xl overflow-hidden">
+    <div className="bg-[#111] border border-white/10 rounded-sm flex flex-col h-full relative group transition-all duration-500 hover:border-[#c8b99a]/50 overflow-hidden">
       {/* Badge (NEW/SALE) */}
       {badge && (
-        <div className={`absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-bold tracking-widest rounded ${
-          badge === 'NEW' ? 'bg-[#2D261E] text-white' : 'bg-[#A37B5C] text-white'
+        <div className={`absolute top-4 left-4 z-10 px-3 py-1 text-[8px] font-bold tracking-widest uppercase shadow-lg ${
+          badge === 'NEW' ? 'bg-[#c8b99a] text-black' : 'bg-red-800 text-white'
         }`}>
           {badge}
         </div>
       )}
 
       {/* Image Container */}
-      <div className="aspect-[4.5/5] relative">
+      <div className="aspect-[4/5] relative overflow-hidden">
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={title}
             fill
-            className="object-cover transition-transform duration-500 cursor-pointer"
+            className="object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#2D261E]/5">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
-               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-               <circle cx="8.5" cy="8.5" r="1.5" />
-               <polyline points="21 15 16 10 5 21" />
-            </svg>
+          <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-white/5">
+            <ShoppingBag size={48} strokeWidth={0.5} />
           </div>
         )}
+
+        {/* Quick Actions Overlay */}
+        <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-10">
+           <button className="w-full py-3 bg-[#c8b99a] text-black text-[9px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-2 hover:bg-white transition-all cursor-pointer">
+              Add to Bag
+           </button>
+        </div>
+
+        {/* Favorite Button */}
+        <button className="absolute top-4 right-4 p-2.5 bg-black/60 backdrop-blur-sm rounded-full text-white hover:bg-[#c8b99a] hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 duration-500 cursor-pointer">
+          <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
+        </button>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-grow p-2.5 min-[400px]:p-4">
-        <h3 className="text-[14px] min-[400px]:text-[15px] font-medium text-[#2D261E] mb-0.5 min-[400px]:mb-1 line-clamp-1">
-          {title}
-        </h3>
-        <p className="text-[12px] min-[400px]:text-[13px] text-[#2D261E]/60 mb-2 min-[400px]:mb-4 line-clamp-1">
-          {description}
-        </p>
+      <div className="flex flex-col flex-grow p-4 space-y-3">
+        <div>
+          <h3 className="text-[12px] tracking-[0.1em] font-bold text-[#fcfbf7] uppercase group-hover:text-[#c8b99a] transition-colors line-clamp-1">
+            {title}
+          </h3>
+          <p className="text-[11px] text-[#888] font-light mt-1">
+            {description}
+          </p>
+        </div>
 
         {sizes && sizes.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3 min-[400px]:mb-4">
+          <div className="flex flex-wrap gap-1.5">
             {sizes.map((size) => (
               <button 
                 key={size} 
                 onClick={() => setSelectedSize(size === selectedSize ? null : size)}
-                className={`text-[9px] min-[400px]:text-[10px] px-2.5 py-1 border rounded-sm uppercase font-bold tracking-tight transition-all duration-200 cursor-pointer ${
+                className={`text-[9px] px-2 py-0.5 border transition-all duration-300 cursor-pointer uppercase font-bold ${
                   selectedSize === size 
-                    ? 'bg-[#2D261E] text-white border-[#2D261E]' 
-                    : 'bg-white text-[#2D261E]/50 border-[#2D261E]/10 hover:border-[#2D261E]/30 hover:text-[#2D261E]'
+                    ? 'bg-[#c8b99a] text-black border-[#c8b99a]' 
+                    : 'bg-transparent text-[#888] border-white/10 hover:border-white/40 hover:text-white'
                 }`}
               >
                 {size}
@@ -82,21 +95,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-[400px]:gap-3 sm:gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[14px] sm:text-[16px] font-bold text-[#2D261E]">
-              Rs {price}
+        <div className="mt-auto pt-2 flex items-center gap-3">
+          <span className="text-[14px] font-bold text-[#fcfbf7]">
+            Rs {price}
+          </span>
+          {originalPrice && (
+            <span className="text-[11px] text-[#555] line-through">
+              Rs {originalPrice}
             </span>
-            {originalPrice && (
-              <span className="text-[11px] sm:text-[13px] text-[#2D261E]/30 line-through">
-                Rs {originalPrice}
-              </span>
-            )}
-          </div>
-          
-          <button className="w-full sm:w-auto bg-[#2D261E] text-white text-[10px] sm:text-[11px] font-bold tracking-widest px-3 sm:px-5 py-2 sm:py-2.5 rounded hover:bg-[#40372D] transition-colors cursor-pointer uppercase">
-            Add to Cart
-          </button>
+          )}
         </div>
       </div>
     </div>
