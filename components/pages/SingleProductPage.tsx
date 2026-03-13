@@ -15,6 +15,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import ProductCard from '../product/ProductCard';
+import CartDrawer from '../common/CartDrawer';
 
 const MOCK_PRODUCT = {
   id: 'noir-01',
@@ -92,18 +93,60 @@ const SingleProductPage: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState(MOCK_PRODUCT.colors[1]);
   const [quantity, setQuantity] = useState(1);
   const [openDetail, setOpenDetail] = useState<number | null>(0);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const [cartItems, setCartItems] = useState<any[]>([]);
 
   const toggleDetail = (index: number) => {
     setOpenDetail(openDetail === index ? null : index);
+  };
+
+  const addToCart = () => {
+    const newItem = {
+      id: MOCK_PRODUCT.id,
+      name: MOCK_PRODUCT.name,
+      price: MOCK_PRODUCT.price,
+      size: selectedSize,
+      color: selectedColor.name,
+      quantity: quantity,
+      image: MOCK_PRODUCT.images[0]
+    };
+
+    setCartItems(prev => {
+      const existingItemIndex = prev.findIndex(
+        item => item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
+      );
+
+      if (existingItemIndex > -1) {
+        const updatedCart = [...prev];
+        updatedCart[existingItemIndex].quantity += newItem.quantity;
+        return updatedCart;
+      }
+      return [...prev, newItem];
+    });
+
+    setIsCartOpen(true);
+  };
+
+  const removeFromCart = (id: string, size: string, color: string) => {
+    setCartItems(prev => prev.filter(item => !(item.id === id && item.size === size && item.color === color)));
+  };
+
+  const updateCartQuantity = (id: string, size: string, color: string, newQuantity: number) => {
+    setCartItems(prev => prev.map(item => 
+      (item.id === id && item.size === size && item.color === color) 
+        ? { ...item, quantity: newQuantity } 
+        : item
+    ));
   };
 
   return (
     <div className="min-h-screen bg-[#fcfbf7] text-[#0a0a0a]" style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }}>
       {/* Breadcrumbs - Responsive text size */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center gap-2 text-[8px] sm:text-[9px] tracking-[0.2em] uppercase text-[#b5b1a8]">
-        <a href="/" className="hover:text-black transition-colors">Home</a>
+        <a href="/" className="hover:text-black transition-colors cursor-pointer">Home</a>
         <ChevronRight size={8} />
-        <a href="/shop" className="hover:text-black transition-colors">Shop</a>
+        <a href="/shop" className="hover:text-black transition-colors cursor-pointer">Shop</a>
         <ChevronRight size={8} />
         <span className="text-black font-semibold truncate max-w-[150px] sm:max-w-none">{MOCK_PRODUCT.name}</span>
       </nav>
@@ -123,7 +166,7 @@ const SingleProductPage: React.FC = () => {
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
                 className="object-cover transition-transform duration-700 hover:scale-105" 
               />
-              <button className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2.5 sm:p-3 bg-white/80 backdrop-blur-md rounded-full text-black hover:bg-black hover:text-white transition-all shadow-sm z-10">
+              <button className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2.5 sm:p-3 bg-white/80 backdrop-blur-md rounded-full text-black hover:bg-black hover:text-white transition-all shadow-sm z-10 cursor-pointer">
                 <Heart size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
             </div>
@@ -134,7 +177,7 @@ const SingleProductPage: React.FC = () => {
                 <button 
                   key={img}
                   onClick={() => setActiveImage(idx)}
-                  className={`relative w-20 h-24 sm:w-24 sm:h-32 shrink-0 border transition-all duration-300 ${activeImage === idx ? 'border-black' : 'border-[#e5e1d8] grayscale-110 opacity-70 hover:opacity-100 hover:grayscale-0'}`}
+                  className={`relative w-20 h-24 sm:w-24 sm:h-32 shrink-0 border transition-all duration-300 cursor-pointer ${activeImage === idx ? 'border-black' : 'border-[#e5e1d8] grayscale-110 opacity-70 hover:opacity-100 hover:grayscale-0'}`}
                 >
                   <Image src={img} alt={`View ${idx + 1}`} fill sizes="100px" className="object-cover" />
                 </button>
@@ -167,7 +210,7 @@ const SingleProductPage: React.FC = () => {
                   <button
                     key={color.name}
                     onClick={() => setSelectedColor(color)}
-                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border transition-all duration-300 ${selectedColor.name === color.name ? 'border-black scale-110' : 'border-[#e5e1d8] hover:border-black'}`}
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border transition-all duration-300 cursor-pointer ${selectedColor.name === color.name ? 'border-black scale-110' : 'border-[#e5e1d8] hover:border-black'}`}
                     style={{ backgroundColor: color.hex }}
                   />
                 ))}
@@ -178,14 +221,14 @@ const SingleProductPage: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <h3 className="text-[8px] sm:text-[9px] tracking-[0.3em] font-bold uppercase">Select Size</h3>
-                <button className="text-[8px] tracking-[0.1em] uppercase border-b border-black font-semibold">Size Guide</button>
+                <button className="text-[8px] tracking-[0.1em] uppercase border-b border-black font-semibold cursor-pointer">Size Guide</button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {MOCK_PRODUCT.sizes.map((size) => (
                   <button 
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-[10px] sm:text-[11px] font-medium border transition-all duration-300 ${selectedSize === size ? 'bg-black text-white border-black' : 'bg-white text-black border-[#e5e1d8] hover:border-black'}`}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-[10px] sm:text-[11px] font-medium border transition-all duration-300 cursor-pointer ${selectedSize === size ? 'bg-black text-white border-black' : 'bg-white text-black border-[#e5e1d8] hover:border-black'}`}
                   >
                     {size}
                   </button>
@@ -197,17 +240,20 @@ const SingleProductPage: React.FC = () => {
             <div className="space-y-3 sm:space-y-4 pt-2">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <div className="flex items-center justify-between border border-[#e5e1d8] h-14 sm:h-12 px-4 bg-white w-full sm:w-32 shrink-0">
-                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 hover:text-[#c8b99a]"><Minus size={16} /></button>
+                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={16} /></button>
                   <span className="text-[14px] sm:text-[13px] font-medium">{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)} className="p-1 hover:text-[#c8b99a]"><Plus size={16} /></button>
+                  <button onClick={() => setQuantity(q => q + 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={16} /></button>
                 </div>
-                <button className="w-full sm:flex-1 h-14 sm:h-12 bg-black text-white text-[11px] sm:text-[10px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-3 hover:bg-[#1a1a1a] transition-all">
+                <button 
+                  onClick={addToCart}
+                  className="w-full sm:flex-1 h-14 sm:h-12 bg-black text-white text-[11px] sm:text-[10px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-3 hover:bg-[#1a1a1a] transition-all cursor-pointer"
+                >
                   <ShoppingBag size={18} />
                   Add to Cart
                 </button>
               </div>
               
-              <button className="w-full h-14 sm:h-12 border border-black text-black text-[11px] sm:text-[10px] tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all">
+              <button className="w-full h-14 sm:h-12 border border-black text-black text-[11px] sm:text-[10px] tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all cursor-pointer">
                 Quick Checkout
               </button>
             </div>
@@ -234,7 +280,7 @@ const SingleProductPage: React.FC = () => {
                 <div key={detail.title} className="border-b border-[#e5e1d8] last:border-0">
                   <button 
                     onClick={() => toggleDetail(idx)}
-                    className="w-full py-4 flex justify-between items-center text-[8px] sm:text-[9px] tracking-[0.3em] font-bold uppercase text-left group"
+                    className="w-full py-4 flex justify-between items-center text-[8px] sm:text-[9px] tracking-[0.3em] font-bold uppercase text-left group cursor-pointer"
                   >
                     <span>{detail.title}</span>
                     {openDetail === idx ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -256,7 +302,7 @@ const SingleProductPage: React.FC = () => {
             <h2 className="text-xl sm:text-2xl md:text-3xl font-light tracking-tight" style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}>
               Suggested <span className="text-[#c8b99a]">Items</span>
             </h2>
-            <a href="/shop" className="text-[8px] sm:text-[9px] font-bold tracking-[0.2em] uppercase border-b-2 border-[#c8b99a] pb-1">Shop Archive</a>
+            <a href="/shop" className="text-[8px] sm:text-[9px] font-bold tracking-[0.2em] uppercase border-b-2 border-[#c8b99a] pb-1 cursor-pointer">Shop Archive</a>
           </div>
 
           <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -274,6 +320,15 @@ const SingleProductPage: React.FC = () => {
           </div>
         </section>
       </main>
+
+      {/* Cart Drawer Component */}
+      <CartDrawer 
+        isOpen={isCartOpen} 
+        onClose={() => setIsCartOpen(false)} 
+        items={cartItems} 
+        onRemove={removeFromCart}
+        onUpdateQuantity={updateCartQuantity}
+      />
     </div>
   );
 };
