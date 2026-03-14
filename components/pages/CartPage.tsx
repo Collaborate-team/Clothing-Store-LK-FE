@@ -11,7 +11,8 @@ import {
   Truck, 
   ShieldCheck,
   ArrowLeft,
-  ShoppingBag
+  ShoppingBag,
+  CheckCircle2
 } from 'lucide-react';
 
 // Mock data for the cart
@@ -60,23 +61,71 @@ const CartPage = () => {
   return (
     <div className="min-h-screen bg-[#fcfbf7] text-[#0a0a0a] pb-20" style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }}>
       {/* Page Header */}
-      <header className="pt-12 pb-8 px-4 text-center border-b border-[#e5e1d8] mb-8 bg-white/50 backdrop-blur-md sticky top-0 z-30">
-        <h1 className="text-3xl md:text-4xl font-light tracking-tight mb-2" style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}>
-          Shopping <span className="text-[#c8b99a]">Bag</span>
+      <header className="pt-16 pb-12 px-4 text-center border-b border-[#e5e1d8] mb-12 bg-white/70 backdrop-blur-xl sticky top-0 z-30 transition-all duration-500">
+        <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-10" style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}>
+          {step === 1 ? (
+            <>Shopping <span className="text-[#c8b99a]">Bag</span></>
+          ) : (
+            <>Secured <span className="text-[#c8b99a]">Checkout</span></>
+          )}
         </h1>
-        <div className="flex items-center justify-center gap-4 text-[10px] tracking-[0.2em] uppercase font-bold text-[#b5b1a8]">
-          <span className={step >= 1 ? 'text-black' : ''}>01. Cart</span>
-          <ChevronRight size={10} />
-          <span className={step >= 2 ? 'text-black' : ''}>02. Checkout</span>
-          <ChevronRight size={10} />
-          <span>03. Complete</span>
+        
+        {/* Visual Progress Stepper */}
+        <div className="max-w-xl mx-auto w-full px-4">
+          <div className="flex items-center justify-between relative">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => setStep(1)}>
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 1 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
+                01
+              </div>
+              <div className={`absolute -bottom-7 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-bold transition-colors duration-500 ${step >= 1 ? 'text-black' : 'text-[#b5b1a8]'}`}>
+                Cart
+              </div>
+              {step === 1 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#c8b99a] rounded-full border-2 border-white animate-pulse" />}
+            </div>
+
+            {/* Connector 1-2 */}
+            <div className="flex-1 mx-4 h-[1px] bg-[#e5e1d8] relative overflow-hidden">
+              <div 
+                className={`absolute inset-0 bg-black transition-transform duration-700 ease-out ${step >= 2 ? 'translate-x-0' : '-translate-x-full'}`} 
+              />
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => items.length > 0 && setStep(2)}>
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 2 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
+                02
+              </div>
+              <div className={`absolute -bottom-7 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-bold transition-colors duration-500 ${step >= 2 ? 'text-black' : 'text-[#b5b1a8]'}`}>
+                Checkout
+              </div>
+              {step === 2 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#c8b99a] rounded-full border-2 border-white animate-pulse" />}
+            </div>
+
+            {/* Connector 2-3 */}
+            <div className="flex-1 mx-4 h-[1px] bg-[#e5e1d8] relative overflow-hidden">
+              <div 
+                className={`absolute inset-0 bg-black transition-transform duration-700 ease-out ${step >= 3 ? 'translate-x-0' : '-translate-x-full'}`} 
+              />
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center relative z-10">
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 3 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
+                03
+              </div>
+              <div className={`absolute -bottom-7 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-bold transition-colors duration-500 ${step >= 3 ? 'text-black' : 'text-[#b5b1a8]'}`}>
+                Complete
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
           
-          {/* LEFT COLUMN: Cart Items or Checkout Form */}
+          {/* LEFT COLUMN: Cart Items, Checkout Form, or Completion */}
           <div className="flex-1 space-y-8">
             {step === 1 ? (
               <div className="bg-white border border-[#e5e1d8] overflow-hidden">
@@ -133,7 +182,7 @@ const CartPage = () => {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : step === 2 ? (
               <div className="bg-white border border-[#e5e1d8] p-8 space-y-10 animate-fade-in">
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
@@ -212,6 +261,33 @@ const CartPage = () => {
                   </div>
                 </section>
               </div>
+            ) : (
+              <div className="bg-white border border-[#e5e1d8] p-16 text-center space-y-8 animate-fade-in shadow-sm">
+                <div className="w-24 h-24 rounded-full bg-black text-[#c8b99a] flex items-center justify-center mx-auto mb-8 relative">
+                   <CheckCircle2 size={50} strokeWidth={1} />
+                   <div className="absolute inset-0 rounded-full border border-[#c8b99a]/30 animate-ping opacity-20" />
+                </div>
+                <div className="space-y-4">
+                  <p className="text-[10px] tracking-[0.5em] font-bold text-[#c8b99a] uppercase">Transaction Successful</p>
+                  <h2 className="text-4xl font-light tracking-tight" style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}>
+                    Your order is <span className="italic text-[#c8b99a]">confirmed.</span>
+                  </h2>
+                </div>
+                <p className="text-[13px] text-[#888] max-w-sm mx-auto font-light leading-relaxed">
+                  Thank you for your purchase. We are preparing your selection <span className="font-bold text-black tracking-widest text-[11px]">#NA-2026-9432</span> with meticulous care.
+                </p>
+                <div className="pt-6">
+                  <button 
+                    onClick={() => {
+                        setItems([]);
+                        setStep(1);
+                    }} 
+                    className="px-12 py-5 bg-black text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all shadow-xl"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
@@ -245,15 +321,17 @@ const CartPage = () => {
               {step === 1 ? (
                 <button 
                   onClick={() => setStep(2)}
-                  className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#1a1a1a] transition-all cursor-pointer flex items-center justify-center gap-3"
+                  disabled={items.length === 0}
+                  className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#1a1a1a] transition-all cursor-pointer flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg"
                 >
                   Proceed to Checkout
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </button>
-              ) : (
+              ) : step === 2 ? (
                 <div className="space-y-4">
                   <button 
-                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#1a1a1a] transition-all cursor-pointer shadow-lg"
+                    onClick={() => setStep(3)}
+                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200"
                   >
                     Place Order Now
                   </button>
@@ -263,6 +341,10 @@ const CartPage = () => {
                   >
                     <ArrowLeft size={14} /> Back to Bag
                   </button>
+                </div>
+              ) : (
+                <div className="p-4 border border-[#c8b99a]/20 bg-[#fcfbf7] rounded-sm text-center">
+                    <p className="text-[10px] tracking-[0.2em] uppercase font-bold text-[#c8b99a]">Order Finished</p>
                 </div>
               )}
 
