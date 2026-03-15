@@ -1,6 +1,31 @@
 import type { Metadata } from "next";
 import NavBar from "@/components/common/nav-bar";
 import "./globals.css";
+import { Geist, Geist_Mono, Cormorant_Garamond, Montserrat } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["300", "400", "600"],
+  style: ["normal", "italic"],
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+});
 
 export const metadata: Metadata = {
 	title: "Online Clothing App",
@@ -12,18 +37,13 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en">
-			<head>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap"
-					rel="stylesheet"
-				/>
-			</head>
-			<body>
-				<NavBar />
-				{children}
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${montserrat.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
 }
