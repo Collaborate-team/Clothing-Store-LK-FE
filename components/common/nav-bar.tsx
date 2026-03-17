@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { FiUser, FiSearch, FiShoppingBag } from "react-icons/fi";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { FiUser, FiSearch, FiShoppingBag, FiMenu, FiX } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import LOGO from '../../public/images/Logo.jpeg'
+
 
 /* ─────────────────────────── Types ─────────────────────────── */
 type MegaColumn = {
@@ -26,36 +30,29 @@ const navLinks: NavLink[] = [
             {
                 heading: "SHOP BY COLLECTION",
                 links: [
-                    { label: "Linen", href: "/women/linen" },
-                    { label: "Casual", href: "/women/casual" },
-                    { label: "Workwear", href: "/women/workwear" },
-                    { label: "Tee Bar", href: "/women/tee-bar" },
-                    { label: "Kids", href: "/kids" },
-                    { label: "Teens", href: "/women/teens" },
+                    { label: "Pure Linen", href: "/women/edit/pure-linen" },
+                    { label: "Casual Luxury", href: "/women/casual" },
+                    { label: "Executive Workwear", href: "/women/workwear" },
+                    { label: "Essential Tee Bar", href: "/women/tee-bar" },
                 ],
             },
             {
                 heading: "SHOP BY CATEGORY",
                 links: [
-                    { label: "Dresses", href: "/women/dresses" },
-                    { label: "Tops", href: "/women/tops" },
-                    { label: "Pants", href: "/women/pants" },
-                    { label: "Skirts", href: "/women/skirts" },
-                    { label: "Shorts", href: "/women/shorts" },
-                    { label: "Co-ord Sets", href: "/women/co-ord-sets" },
-                    { label: "Denims", href: "/women/denims" },
-                    { label: "Tees", href: "/women/tees" },
-                    { label: "Printed Tees", href: "/women/printed-tees" },
+                    { label: "Floating Dresses", href: "/women/dresses" },
+                    { label: "Premium Tops", href: "/women/tops" },
+                    { label: "Tailored Pants", href: "/women/pants" },
+                    { label: "Summer Skirts", href: "/women/skirts" },
+                    { label: "Designer Denims", href: "/women/denims" },
                 ],
             },
             {
-                heading: "SHOP BY EDIT",
+                heading: "CURATED EDITS",
                 links: [
-                    { label: "Mahali", href: "/women/edit/mahali" },
-                    { label: "Palms Edit", href: "/women/edit/palms" },
+                    { label: "The Palms Edit", href: "/women/edit/palms" },
                     { label: "Arienti Classics", href: "/women/edit/classics" },
                     { label: "The Girl Edit", href: "/women/edit/girl" },
-                    { label: "Pure Linen", href: "/women/edit/pure-linen" },
+                    { label: "Mahali", href: "/women/edit/mahali" },
                 ],
             },
         ],
@@ -65,168 +62,243 @@ const navLinks: NavLink[] = [
         href: "/men",
         mega: [
             {
-                heading: "SHOP BY COLLECTION",
+                heading: "COLLECTIONS",
                 links: [
-                    { label: "Casual", href: "/men/casual" },
-                    { label: "Workwear", href: "/men/workwear" },
-                    { label: "Formal", href: "/men/formal" },
-                    { label: "Linen", href: "/men/linen" },
-                    { label: "Activewear", href: "/men/activewear" },
+                    { label: "Heritage Linen", href: "/men/linen" },
+                    { label: "Modern Workwear", href: "/men/workwear" },
+                    { label: "Tailored Formal", href: "/men/formal" },
+                    { label: "Athleisure", href: "/men/activewear" },
                 ],
             },
             {
-                heading: "SHOP BY CATEGORY",
+                heading: "CATEGORIES",
                 links: [
-                    { label: "T-Shirts", href: "/men/tshirts" },
-                    { label: "Shirts", href: "/men/shirts" },
-                    { label: "Trousers", href: "/men/trousers" },
-                    { label: "Shorts", href: "/men/shorts" },
-                    { label: "Jackets", href: "/men/jackets" },
-                    { label: "Denims", href: "/men/denims" },
-                    { label: "Co-ord Sets", href: "/men/co-ord-sets" },
-                ],
-            },
-            {
-                heading: "SHOP BY EDIT",
-                links: [
-                    { label: "Summer Edit", href: "/men/edit/summer" },
-                    { label: "Classics", href: "/men/edit/classics" },
-                    { label: "Linen Edit", href: "/men/edit/linen" },
-                    { label: "Weekend Edit", href: "/men/edit/weekend" },
+                    { label: "Signature Shirts", href: "/men/shirts" },
+                    { label: "Premium T-Shirts", href: "/men/tshirts" },
+                    { label: "Precision Trousers", href: "/men/trousers" },
+                    { label: "Summer Shorts", href: "/men/shorts" },
+                    { label: "Outerwear", href: "/men/jackets" },
                 ],
             },
         ],
     },
-    {
-        label: "KIDS",
-        href: "/kids",
-        mega: [
-            {
-                heading: "SHOP BY COLLECTION",
-                links: [
-                    { label: "Girls", href: "/kids/girls" },
-                    { label: "Boys", href: "/kids/boys" },
-                    { label: "Babies", href: "/kids/babies" },
-                    { label: "Teens", href: "/kids/teens" },
-                ],
-            },
-            {
-                heading: "SHOP BY CATEGORY",
-                links: [
-                    { label: "Tops", href: "/kids/tops" },
-                    { label: "Bottoms", href: "/kids/bottoms" },
-                    { label: "Dresses", href: "/kids/dresses" },
-                    { label: "Sets", href: "/kids/sets" },
-                    { label: "Outerwear", href: "/kids/outerwear" },
-                ],
-            },
-            {
-                heading: "SHOP BY EDIT",
-                links: [
-                    { label: "School Edit", href: "/kids/edit/school" },
-                    { label: "Playwear", href: "/kids/edit/playwear" },
-                    { label: "Party Wear", href: "/kids/edit/party" },
-                ],
-            },
-        ],
-    },
+    { label: "KIDS", href: "/kids" },
     { label: "ACCESSORIES", href: "/accessories" },
-    { label: "GIFT CARD", href: "/gift-card" },
 ];
 
 /* ─────────────────────────── Component ─────────────────────── */
 export default function NavBar() {
-    const [cartCount] = useState(0);
+    const [isScrolled, setIsScrolled] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [cartCount] = useState(0);
+
+    // Scroll Detection
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     return (
         <>
-            {/* ── Header ── */}
-            <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 h-14 bg-[rgba(10,10,10,0.60)] backdrop-blur-md border-b border-white/[0.08]">
+            <header 
+                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 px-6 md:px-12 h-20 flex items-center justify-between border-b ${
+                    isScrolled 
+                    ? "bg-white/90 backdrop-blur-xl border-black/5 h-16 shadow-lg" 
+                    : "bg-transparent border-transparent h-20"
+                }`}
+                style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
+            >
+                {/* ── Left: Mobile Menu Trigger ── */}
+                <div className="flex lg:hidden flex-1">
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="text-black hover:text-[#c8a96e] transition-colors p-2"
+                        aria-label="Open Menu"
+                    >
+                        <FiMenu size={24} />
+                    </button>
+                </div>
 
-                {/* Logo */}
-                <Link
-                    href="/"
-                    className="font-[Dancing_Script] text-[1.7rem] font-bold text-white no-underline whitespace-nowrap min-w-[120px] leading-none"
-                    style={{ fontFamily: "'Dancing Script', cursive" }}
-                >
-                    Arienti
-                </Link>
+                {/* ── Center: Logo ── */}
+                <div className="flex-1 lg:flex-none flex justify-center lg:justify-start">
+                    <Link
+                        href="/"
+                        className="group flex flex-col items-center lg:items-start"
+                    >
+                       <Image
+                        src={LOGO}
+                        alt="Iconic Apparel Logo"
+                        width={150}
+                        height={40}
+                        className="w-[120px] sm:w-[150px] h-auto"
+                        />
+                    </Link>
+                </div>
 
-                {/* Nav Links */}
-                <nav className="flex items-center gap-6 flex-1 justify-center">
+                {/* ── Middle: Nav Links (Desktop) ── */}
+                <nav className="hidden lg:flex items-center gap-10 flex-1 justify-center">
                     {navLinks.map((link) => (
                         <div
                             key={link.href}
-                            className="relative"
+                            className="relative h-full flex items-center"
                             onMouseEnter={() => link.mega && setOpenDropdown(link.label)}
                             onMouseLeave={() => setOpenDropdown(null)}
                         >
                             <Link
                                 href={link.href}
-                                className={`text-[0.65rem] font-semibold tracking-[0.09em] no-underline whitespace-nowrap transition-colors duration-200 pb-1 underline-offset-4 ${openDropdown === link.label
-                                    ? "text-white underline"
-                                    : "text-white/80 hover:text-white hover:underline"
-                                    }`}
+                                className={`text-[0.7rem] font-bold tracking-[0.2em] text-black/90 hover:text-black transition-all duration-300 relative py-2 ${
+                                    openDropdown === link.label ? "text-[#c8a96e]" : ""
+                                }`}
                             >
                                 {link.label}
+                                <motion.div 
+                                    className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#c8a96e]"
+                                    initial={{ scaleX: 0 }}
+                                    animate={{ scaleX: openDropdown === link.label ? 1 : 0 }}
+                                    transition={{ duration: 0.3 }}
+                                />
                             </Link>
 
-                            {/* Mega dropdown panel */}
-                            {link.mega && openDropdown === link.label && (
-                                <div
-                                    onMouseEnter={() => setOpenDropdown(link.label)}
-                                    onMouseLeave={() => setOpenDropdown(null)}
-                                    className="animate-fade-down absolute z-[51] top-[calc(100%+14px)] left-1/2 -translate-x-1/2 grid grid-cols-3 gap-8 p-7 min-w-[520px] bg-white/95 backdrop-blur-xl border border-white/90 rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.18)]"
-                                >
-                                    {link.mega.map((col) => (
-                                        <div key={col.heading}>
-                                            <p className="text-[0.6rem] font-bold tracking-[0.12em] text-gray-900 mb-2.5 pb-1.5 border-b border-black/10">
-                                                {col.heading}
-                                            </p>
-                                            {col.links.map((item) => (
-                                                <Link
-                                                    key={item.href}
-                                                    href={item.href}
-                                                    className="block text-[0.75rem] font-medium tracking-[0.04em] text-[#2a5fa8] no-underline py-[0.28rem] transition-colors duration-150 hover:text-[#0f3d7a]"
-                                                >
-                                                    {item.label}
-                                                </Link>
+                            {/* Mega Dropdown */}
+                            <AnimatePresence>
+                                {link.mega && openDropdown === link.label && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        className="absolute top-[100%] left-1/2 -translate-x-1/2 pt-4 w-screen max-w-4xl"
+                                    >
+                                        <div className="bg-white/95 backdrop-blur-2xl border border-black/10 rounded-2xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] flex p-10 gap-16">
+                                            {link.mega.map((col) => (
+                                                <div key={col.heading} className="flex-1">
+                                                    <h3 className="text-[0.6rem] font-black tracking-[0.3em] text-[#c8a96e] uppercase mb-6 pb-2 border-b border-black/5">
+                                                        {col.heading}
+                                                    </h3>
+                                                    <div className="flex flex-col gap-4">
+                                                        {col.links.map((item) => (
+                                                            <Link
+                                                                key={item.href}
+                                                                href={item.href}
+                                                                className="text-xs text-black/60 hover:text-black hover:translate-x-1 transition-all duration-300 font-medium tracking-wide"
+                                                            >
+                                                                {item.label}
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             ))}
+                                            <div className="w-1/4 relative overflow-hidden rounded-xl border border-white/5 group/img">
+                                                <div className="absolute inset-0 bg-[#c8a96e]/20 group-hover/img:bg-transparent transition-colors z-10" />
+                                                <img 
+                                                    src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=400" 
+                                                    alt="Featured" 
+                                                    className="w-full h-full object-cover grayscale transition-all duration-700 group-hover/img:grayscale-0 group-hover/img:scale-110"
+                                                />
+                                                <div className="absolute bottom-4 left-4 z-20">
+                                                    <p className="text-[0.5rem] font-bold text-white tracking-widest uppercase mb-1">Featured</p>
+                                                    <p className="text-xs font-serif text-[#c8a96e] italic">Spring '26 Collection</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     ))}
                 </nav>
 
-                {/* Right Icons */}
-                <div className="flex items-center gap-5 min-w-[120px] justify-end">
-                    <button aria-label="Account" className="bg-transparent border-none cursor-pointer text-white/75 hover:text-white p-1 flex items-center justify-center transition-colors duration-200">
-                        <FiUser size={17} />
-                    </button>
-                    <button aria-label="Search" className="bg-transparent border-none cursor-pointer text-white/75 hover:text-white p-1 flex items-center justify-center transition-colors duration-200">
-                        <FiSearch size={17} />
-                    </button>
-                    <button aria-label="Cart" className="relative bg-transparent border-none cursor-pointer text-white/75 hover:text-white p-1 flex items-center justify-center transition-colors duration-200">
-                        <FiShoppingBag size={17} />
+                {/* ── Right: Action Icons ── */}
+                <div className="flex-1 lg:flex-none flex items-center justify-end gap-2 md:gap-6">
+                    {/* Search Expansion */}
+                    <div className="relative flex items-center">
+                        <AnimatePresence>
+                            {isSearchOpen && (
+                                <motion.input 
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 200, opacity: 1 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    placeholder="SEARCH LUXURY..."
+                                    className="bg-black/5 border border-black/10 rounded-full px-4 py-2 text-[10px] tracking-widest text-black outline-none focus:border-[#c8a96e]/50 mr-2"
+                                />
+                            )}
+                        </AnimatePresence>
+                        <button 
+                            onClick={() => setIsSearchOpen(!isSearchOpen)}
+                            className="text-black/80 hover:text-[#c8a96e] p-2 transition-colors"
+                        >
+                            <FiSearch size={18} />
+                        </button>
+                    </div>
+
+                    <Link href="/order-history" className="text-black/80 hover:text-[#c8a96e] p-2 transition-colors hidden sm:block">
+                        <FiUser size={18} />
+                    </Link>
+
+                    <Link href="/cart" className="relative text-black/80 hover:text-[#c8a96e] p-2 transition-colors">
+                        <FiShoppingBag size={18} />
                         {cartCount > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 bg-[#c8a96e] text-black rounded-full w-3.5 h-3.5 text-[0.55rem] font-bold flex items-center justify-center">
+                            <span className="absolute top-1 right-1 bg-[#c8a96e] text-black text-[0.55rem] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
                                 {cartCount}
                             </span>
                         )}
-                    </button>
+                    </Link>
                 </div>
             </header>
 
-            {/* Dark scrim behind dropdown */}
-            {openDropdown && (
-                <div
-                    onMouseEnter={() => setOpenDropdown(null)}
-                    className="animate-fade-in fixed top-14 left-0 right-0 bottom-0 z-[48] bg-black/20"
-                />
-            )}
+            {/* ── Mobile Menu Overlay ── */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div 
+                        initial={{ x: "-100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "-100%" }}
+                        transition={{ type: "spring", damping: 30, stiffness: 200 }}
+                        className="fixed inset-0 z-[150] bg-white p-10 flex flex-col"
+                    >
+                        <div className="flex justify-between items-center mb-16">
+                            <span className="font-serif italic text-2xl text-[#c8a96e]">Arienti</span>
+                            <button onClick={() => setIsMobileMenuOpen(false)} className="text-black/50 hover:text-black">
+                                <FiX size={32} />
+                            </button>
+                        </div>
+                        <nav className="flex flex-col gap-8">
+                            {navLinks.map((link) => (
+                                <Link 
+                                    key={link.href} 
+                                    href={link.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="text-3xl font-light text-black hover:text-[#c8a96e] transition-colors tracking-tighter"
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </nav>
+                        <div className="mt-auto border-t border-black/10 pt-8 flex gap-8">
+                            <Link href="/order-history" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Profile</Link>
+                            <Link href="/wishlist" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Wishlist</Link>
+                            <Link href="/help" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Contact</Link>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ── Scrim for Desktop MegaMenu ── */}
+            <AnimatePresence>
+                {openDropdown && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] pointer-events-none"
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 }

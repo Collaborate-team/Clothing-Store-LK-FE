@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import LOGO from '../../public/images/iconic-Logo.png'
+import Link from "next/link";
+import LOGO from '../../public/images/Logo.jpeg'
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -29,22 +30,22 @@ const Footer = () => {
 
   return (
     <footer
-      className="w-full bg-[#0d0d0d] text-[#f5f0e8] relative overflow-hidden"
+      className="w-full bg-white text-[#1a1a1a] relative overflow-hidden border-t border-black/5"
       style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }}
     >
       {/* Decorative top gradient line */}
-      <div className="h-[1px] bg-gradient-to-r from-transparent via-[#8b6f4e] to-transparent" />
+      <div className="h-[1px] bg-gradient-to-r from-transparent via-[#c8b99a] to-transparent" />
 
       {/* Newsletter Band */}
-      <div className="relative z-[1] border-b border-[rgba(200,185,154,0.3)] px-5 py-8 sm:px-8 sm:py-10 md:px-12 lg:px-20 md:py-[52px] flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8 md:gap-10 animate-fade-in">
+      <div className="relative z-[1] border-b border-black/5 px-5 py-8 sm:px-8 sm:py-10 md:px-12 lg:px-20 md:py-[52px] flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8 md:gap-10 animate-fade-in">
         <div className="text-center md:text-left w-full md:w-auto">
           <h2
-            className="text-[24px] sm:text-[28px] md:text-[clamp(28px,4vw,46px)] font-light tracking-[0.04em] leading-[1.1] text-[#f5f0e8]"
+            className="text-[24px] sm:text-[28px] md:text-[clamp(28px,4vw,46px)] font-light tracking-[0.04em] leading-[1.1] text-[#1a1a1a]"
             style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}
           >
             Wear what you <em className="italic text-[#c8b99a]">feel.</em>
           </h2>
-          <p className="mt-2 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase text-[#c8b99a] font-light">
+          <p className="mt-2 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase text-[#8b6f4e] font-bold">
             Join the inner circle — exclusive drops & early access
           </p>
         </div>
@@ -54,18 +55,18 @@ const Footer = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="YOUR EMAIL ADDRESS"
-            className="flex-1 min-w-0 w-full md:w-[280px] bg-transparent border border-[rgba(200,185,154,0.3)] sm:border-r-0 px-4 sm:px-5 py-3 sm:py-3.5 text-[#f5f0e8] text-[11px] tracking-[0.12em] outline-none placeholder:text-[rgba(200,185,154,0.4)] placeholder:tracking-[0.14em] placeholder:uppercase focus:border-[#c8b99a] transition-colors"
+            className="flex-1 min-w-0 w-full md:w-[280px] bg-black/5 border border-black/10 sm:border-r-0 px-4 sm:px-5 py-3 sm:py-3.5 text-[#1a1a1a] text-[11px] tracking-[0.12em] outline-none placeholder:text-black/30 placeholder:tracking-[0.14em] placeholder:uppercase focus:border-[#c8b99a] transition-colors"
           />
-          <button className="bg-[#c8b99a] border border-[#c8b99a] px-5 md:px-7 py-3 sm:py-3.5 text-[#0d0d0d] text-[10px] font-medium tracking-[0.2em] uppercase cursor-pointer hover:bg-[#8b6f4e] hover:border-[#8b6f4e] hover:text-[#f5f0e8] transition-colors whitespace-nowrap">
+          <button className="bg-[#c8b99a] border border-[#c8b99a] px-5 md:px-7 py-3 sm:py-3.5 text-white text-[10px] font-medium tracking-[0.2em] uppercase cursor-pointer hover:bg-[#8b6f4e] hover:border-[#8b6f4e] hover:text-white transition-colors whitespace-nowrap">
             Subscribe
           </button>
         </div>
       </div>
 
       {/* Main Footer Grid */}
-      <div className="relative z-[1] grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-8 sm:gap-8 md:gap-10 lg:gap-0 px-5 py-10 sm:px-8 sm:py-12 md:px-12 md:py-14 lg:px-20 lg:py-16 border-b border-[rgba(200,185,154,0.3)] animate-fade-in">
+      <div className="relative z-[1] grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-8 sm:gap-8 md:gap-10 lg:gap-0 px-5 py-10 sm:px-8 sm:py-12 md:px-12 md:py-14 lg:px-20 lg:py-16 border-b border-black/5 animate-fade-in">
         {/* Brand Column */}
-        <div className="sm:col-span-3 lg:col-span-1 lg:pr-[60px] sm:pb-8 sm:border-b sm:border-[rgba(200,185,154,0.15)] lg:pb-0 lg:border-b-0 flex flex-col items-center sm:items-start">
+        <div className="sm:col-span-3 lg:col-span-1 lg:pr-[60px] sm:pb-8 sm:border-b sm:border-black/5 lg:pb-0 lg:border-b-0 flex flex-col items-center sm:items-start">
           <div className="mb-5 ml-0 sm:ml-[15px]">
             <Image
               src={LOGO}
@@ -76,9 +77,9 @@ const Footer = () => {
             />
           </div>
           <div className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8b6f4e] font-bold mb-5 sm:mb-7">
-            ICONIC APPAREL · EST. 2026
+            ARIYENTI · EST. 2026
           </div>
-          <p className="text-[12px] leading-[1.9] text-[rgba(245,240,232,0.5)] font-light max-w-[280px] mb-6 sm:mb-8 text-center sm:text-left">
+          <p className="text-[12px] leading-[1.9] text-black/50 font-light max-w-[280px] mb-6 sm:mb-8 text-center sm:text-left">
             Thoughtfully crafted pieces for the considered wardrobe. Slow
             fashion, enduring style — designed to be worn and worn again.
           </p>
@@ -135,8 +136,8 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="relative z-[1] px-5 py-5 sm:px-8 md:px-12 lg:px-20 flex flex-col items-center sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5 animate-fade-in">
-        <p className="text-[9px] sm:text-[10px] text-[rgba(200,185,154,0.35)] tracking-[0.14em] font-light text-center sm:text-left order-3 sm:order-1">
-          © 2026 ICONIC Apparel. All rights reserved.
+        <p className="text-[9px] sm:text-[10px] text-black/30 tracking-[0.14em] font-light text-center sm:text-left order-3 sm:order-1">
+          © 2026 ARIYENTI Apparel. All rights reserved.
         </p>
 
         <div className="flex flex-wrap justify-center sm:justify-start gap-4 sm:gap-5 md:gap-7 order-1 sm:order-2">
@@ -145,13 +146,13 @@ const Footer = () => {
             { label: "Terms of Use", href: "/terms-of-use" },
             { label: "Cookie Settings", href: "/cookie-settings" },
           ].map((item) => (
-            <a
+            <Link
               key={item.label}
               href={item.href}
-              className="text-[10px] text-[rgba(200,185,154,0.35)] no-underline tracking-[0.12em] hover:text-[#c8b99a] transition-colors cursor-pointer"
+              className="text-[10px] text-black/30 no-underline tracking-[0.12em] hover:text-[#c8b99a] transition-colors cursor-pointer"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -206,19 +207,19 @@ const FooterLinkColumn = ({
   links: { label: string; href: string }[];
 }) => (
   <div className="text-center sm:text-left">
-    <h4 className="text-[12px] sm:text-[13px] font-medium tracking-[0.28em] uppercase text-[#c8b99a] mb-4 sm:mb-6 pb-2 sm:pb-3 border-b border-[rgba(200,185,154,0.3)] inline-block sm:block w-auto sm:w-full">
+    <h4 className="text-[12px] sm:text-[13px] font-medium tracking-[0.28em] uppercase text-[#c8b99a] mb-4 sm:mb-6 pb-2 sm:pb-3 border-b border-black/10 inline-block sm:block w-auto sm:w-full">
       {title}
     </h4>
     <ul className="list-none p-0 m-0">
       {links.map((link) => (
         <li key={link.label} className="mb-2.5 sm:mb-3">
-          <a
+          <Link
             href={link.href}
-            className="text-[rgba(245,240,232,0.55)] text-[13px] sm:text-[14px] font-light tracking-[0.06em] no-underline hover:text-[#f5f0e8] transition-colors relative group"
+            className="text-black/60 text-[13px] sm:text-[14px] font-light tracking-[0.06em] no-underline hover:text-black transition-colors relative group"
           >
             {link.label}
             <span className="absolute left-0 -bottom-0.5 w-0 h-[1px] bg-[#c8b99a] group-hover:w-full transition-all duration-300" />
-          </a>
+          </Link>
         </li>
       ))}
     </ul>
@@ -234,7 +235,7 @@ const PayBadge = ({
 }) => (
   <span
     title={title}
-    className="bg-[rgba(200,185,154,0.07)] border border-[rgba(200,185,154,0.3)] px-2 sm:px-2.5 py-1 flex items-center justify-center h-[28px] sm:h-[30px] opacity-55 hover:opacity-90 transition-opacity"
+    className="bg-black/5 border border-black/10 px-2 sm:px-2.5 py-1 flex items-center justify-center h-[28px] sm:h-[30px] opacity-70 hover:opacity-100 transition-opacity"
   >
     {children}
   </span>

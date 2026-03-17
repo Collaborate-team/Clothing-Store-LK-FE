@@ -169,7 +169,7 @@ export default function ViewAllProducts() {
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'min' | 'max') => {
-    const val = parseInt(e.target.value) || 0;
+    const val = Number.parseInt(e.target.value) || 0;
     setPriceRange(prev => ({ ...prev, [type]: val }));
   };
 
@@ -202,19 +202,20 @@ export default function ViewAllProducts() {
         <div 
           className="fixed inset-0 bg-black/60 z-[100] lg:hidden backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setIsMobileFiltersOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* LEFT SIDEBAR - FILTERS */}
-      <aside className={`fixed inset-y-0 left-0 z-[101] w-72 bg-black border-r border-gray-800 p-6 overflow-y-auto transform transition-transform duration-300 lg:static lg:w-64 lg:p-0 lg:border-0 lg:bg-transparent lg:translate-x-0 ${isMobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between lg:hidden mb-8 border-b border-gray-800 pb-4">
-          <h2 className="text-xl font-bold tracking-tight text-white uppercase flex items-center gap-2">
+      <aside className={`fixed inset-y-0 left-0 z-[101] w-72 bg-white border-r border-black/5 p-6 overflow-y-auto transform transition-transform duration-300 lg:static lg:w-64 lg:p-0 lg:border-0 lg:bg-transparent lg:translate-x-0 ${isMobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between lg:hidden mb-8 border-b border-black/5 pb-4">
+          <h2 className="text-xl font-bold tracking-tight text-black uppercase flex items-center gap-2">
             <Filter size={18} />
             Filters
           </h2>
           <button 
             onClick={() => setIsMobileFiltersOpen(false)}
-            className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
+            className="p-2 hover:bg-black/5 rounded-full text-black/40 hover:text-black transition-colors"
           >
             <X size={20} />
           </button>
@@ -225,10 +226,10 @@ export default function ViewAllProducts() {
             const isOpen = openSections[section.title];
             
             return (
-              <div key={idx} className="border-b border-gray-800 pb-6 last:border-0 last:pb-0">
+              <div key={idx} className="border-b border-black/5 pb-6 last:border-0 last:pb-0">
                 <button 
                   onClick={() => toggleSection(section.title)}
-                  className="flex items-center justify-between w-full text-left font-semibold text-sm mb-4 tracking-wide text-white group"
+                  className="flex items-center justify-between w-full text-left font-semibold text-sm mb-4 tracking-wide text-black group"
                 >
                   <span className="group-hover:text-[#A37B5C] transition-colors">{section.title}</span>
                   {isOpen ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
@@ -243,7 +244,7 @@ export default function ViewAllProducts() {
                       
                       return (
                         <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                          <div className={`relative flex items-center justify-center w-4 h-4 border rounded transition-all duration-200 ${isChecked ? 'bg-[#2D261E] border-[#2D261E]' : 'border-gray-600 group-hover:border-gray-400'}`}>
+                          <div className={`relative flex items-center justify-center w-4 h-4 border rounded transition-all duration-200 ${isChecked ? 'bg-black border-black' : 'border-black/20 group-hover:border-black/40'}`}>
                             <input 
                               type="checkbox" 
                               checked={isChecked}
@@ -256,7 +257,7 @@ export default function ViewAllProducts() {
                               </svg>
                             )}
                           </div>
-                          <span className={`text-[11px] tracking-wider uppercase transition-colors ${isChecked ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                          <span className={`text-[11px] tracking-wider uppercase transition-colors ${isChecked ? 'text-black' : 'text-black/40 group-hover:text-black'}`}>
                               {opt}
                           </span>
                         </label>
@@ -268,24 +269,24 @@ export default function ViewAllProducts() {
                       <div className="flex flex-col gap-4 mt-2">
                         <div className="flex items-center justify-between gap-4">
                             <div className="flex flex-col gap-1.5 w-full">
-                              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Min (Rs)</span>
+                              <span className="text-[9px] text-black/40 font-bold uppercase tracking-tight">Min (Rs)</span>
                               <div className="relative">
                                 <input 
                                   type="number" 
                                   value={priceRange.min}
                                   onChange={(e) => handlePriceChange(e, 'min')}
-                                  className="w-full bg-black/50 border border-gray-800 text-white text-[11px] py-2 px-3 outline-none focus:border-[#A37B5C] transition-colors rounded-sm" 
+                                  className="w-full bg-black/5 border border-black/10 text-black text-[11px] py-2 px-3 outline-none focus:border-[#A37B5C] transition-colors rounded-sm" 
                                 />
                               </div>
                             </div>
                             <div className="flex flex-col gap-1.5 w-full">
-                              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Max (Rs)</span>
+                              <span className="text-[9px] text-black/40 font-bold uppercase tracking-tight">Max (Rs)</span>
                               <div className="relative">
                                 <input 
                                   type="number" 
                                   value={priceRange.max}
                                   onChange={(e) => handlePriceChange(e, 'max')}
-                                  className="w-full bg-black/50 border border-gray-800 text-white text-[11px] py-2 px-3 outline-none focus:border-[#A37B5C] transition-colors rounded-sm" 
+                                  className="w-full bg-black/5 border border-black/10 text-black text-[11px] py-2 px-3 outline-none focus:border-[#A37B5C] transition-colors rounded-sm" 
                                 />
                               </div>
                             </div>
@@ -300,7 +301,7 @@ export default function ViewAllProducts() {
 
                       return (
                         <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                          <div className={`relative flex items-center justify-center w-4 h-4 border rounded transition-all duration-200 ${isChecked ? 'bg-[#2D261E] border-[#2D261E]' : 'border-gray-600 group-hover:border-gray-400'}`}>
+                          <div className={`relative flex items-center justify-center w-4 h-4 border rounded transition-all duration-200 ${isChecked ? 'bg-black border-black' : 'border-black/20 group-hover:border-black/40'}`}>
                             <input 
                               type="checkbox" 
                               checked={isChecked}
@@ -314,7 +315,7 @@ export default function ViewAllProducts() {
                             )}
                           </div>
                           <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, starIdx) => {
+                            {[...new Array(5)].map((_, starIdx) => {
                               const isFilled = starIdx < numericOpt;
                               return (
                                 <Star 
@@ -341,16 +342,16 @@ export default function ViewAllProducts() {
       {/* RIGHT MAIN AREA - PRODUCTS */}
       <section className="flex-1 flex flex-col">
         {/* TOP BAR */}
-        <div className="flex flex-col sm:flex-row items-center border border-gray-800 py-3 px-4 md:px-6 mb-8 justify-between text-xs tracking-wider uppercase font-semibold text-gray-400 gap-4 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-col sm:flex-row items-center border border-black/5 py-3 px-4 md:px-6 mb-8 justify-between text-xs tracking-wider uppercase font-semibold text-black/40 gap-4 shadow-sm bg-white">
           <div className="flex items-center justify-between w-full sm:w-auto gap-4">
             <button 
               onClick={() => setIsMobileFiltersOpen(true)}
-              className="lg:hidden flex items-center gap-2 bg-white text-black px-4 py-2 rounded-sm font-bold active:scale-95 transition-transform"
+              className="lg:hidden flex items-center gap-2 bg-black text-white px-4 py-2 rounded-sm font-bold active:scale-95 transition-transform"
             >
               <Filter size={14} />
               Filters
             </button>
-            <span className="hidden sm:inline-block border-l border-gray-800 pl-4">
+            <span className="hidden sm:inline-block border-l border-black/5 pl-4">
               {filteredProducts.length} ITEMS FOUND
             </span>
             <span className="sm:hidden font-bold text-[10px]">
@@ -360,7 +361,7 @@ export default function ViewAllProducts() {
           <div className="flex items-center gap-6">
 
             {/* SORTING DROPDOWN */}
-            <div className="relative border-l border-gray-800 pl-6 cursor-pointer">
+            <div className="relative border-l border-black/5 pl-6 cursor-pointer">
                <div 
                   className="flex items-center gap-2 hover:text-white transition-colors"
                   onClick={() => setIsSortOpen(!isSortOpen)}
@@ -370,7 +371,7 @@ export default function ViewAllProducts() {
                </div>
                
                {isSortOpen && (
-                 <div className="absolute top-full right-0 mt-2 min-w-[160px] bg-gray-900 border border-gray-800 rounded-sm shadow-xl z-50 py-2">
+                 <div className="absolute top-full right-0 mt-2 min-w-[160px] bg-white border border-black/5 rounded-sm shadow-xl z-50 py-2">
                    {SORT_OPTIONS.map((opt, id) => (
                      <button 
                        key={id}
@@ -378,7 +379,7 @@ export default function ViewAllProducts() {
                          setSortOption(opt);
                          setIsSortOpen(false);
                        }}
-                       className={`w-full text-left px-4 py-2 hover:bg-gray-800 transition-colors ${sortOption === opt ? 'text-white font-bold' : 'text-gray-400'}`}
+                       className={`w-full text-left px-4 py-2 hover:bg-black/5 transition-colors ${sortOption === opt ? 'text-black font-bold' : 'text-black/40'}`}
                      >
                        {opt}
                      </button>
@@ -387,11 +388,11 @@ export default function ViewAllProducts() {
                )}
             </div>
 
-            <div className="flex items-center gap-1 border-l border-gray-800 pl-6">
-               <button className="p-1 rounded bg-white text-black hover:bg-gray-200 transition-colors">
+            <div className="flex items-center gap-1 border-l border-black/5 pl-6">
+               <button className="p-1 rounded bg-black text-white hover:bg-black/80 transition-colors shadow-md">
                  <Grid size={16} strokeWidth={2.5} />
                </button>
-               <button className="p-1 hover:bg-gray-800 rounded text-gray-400 transition-colors">
+               <button className="p-1 hover:bg-black/5 rounded text-black/40 transition-colors">
                  <List size={16} strokeWidth={2.5} />
                </button>
             </div>
@@ -414,7 +415,7 @@ export default function ViewAllProducts() {
               </div>
             ))
           ) : (
-            <div className="col-span-full py-20 text-center text-white/40 italic">
+            <div className="col-span-full py-20 text-center text-black/40 italic">
               No items found in this category.
             </div>
           )}
