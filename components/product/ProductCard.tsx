@@ -12,6 +12,7 @@ interface ProductCardProps {
   price: string;
   originalPrice?: string;
   imageUrl?: string | StaticImageData;
+  hoverImageUrl?: string | StaticImageData;
   badge?: 'NEW' | 'SALE';
   isFavorite?: boolean;
   sizes?: string[];
@@ -24,6 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   price,
   originalPrice,
   imageUrl,
+  hoverImageUrl,
   badge,
   isFavorite = false,
   sizes,
@@ -45,12 +47,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <Link href={`/products/${id}`} className="block">
         <div className="aspect-[4/5] relative overflow-hidden">
           {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
-            />
+            <>
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                className={`object-cover transition-all duration-700 ease-in-out cursor-pointer ${hoverImageUrl ? 'group-hover:opacity-0 group-hover:scale-105' : 'group-hover:scale-110'}`}
+              />
+              {hoverImageUrl && (
+                <Image
+                  src={hoverImageUrl}
+                  alt={`${title} - alternative view`}
+                  fill
+                  className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-in-out cursor-pointer"
+                />
+              )}
+            </>
           ) : (
             <div className="w-full h-full bg-black/5 flex items-center justify-center text-black/5">
               <ShoppingBag size={48} strokeWidth={0.5} />
