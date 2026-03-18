@@ -18,6 +18,8 @@ interface ProductCardProps {
   sizes?: string[];
 }
 
+import { useNotification } from '@/context/NotificationContext';
+
 const ProductCard: React.FC<ProductCardProps> = ({
   id = 1,
   title,
@@ -31,6 +33,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
   sizes,
 }) => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const { showNotification } = useNotification();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Simulate add to cart
+    showNotification(`${title} has been added to your bag.`, 'success', 'Added to Bag');
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showNotification(isFavorite ? `${title} removed from favorites.` : `${title} added to favorites!`, 'info', 'Favorites Updated');
+  };
 
   return (
     <div className="bg-white border border-black/5 rounded-sm flex flex-col h-full relative group transition-all duration-500 hover:border-[#c8b99a]/50 overflow-hidden shadow-sm">
@@ -69,16 +86,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           )}
 
-          {/* Quick Actions Overlay (Stopped from bubbling Link if needed, but for now okay) */}
+          {/* Quick Actions Overlay */}
           <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-10">
-            <button className="w-full py-3 bg-[#c8b99a] text-black text-[9px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-2 hover:bg-white transition-all cursor-pointer">
+            <button 
+              onClick={handleAddToCart}
+              className="w-full py-3 bg-[#c8b99a] text-black text-[9px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-2 hover:bg-white transition-all cursor-pointer"
+            >
                 Add to Bag
             </button>
           </div>
 
           {/* Favorite Button */}
           <button 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={handleToggleFavorite}
             className="absolute top-4 right-4 p-2.5 bg-white/80 backdrop-blur-sm rounded-full text-black hover:bg-[#c8b99a] hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 duration-500 z-20 cursor-pointer"
           >
             <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
