@@ -1,75 +1,54 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+import axiosInstance from './axios-instance';
 
 // --- PRODUCTS ---
 export async function fetchAllProducts() {
-  const response = await fetch(`${BASE_URL}/products/all`);
-  if (!response.ok) throw new Error('Failed to fetch products');
-  return response.json();
+  const response = await axiosInstance.get('/products/all');
+  return response.data;
 }
 
 export async function fetchProductById(id: string | number) {
-  const response = await fetch(`${BASE_URL}/products/retrieve/by/id/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch product');
-  return response.json();
+  const response = await axiosInstance.get(`/products/retrieve/by/id/${id}`);
+  return response.data;
 }
 
 export async function addProduct(product: any) {
-  const response = await fetch(`${BASE_URL}/products/add`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(product)
-  });
-  if (!response.ok) throw new Error('Failed to add product');
-  return response.json();
+  const response = await axiosInstance.post('/products/add', product);
+  return response.data;
 }
 
 export async function updateProduct(id: string | number, product: any) {
-  const response = await fetch(`${BASE_URL}/products/update/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(product)
-  });
-  if (!response.ok) throw new Error('Failed to update product');
-  return response.json();
+  const response = await axiosInstance.put(`/products/update/${id}`, product);
+  return response.data;
 }
 
 export async function deleteProduct(id: string | number) {
-  const response = await fetch(`${BASE_URL}/products/delete/${id}`, {
-    method: 'DELETE'
-  });
-  if (!response.ok) throw new Error('Failed to delete product');
+  await axiosInstance.delete(`/products/delete/${id}`);
   return true;
 }
 
 export async function getLowStockProducts() {
-  const response = await fetch(`${BASE_URL}/products/inventory/low-stock`);
-  if (!response.ok) throw new Error('Failed to fetch low stock products');
-  return response.json();
+  const response = await axiosInstance.get('/products/inventory/low-stock');
+  return response.data;
 }
 
 export async function checkProductAvailability(id: string | number) {
-  const response = await fetch(`${BASE_URL}/products/${id}/availability`);
-  if (!response.ok) throw new Error('Failed to check availability');
-  return response.json();
+  const response = await axiosInstance.get(`/products/${id}/availability`);
+  return response.data;
 }
 
 // --- ORDERS ---
 export async function fetchAllOrders() {
-  const response = await fetch(`${BASE_URL}/orders/retrieve/all`);
-  if (!response.ok) throw new Error('Failed to fetch orders');
-  return response.json();
+  const response = await axiosInstance.get('/orders/retrieve/all');
+  return response.data;
 }
 
 export async function fetchOrderById(id: string | number) {
-  const response = await fetch(`${BASE_URL}/orders/retrieve/by/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch order details');
-  return response.json();
+  const response = await axiosInstance.get(`/orders/retrieve/by/${id}`);
+  return response.data;
 }
 
 export async function updateOrderStatus(id: string | number, status: string) {
-  const response = await fetch(`${BASE_URL}/orders/updateStatus/${id}?status=${status}`, {
-    method: 'PUT'
-  });
-  if (!response.ok) throw new Error('Failed to update order status');
+  await axiosInstance.put(`/orders/updateStatus/${id}?status=${status}`);
   return true;
 }
+
