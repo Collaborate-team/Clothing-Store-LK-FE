@@ -5,15 +5,22 @@ import {
   ShoppingBag, 
   ChevronRight,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Search,
+  Filter,
+  X,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
-import { fetchAllOrders, updateOrderStatus } from '@/lib/api-service';
+import { fetchAllOrders, updateOrderStatus, searchOrders } from '@/lib/api-service';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState<'orderId' | 'name' | 'email' | 'mobile'>('orderId');
   const [error, setError] = useState('');
   const { showNotification } = useNotification();
 
@@ -35,6 +42,30 @@ export default function AdminOrders() {
     loadOrders();
   }, []);
 
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) {
+      loadOrders();
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await searchOrders(searchType, searchQuery);
+      setOrders(Array.isArray(results) ? results : []);
+    } catch (err) {
+      console.error('Search failed', err);
+      showNotification('Search failed. Please try again.', 'error', 'Error');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    loadOrders();
+  };
+
   const handleStatusChange = async (id: number | string, newStatus: string) => {
     try {
       await updateOrderStatus(id, newStatus);
@@ -46,23 +77,62 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-10 animate-fade-in pb-20">
+      {/* Page Header & Search */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-black flex items-center gap-3 uppercase">
-             <ShoppingBag size={24} />
-             Orders
+             <ShoppingBag size={24} className="text-[#c8b99a]" />
+             Sales & Orders
           </h1>
-          <p className="text-[10px] text-black/40 font-bold uppercase tracking-widest mt-1">Track and manage customer orders</p>
+          <p className="text-[10px] text-black/40 font-bold uppercase tracking-widest mt-1">Track and manage customer transactions ({orders.length})</p>
         </div>
-        <button 
-          onClick={loadOrders}
-          className="p-3 border border-black/5 hover:bg-black hover:text-white transition-all rounded-sm"
-        >
-          <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-        </button>
+
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-2xl bg-white p-2 border border-black/5 rounded-sm shadow-sm">
+           <div className="relative flex-1 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-focus-within:text-[#c8b99a] transition-colors" size={16} />
+              <input 
+                type="text" 
+                placeholder={`Search by ${searchType}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-black/[0.02] border border-transparent py-3 pl-11 pr-4 text-xs font-bold text-black outline-none focus:bg-white focus:border-black/5 transition-all rounded-sm uppercase tracking-widest placeholder:text-black/20"
+              />
+              {searchQuery && (
+                <button 
+                  type="button" 
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-black/5 rounded-full text-black/20 hover:text-black transition-all"
+                >
+                  <X size={14} />
+                </button>
+              )}
+           </div>
+
+           <div className="relative min-w-[140px]">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" size={14} />
+              <select 
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value as any)}
+                className="w-full h-full bg-black/[0.02] border border-transparent py-3 pl-10 pr-8 text-[10px] font-bold uppercase tracking-widest text-black outline-none cursor-pointer hover:bg-black/[0.04] transition-all appearance-none rounded-sm"
+              >
+                 <option value="orderId">Order ID</option>
+                 <option value="name">Customer Name</option>
+                 <option value="email">Email</option>
+                 <option value="mobile">Mobile No</option>
+              </select>
+           </div>
+
+           <button 
+             type="submit"
+             disabled={isSearching}
+             className="bg-black text-white px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#c8b99a] hover:text-black transition-all disabled:opacity-50 flex items-center justify-center gap-2 rounded-sm"
+           >
+              {isSearching ? <RefreshCw className="animate-spin" size={14} /> : 'Search'}
+           </button>
+        </form>
       </div>
+
 
       {error && (
         <div className="bg-red-50 border border-red-100 p-4 rounded-sm flex items-center gap-2 text-red-600">

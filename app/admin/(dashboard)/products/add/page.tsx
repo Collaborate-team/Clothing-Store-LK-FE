@@ -38,9 +38,10 @@ export default function AddProductPage() {
     sizes: [] as string[],
     colors: [] as string[],
     description: '',
-    status: 'INSTOCK'
+    stockStatus: 'INSTOCK'
   });
 
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -68,11 +69,14 @@ export default function AddProductPage() {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       const newPreviews = files.map(file => URL.createObjectURL(file));
+      
+      setImageFiles(prev => [...prev, ...files]);
       setImagePreviews(prev => [...prev, ...newPreviews]);
     }
   };
 
   const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -81,7 +85,8 @@ export default function AddProductPage() {
     setIsLoading(true);
 
     try {
-      await addProduct(formData);
+      await addProduct(formData as any, imageFiles);
+      
       showNotification(`${formData.name} has been added successfully.`, 'success', 'Product Published');
       setSuccess(true);
       setTimeout(() => router.push('/admin/products'), 2000);
@@ -134,7 +139,7 @@ export default function AddProductPage() {
                       placeholder="e.g., Linen Short for Summer"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-xs text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm"
+                      className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-xs text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm font-bold"
                    />
                 </div>
 
@@ -160,7 +165,7 @@ export default function AddProductPage() {
                          required
                          value={formData.price}
                          onChange={handleInputChange}
-                         className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-xs text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm"
+                         className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-xs text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm font-bold"
                       />
                    </div>
                    <div className="space-y-2">
@@ -171,7 +176,7 @@ export default function AddProductPage() {
                          required
                          value={formData.quantity}
                          onChange={handleInputChange}
-                         className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-xs text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm"
+                         className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-xs text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm font-bold"
                       />
                    </div>
                 </div>
@@ -233,7 +238,7 @@ export default function AddProductPage() {
                      name="category"
                      value={formData.category}
                      onChange={handleInputChange}
-                     className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-[10px] font-bold uppercase tracking-widest text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm cursor-pointer"
+                     className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-[10px] font-bold uppercase tracking-widest text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm cursor-pointer font-bold"
                    >
                       {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                    </select>
@@ -242,10 +247,10 @@ export default function AddProductPage() {
                 <div className="space-y-2">
                    <label className="text-[10px] text-black/60 font-bold uppercase tracking-widest ml-1">Stock Status</label>
                    <select 
-                     name="status"
-                     value={formData.status}
+                     name="stockStatus"
+                     value={formData.stockStatus}
                      onChange={handleInputChange}
-                     className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-[10px] font-bold uppercase tracking-widest text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm cursor-pointer"
+                     className="w-full bg-black/[0.02] border border-black/5 py-3.5 px-4 text-[10px] font-bold uppercase tracking-widest text-black outline-none focus:bg-white focus:border-[#c8b99a] transition-all rounded-sm cursor-pointer font-bold"
                    >
                       <option value="INSTOCK">IN STOCK</option>
                       <option value="LOWSTOCK">LOW STOCK</option>
@@ -255,37 +260,51 @@ export default function AddProductPage() {
              </div>
 
              {/* Images Area */}
-             <div className="bg-white p-8 border border-black/5 rounded-sm shadow-sm space-y-6">
-                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-black">Product Images</h2>
+             <div className="bg-white p-10 border border-black/5 rounded-sm shadow-sm space-y-8">
+                <div>
+                   <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-black border-b border-black/5 pb-4">Product Photography</h2>
+                   <p className="text-[9px] text-black/30 font-bold uppercase tracking-widest mt-2">Upload high-resolution images for best results</p>
+                </div>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                    {imagePreviews.map((preview, i) => (
-                     <div key={i} className="aspect-square relative group rounded-sm overflow-hidden border border-black/5">
-                        <img src={preview} alt="Product" className="w-full h-full object-cover" />
-                        <button 
-                          type="button" 
-                          onClick={() => removeImage(i)}
-                          className="absolute top-1 right-1 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        >
-                           <X size={12} />
-                        </button>
-                     </div>
+                      <div key={i} className="aspect-[3/4] relative group rounded-sm overflow-hidden border border-black/5 bg-black/[0.02] shadow-sm hover:shadow-md transition-all duration-500">
+                         <img src={preview} alt="Product" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button 
+                              type="button" 
+                              onClick={() => removeImage(i)}
+                              className="p-3 bg-red-600 text-white rounded-full shadow-2xl hover:bg-red-700 transition-colors transform hover:scale-110"
+                              title="Remove Image"
+                            >
+                               <X size={16} />
+                            </button>
+                         </div>
+                         <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-sm">
+                            <span className="text-[8px] text-white font-bold uppercase tracking-widest">Image {i + 1}</span>
+                         </div>
+                      </div>
                    ))}
                    
-                   <label className="aspect-square bg-black/[0.02] border-2 border-dashed border-black/5 rounded-sm flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#c8b99a] transition-colors group">
-                      <PlusCircle className="text-black/10 group-hover:text-[#c8b99a] transition-colors" size={32} strokeWidth={1} />
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-black/40">Browse Image</span>
+                   <label className="aspect-[3/4] bg-black/[0.01] border-2 border-dashed border-black/5 rounded-sm flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#c8b99a] hover:bg-black/[0.02] transition-all group overflow-hidden relative">
+                      <div className="absolute inset-0 bg-[radial-gradient(#c8b99a_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.03] group-hover:opacity-[0.05]"></div>
+                      <PlusCircle className="text-black/10 group-hover:text-[#c8b99a] group-hover:scale-110 transition-all duration-500" size={40} strokeWidth={1} />
+                      <div className="text-center">
+                         <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 group-hover:text-black transition-colors">Add Image</span>
+                         <span className="block text-[8px] font-bold uppercase tracking-widest text-black/20 mt-1">PNG, JPG up to 10MB</span>
+                      </div>
                       <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
                    </label>
                 </div>
              </div>
 
+
              {/* Actions */}
              <div className="pt-4">
                 <button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full py-5 bg-black text-white text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-[#c8b99a] hover:text-black transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50"
+                   type="submit" 
+                   disabled={isLoading}
+                   className="w-full py-5 bg-black text-white text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-[#c8b99a] hover:text-black transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                    {isLoading ? (
                      <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>

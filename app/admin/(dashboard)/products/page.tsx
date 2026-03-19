@@ -12,12 +12,15 @@ import {
   ExternalLink,
   Tag,
   Eye,
-  ShoppingBag
+  ShoppingBag,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
-import { fetchAllProducts, deleteProduct } from '@/lib/api-service';
+import { useRouter } from 'next/navigation';
+import { fetchAllProducts, deleteProduct, getProductImageUrl } from '@/lib/api-service';
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
+
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([]);
@@ -149,10 +152,10 @@ export default function AdminProducts() {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-5">
                         <div className="w-16 h-20 bg-black/5 rounded-sm flex items-center justify-center overflow-hidden border border-black/5 relative group-hover:scale-105 transition-transform duration-500">
-                           {product.imageUrl ? (
-                             <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
+                           {product.imageUrls && product.imageUrls.length > 0 ? (
+                             <img src={getProductImageUrl(product.imageUrls[0])} alt="" className="w-full h-full object-cover" />
                            ) : (
-                             <Package size={24} className="text-black/5" />
+                             <Package size={24} className="text-black/5" strokeWidth={1} />
                            )}
                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                               <ExternalLink size={16} className="text-white" />

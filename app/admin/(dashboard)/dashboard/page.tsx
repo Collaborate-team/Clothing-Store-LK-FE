@@ -11,72 +11,86 @@ import {
   ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
-import { fetchAllOrders } from '@/lib/api-service';
-
-const DashboardStats = [
-  { 
-    title: 'Total Revenue', 
-    value: 'Rs 1,245,000', 
-    change: '+12.5%', 
-    isPositive: true, 
-    icon: DollarSign,
-    color: 'bg-green-500' 
-  },
-  { 
-    title: 'Active Orders', 
-    value: '48', 
-    change: '+5.2%', 
-    isPositive: true, 
-    icon: ShoppingBag,
-    color: 'bg-black' 
-  },
-  { 
-    title: 'Products in Stock', 
-    value: '154', 
-    change: '-2%', 
-    isPositive: false, 
-    icon: Package,
-    color: 'bg-[#c8b99a]' 
-  },
-  { 
-    title: 'Low Stock', 
-    value: '3', 
-    change: 'Urgent', 
-    isPositive: false, 
-    icon: AlertTriangle,
-    color: 'bg-red-500',
-    href: '/admin/products/inventory'
-  },
-];
+import { fetchAllOrders, getTopLevelStats } from '@/lib/api-service';
 
 export default function AdminDashboard() {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    revenue: 0,
+    activeOrders: 0,
+    inStock: 0,
+    lowStock: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadRecentOrders = async () => {
+    const loadDashboardData = async () => {
       try {
-        const orders = await fetchAllOrders();
-        // Assuming API returns an array, take the first 5 (latest)
+        const [orders, topStats] = await Promise.all([
+          fetchAllOrders(),
+          getTopLevelStats()
+        ]);
+        
         setRecentOrders(Array.isArray(orders) ? orders.slice(0, 5) : []);
+        setStats({
+          revenue: topStats.revenue || 0,
+          activeOrders: topStats.activeOrders || 0,
+          inStock: topStats.inStock || 0,
+          lowStock: topStats.lowStock || 0
+        });
       } catch (err) {
-        console.error('Failed to load dashboard orders', err);
+        console.error('Failed to load dashboard data', err);
       } finally {
         setIsLoading(false);
       }
     };
-    loadRecentOrders();
+    loadDashboardData();
   }, []);
+
+  const dashboardCards = [
+    { 
+      title: 'Total Revenue', 
+      value: `Rs ${stats.revenue.toLocaleString()}`, 
+      change: 'Calculated from orders', 
+      isPositive: true, 
+      icon: DollarSign,
+      color: 'bg-green-500' 
+    },
+    { 
+      title: 'Active Orders', 
+      value: stats.activeOrders.toString(), 
+      change: 'Current backlog', 
+      isPositive: true, 
+      icon: ShoppingBag,
+      color: 'bg-black' 
+    },
+    { 
+      title: 'Products in Stock', 
+      value: stats.inStock.toString(), 
+      change: 'Active inventory', 
+      isPositive: true, 
+      icon: Package,
+      color: 'bg-[#c8b99a]' 
+    },
+    { 
+      title: 'Low Stock', 
+      value: stats.lowStock.toString(), 
+      change: 'Requires attention', 
+      isPositive: stats.lowStock === 0, 
+      icon: AlertTriangle,
+      color: 'bg-red-500',
+      href: '/admin/products'
+    },
+  ];
 
   return (
     <div className="space-y-10">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {DashboardStats.map((stat, i) => {
+        {dashboardCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
             <div key={i} className="bg-white p-6 rounded-sm border border-black/5 hover:border-[#c8b99a]/50 transition-all duration-300 shadow-sm relative group overflow-hidden">
-               {/* Accent line */}
                <div className={`absolute left-0 top-0 bottom-0 w-1 ${stat.color}`}></div>
                
                <div className="flex items-center justify-between mb-4">
@@ -96,12 +110,11 @@ export default function AdminDashboard() {
                
                <div className="flex items-end gap-2">
                  <p className="text-2xl font-bold tracking-tight text-black">
-                   {stat.value}
+                   {isLoading ? '...' : stat.value}
                  </p>
-                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5 mb-1 ${
+                 <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5 mb-1 ${
                    stat.isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
                  }`}>
-                   {stat.isPositive ? <ArrowUpRight size={10} /> : <TrendingDown size={10} />}
                    {stat.change}
                  </span>
                </div>
@@ -140,18 +153,18 @@ export default function AdminDashboard() {
                            <tr key={order.id} className="hover:bg-black/[0.01] transition-colors">
                              <td className="py-4">
                                <div className="flex flex-col">
-                                 <span className="text-[11px] font-bold uppercase tracking-tight text-black">{order.customerName}</span>
-                                 <span className="text-[8px] text-black/30 font-bold uppercase tracking-widest">#{order.orderId}</span>
+                                 <span className="text-[11px] font-bold uppercase tracking-tight text-black">{order.customerName || 'Guest Customer'}</span>
+                                 <span className="text-[8px] text-black/30 font-bold uppercase tracking-widest">#{order.orderId || order.id}</span>
                                </div>
                              </td>
                              <td className="py-4">
-                                <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded-full ${
-                                  order.orderStatus === 'PENDING' ? 'bg-amber-50 text-amber-600' :
-                                  order.orderStatus === 'DELIVERED' ? 'bg-green-50 text-green-600' :
-                                  'bg-black/5 text-black'
-                                }`}>
-                                   {order.orderStatus}
-                                </span>
+                                 <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded-full ${
+                                   order.orderStatus === 'PENDING' ? 'bg-amber-50 text-amber-600' :
+                                   order.orderStatus === 'DELIVERED' ? 'bg-green-50 text-green-600' :
+                                   'bg-black/5 text-black'
+                                 }`}>
+                                    {order.orderStatus}
+                                 </span>
                              </td>
                              <td className="py-4 text-right">
                                 <span className="text-[11px] font-bold text-black">Rs {order.total?.toLocaleString()}</span>
@@ -164,33 +177,27 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-20 border-2 border-dashed border-black/5 rounded-sm">
                     <ShoppingBag size={48} className="mx-auto text-black/5 mb-4" strokeWidth={0.5} />
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-black/40">No orders to display</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-black/40">No actual orders found</p>
                 </div>
               )}
            </div>
         </div>
 
-        {/* Inventory Summary - Placeholder or Real */}
+        {/* Inventory Summary - Dynamic and clean */}
         <div className="bg-white p-8 rounded-sm border border-black/5 shadow-sm">
            <div className="flex items-center justify-between mb-8">
               <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-black">Inventory Quick-View</h2>
-              <Link href="/admin/products/inventory" className="text-[10px] font-bold text-[#c8b99a] uppercase tracking-widest hover:text-black transition-colors">
+              <Link href="/admin/products" className="text-[10px] font-bold text-[#c8b99a] uppercase tracking-widest hover:text-black transition-colors">
                 Manage
               </Link>
            </div>
            
-           <div className="space-y-6">
-               {['Polos', 'Henleys', 'Accessories'].map(cat => (
-                 <div key={cat} className="space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest">
-                       <span>{cat}</span>
-                       <span className="text-black/40">75% Full</span>
-                    </div>
-                    <div className="h-1 bg-black/5 rounded-full overflow-hidden">
-                       <div className="h-full bg-black/80 w-3/4 animate-grow-x"></div>
-                    </div>
-                 </div>
-               ))}
+           <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+              <Package size={40} className="text-black/10" strokeWidth={1} />
+              <div className="space-y-1">
+                 <p className="text-[11px] font-bold uppercase tracking-widest text-black/40">Real-time inventory active</p>
+                 <p className="text-[9px] text-black/20 uppercase font-bold tracking-widest">Showing data from live database</p>
+              </div>
            </div>
         </div>
       </div>
