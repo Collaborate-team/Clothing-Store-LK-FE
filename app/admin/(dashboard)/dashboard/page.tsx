@@ -32,11 +32,21 @@ export default function AdminDashboard() {
         ]);
         
         setRecentOrders(Array.isArray(orders) ? orders.slice(0, 5) : []);
+        
+        let lowStockCount = 0;
+        if (Array.isArray(topStats.lowStock)) {
+          lowStockCount = topStats.lowStock.length;
+        } else if (typeof topStats.lowStock === 'number') {
+          lowStockCount = topStats.lowStock;
+        } else if (topStats.lowStockProducts !== undefined) {
+          lowStockCount = topStats.lowStockProducts;
+        }
+
         setStats({
           revenue: topStats.revenue || 0,
           activeOrders: topStats.activeOrders || 0,
           inStock: topStats.inStock || 0,
-          lowStock: topStats.lowStock || 0
+          lowStock: lowStockCount
         });
       } catch (err) {
         console.error('Failed to load dashboard data', err);
@@ -141,37 +151,42 @@ export default function AdminDashboard() {
               ) : recentOrders.length > 0 ? (
                 <div className="overflow-x-auto">
                    <table className="w-full text-left">
-                     <thead>
-                       <tr className="border-b border-black/5 text-[9px] font-bold uppercase tracking-widest text-black/40">
-                         <th className="pb-4">Customer</th>
-                         <th className="pb-4">Status</th>
-                         <th className="pb-4 text-right">Total</th>
-                       </tr>
-                     </thead>
-                     <tbody className="divide-y divide-black/5">
-                        {recentOrders.map((order) => (
-                           <tr key={order.id} className="hover:bg-black/[0.01] transition-colors">
-                             <td className="py-4">
-                               <div className="flex flex-col">
-                                 <span className="text-[11px] font-bold uppercase tracking-tight text-black">{order.customerName || 'Guest Customer'}</span>
-                                 <span className="text-[8px] text-black/30 font-bold uppercase tracking-widest">#{order.orderId || order.id}</span>
-                               </div>
-                             </td>
-                             <td className="py-4">
-                                 <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded-full ${
-                                   order.orderStatus === 'PENDING' ? 'bg-amber-50 text-amber-600' :
-                                   order.orderStatus === 'DELIVERED' ? 'bg-green-50 text-green-600' :
-                                   'bg-black/5 text-black'
-                                 }`}>
-                                    {order.orderStatus}
-                                 </span>
-                             </td>
-                             <td className="py-4 text-right">
-                                <span className="text-[11px] font-bold text-black">Rs {order.total?.toLocaleString()}</span>
-                             </td>
-                           </tr>
-                        ))}
-                     </tbody>
+                       <thead>
+                        <tr className="border-b border-black/10 text-[9px] font-bold uppercase tracking-widest text-black/60 bg-black/[0.02]">
+                          <th className="px-4 py-4">Customer</th>
+                          <th className="px-4 py-4">Status</th>
+                          <th className="px-4 py-4 text-right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-black/5">
+                         {recentOrders.map((order) => (
+                            <tr key={order.id} className="hover:bg-black/[0.01] transition-colors">
+                              <td className="py-4 px-4">
+                                <div className="flex flex-col">
+                                  <span className="text-[11px] font-bold uppercase tracking-tight text-black">{order.customerName || order.name || 'Guest'}</span>
+                                  <span className="text-[8px] text-black/30 font-bold uppercase tracking-widest">#{order.orderId || order.id}</span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-4">
+                                  <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded-full ${
+                                    (order.orderStatus || order.status) === 'PENDING' ? 'bg-amber-50 text-amber-600' :
+                                    (order.orderStatus || order.status) === 'CONFIRMED' ? 'bg-indigo-50 text-indigo-600' :
+                                    (order.orderStatus || order.status) === 'PROCESSING' ? 'bg-purple-50 text-purple-600' :
+                                    (order.orderStatus || order.status) === 'SHIPPED' ? 'bg-blue-50 text-blue-600' :
+                                    (order.orderStatus || order.status) === 'DELIVERED' ? 'bg-green-50 text-green-600' :
+                                    (order.orderStatus || order.status) === 'CANCELLED' ? 'bg-red-50 text-red-600' :
+                                    (order.orderStatus || order.status) === 'REFUNDED' ? 'bg-gray-100 text-gray-600' :
+                                    'bg-black/5 text-black'
+                                  }`}>
+                                     {order.orderStatus || order.status || 'PENDING'}
+                                  </span>
+                              </td>
+                              <td className="py-4 px-4 text-right">
+                                 <span className="text-[11px] font-bold text-black">Rs {(order.total || order.totalAmount || 0).toLocaleString()}</span>
+                              </td>
+                            </tr>
+                         ))}
+                      </tbody>
                    </table>
                 </div>
               ) : (
