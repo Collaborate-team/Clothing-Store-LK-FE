@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import NavBar from "@/components/common/nav-bar";
-import Footer from "@/components/common/Footer";
 import "./globals.css";
 import { Geist, Geist_Mono, Cormorant_Garamond, Montserrat } from "next/font/google";
 
@@ -32,6 +30,9 @@ export const metadata: Metadata = {
 	description: "Clothing Store LK front-end",
 };
 
+import { NotificationProvider } from '@/context/NotificationContext';
+import { ModalProvider } from '@/context/ModalContext';
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -42,9 +43,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${montserrat.variable} antialiased`}
       >
-        <NavBar />
-        {children}
-        <Footer />
+        <NotificationProvider>
+          <ModalProvider>
+            {children}
+          </ModalProvider>
+        </NotificationProvider>
       </body>
     </html>
   );
