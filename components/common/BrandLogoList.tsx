@@ -26,7 +26,7 @@ export default function BrandLogoList() {
             key={`${brand.id}-${index}`}
             className="flex items-center justify-center grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer"
           >
-            <span className="text-2xl md:text-3xl font-serif tracking-[0.3em] text-white whitespace-nowrap">
+            <span className="text-2xl md:text-3xl font-serif tracking-[0.3em] text-black whitespace-nowrap">
               {brand.name}
             </span>
           </div>
