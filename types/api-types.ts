@@ -1,14 +1,20 @@
 // --- Enums ---
 export enum OrderStatus {
   PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  PROCESSING = 'PROCESSING',
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED'
 }
 
 export enum PaymentMethod {
-  CARD = 'CARD',
-  CASH = 'CASH'
+  CASH_ON_DELIVERY = 'CASH_ON_DELIVERY',
+  CREDIT_CARD = 'CREDIT_CARD',
+  DEBIT_CARD = 'DEBIT_CARD',
+  ONLINE_TRANSFER = 'ONLINE_TRANSFER',
+  PAYPAL = 'PAYPAL'
 }
 
 export enum Category {
@@ -75,15 +81,20 @@ export interface CustomerDTO {
   address?: string;
 }
 
-export interface OrderItemRequestDTO {
+export interface OrderItemDTO {
   productId: number;
-  quantity: number;
+  productName: string;
+  imageUrl: string;
+  color: Color;
+  size: Size;
+  qty: number;
+  unitPrice: number;
 }
 
 export interface OrderDTO {
   id?: number;
   orderId?: string;
-  items: OrderItemRequestDTO[];
+  items: OrderItemDTO[];
   paymentMethod: PaymentMethod;
   customerName?: string;
   email?: string;

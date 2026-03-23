@@ -9,7 +9,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// Add a request interceptor to debug the URL
 axiosInstance.interceptors.request.use((config) => {
   const fullUrl = `${config.baseURL || ''}${config.url || ''}`;
   console.log('Sending request to:', fullUrl);
@@ -18,7 +17,6 @@ axiosInstance.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Add a response interceptor to debug response errors
 axiosInstance.interceptors.response.use((response) => {
   return response;
 }, (error) => {

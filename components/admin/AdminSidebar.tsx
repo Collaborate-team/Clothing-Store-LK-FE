@@ -11,8 +11,10 @@ import {
   BarChart3, 
   LogOut,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
+import { getTopLevelStats } from '@/lib/api-service';
 
 const sidebarLinks = [
   {
@@ -54,6 +56,36 @@ const sidebarLinks = [
 const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const [lowStockCount, setLowStockCount] = React.useState<number>(0);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await getTopLevelStats();
+        
+        let count = 0;
+        if (Array.isArray(stats.lowStock)) {
+          count = stats.lowStock.length;
+        } else if (typeof stats.lowStock === 'number') {
+          count = stats.lowStock;
+        } else if (stats.lowStockProducts !== undefined) {
+          count = stats.lowStockProducts;
+        }
+        
+        setLowStockCount(count);
+      } catch (error) {
+        console.error('Error fetching low stock stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchStats, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('isAdminAuthenticated');
@@ -117,19 +149,27 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
 
       {/* Quick Status / Warnings */}
       <div className="px-6 py-6 border-t border-black/5">
-        <div className="bg-red-50 p-3 rounded-sm border border-red-100 mb-4">
-             <div className="flex items-center gap-2 text-red-600 mb-1">
-                 <AlertCircle size={14} />
-                 <span className="text-[10px] font-bold uppercase tracking-tight">Low Stock Alert</span>
-             </div>
-             <p className="text-[9px] text-red-800 leading-normal">
-                 3 items are running out of stock. Update immediately.
-             </p>
-        </div>
+        {!isLoading && lowStockCount > 0 && (
+          <div className="bg-red-50 p-3 rounded-sm border border-red-100 mb-4 animate-pulse">
+               <div className="flex items-center gap-2 text-red-600 mb-1">
+                   <AlertCircle size={14} />
+                   <span className="text-[10px] font-bold uppercase tracking-tight">Low Stock Alert</span>
+               </div>
+               <p className="text-[9px] text-red-800 leading-normal font-medium">
+                   {lowStockCount} {lowStockCount === 1 ? 'item is' : 'items are'} running out of stock. Update immediately.
+               </p>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex items-center justify-center py-4 mb-4 text-black/20">
+            <Loader2 size={16} className="animate-spin" />
+          </div>
+        )}
 
         <button 
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-black/10 text-black text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all duration-500 cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-red-600/20 text-red-600 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-red-600 hover:text-white transition-all duration-500 cursor-pointer rounded-sm"
         >
           <LogOut size={14} />
           Sign Out

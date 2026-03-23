@@ -240,7 +240,8 @@ const CartPage = () => {
                       { id: 'CREDIT_CARD', label: 'Credit Card', icon: <CreditCard size={18} /> },
                       { id: 'DEBIT_CARD', label: 'Debit Card', icon: <CreditCard size={18} className="rotate-180" /> },
                       { id: 'ONLINE_TRANSFER', label: 'Bank Transfer', icon: <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_xM7u4YIn9I_7p_p2L8K2N3_7q8o_7p8A4w&s" alt="Transfer" width={20} height={20} className="grayscale" /> },
-                      { id: 'CASH_ON_DELIVERY', label: 'Cash on Delivery', icon: <Truck size={18} /> }
+                      { id: 'CASH_ON_DELIVERY', label: 'Cash on Delivery', icon: <Truck size={18} /> },
+                      { id: 'PAYPAL', label: 'PayPal', icon: <Image src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" width={20} height={20} /> }
                     ].map((method) => (
                       <button 
                         key={method.id}

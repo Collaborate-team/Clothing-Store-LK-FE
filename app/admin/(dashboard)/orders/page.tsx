@@ -67,13 +67,108 @@ export default function AdminOrders() {
   };
 
   const handleStatusChange = async (id: number | string, newStatus: string) => {
+    // Optimistic Update
+    const previousOrders = [...orders];
+    setOrders(orders.map(o => o.id === id ? { ...o, orderStatus: newStatus, status: newStatus } : o));
+
     try {
       await updateOrderStatus(id, newStatus);
       showNotification(`Order #${id} has been updated to ${newStatus}.`, 'success', 'Status Updated');
-      loadOrders(); // Refresh
+      loadOrders(); // Final Sync with backend
     } catch (err) {
+      setOrders(previousOrders); // Rollback
       showNotification('Failed to update order status.', 'error', 'Error');
     }
+  };
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'bg-amber-50 text-amber-600 border-amber-100';
+      case 'CONFIRMED': return 'bg-indigo-50 text-indigo-600 border-indigo-100';
+      case 'PROCESSING': return 'bg-purple-50 text-purple-600 border-purple-100';
+      case 'SHIPPED': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'DELIVERED': return 'bg-green-50 text-green-600 border-green-100';
+      case 'CANCELLED': return 'bg-red-50 text-red-600 border-red-100';
+      case 'REFUNDED': return 'bg-gray-100 text-gray-600 border-gray-200';
+      default: return 'bg-black/5 text-black border-transparent';
+    }
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="h-64 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-black/10 border-t-black rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+
+    if (orders.length === 0) {
+      return (
+        <div className="h-64 flex flex-col items-center justify-center text-black/20 italic">
+          <ShoppingBag size={48} strokeWidth={0.5} className="mb-4" />
+          No orders found.
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b border-black/10 bg-black/[0.03]">
+              <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-black">Order ID</th>
+              <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-black">Customer</th>
+              <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-black">Amount</th>
+              <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-black">Status</th>
+              <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-black text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-black/5">
+            {orders.map((order) => {
+              const currentStatus = order.orderStatus || order.status || 'PENDING';
+              return (
+                <tr key={order.id} className="hover:bg-black/[0.01] transition-colors group">
+                  <td className="px-6 py-5">
+                    <span className="text-[11px] font-bold text-black uppercase tracking-widest">#{order.orderId || order.id}</span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="text-[11px] font-bold text-black uppercase tracking-tight">{order.customerName || order.name || 'Unknown'}</div>
+                    <div className="text-[9px] text-black/40 uppercase tracking-widest font-bold font-mono">{order.mobileNo || order.email || 'No Contact'}</div>
+                  </td>
+                  <td className="px-6 py-5 text-[11px] font-bold text-black">
+                    Rs {(order.total || order.totalAmount || 0).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-5">
+                      <select 
+                        value={currentStatus}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-sm outline-none border transition-all cursor-pointer ${getStatusStyles(currentStatus)}`}
+                      >
+                          <option value="PENDING">PENDING</option>
+                          <option value="CONFIRMED">CONFIRMED</option>
+                          <option value="PROCESSING">PROCESSING</option>
+                          <option value="SHIPPED">SHIPPED</option>
+                          <option value="DELIVERED">DELIVERED</option>
+                          <option value="CANCELLED">CANCELLED</option>
+                          <option value="REFUNDED">REFUNDED</option>
+                      </select>
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                       <Link 
+                         href={`/admin/orders/${order.id}`}
+                         className="bg-black text-white px-4 py-2 text-[9px] font-bold uppercase tracking-widest hover:bg-[#c8b99a] hover:text-black transition-all inline-flex items-center gap-2 rounded-sm shadow-sm"
+                       >
+                          Details <ChevronRight size={12} />
+                       </Link>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
   };
 
   return (
@@ -142,65 +237,9 @@ export default function AdminOrders() {
       )}
 
       <div className="bg-white border border-black/5 rounded-sm shadow-sm overflow-hidden min-h-[400px]">
-        <div className="overflow-x-auto">
-          {isLoading ? (
-             <div className="h-64 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-black/10 border-t-black rounded-full animate-spin"></div>
-             </div>
-          ) : orders.length > 0 ? (
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-black/5 bg-black/[0.02]">
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/40">Order ID</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/40">Customer</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/40">Amount</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/40">Status</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/40 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/5">
-                {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-black/[0.01] transition-colors group">
-                    <td className="px-6 py-5">
-                      <span className="text-[11px] font-bold text-black">#{order.id}</span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="text-[11px] font-bold text-black uppercase tracking-tight">{order.customerName || order.user?.username || 'Unknown'}</div>
-                    </td>
-                    <td className="px-6 py-5 text-[11px] font-bold text-black">Rs {order.totalAmount || order.price}</td>
-                    <td className="px-6 py-5">
-                        <select 
-                          value={order.status}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                          className="text-[9px] font-bold uppercase tracking-widest bg-black/5 border-none px-2 py-1 rounded-sm focus:ring-1 focus:ring-black outline-none"
-                        >
-                            <option value="PENDING">PENDING</option>
-                            <option value="PROCESSING">PROCESSING</option>
-                            <option value="SHIPPED">SHIPPED</option>
-                            <option value="DELIVERED">DELIVERED</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                        </select>
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                         <Link 
-                           href={`/admin/orders/${order.id}`}
-                           className="bg-black text-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest hover:bg-[#c8b99a] hover:text-black transition-all flex items-center gap-2 ml-auto w-fit"
-                         >
-                            Details <ChevronRight size={12} />
-                         </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-             <div className="h-64 flex flex-col items-center justify-center text-black/20 italic">
-                <ShoppingBag size={48} strokeWidth={0.5} className="mb-4" />
-                No orders found.
-             </div>
-          )}
-        </div>
+        {renderContent()}
       </div>
     </div>
   );
 }
+
