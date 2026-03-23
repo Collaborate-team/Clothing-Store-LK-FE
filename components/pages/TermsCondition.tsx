@@ -95,7 +95,7 @@ const TermsCondition: React.FC = () => {
       <div 
         className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
         onClick={toggleMobileMenu}
-        role="presentation"
+        aria-hidden="true"
       />
       
       {/* Mobile Sidebar Drawer */}
@@ -122,8 +122,8 @@ const TermsCondition: React.FC = () => {
       </aside>
 
       {/* Header */}
-      <header className="bg-[#0a0a0a] text-white py-20 md:py-32 px-6 flex justify-center items-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#c8b99a_1px,transparent_1px)] [background-size:20px_20px]" />
+      <header className="bg-white text-black py-20 md:py-32 px-6 flex justify-center items-center relative overflow-hidden border-b border-black/5">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#c8b99a_1px,transparent_1px)] [background-size:20px_20px]" />
         
         {/* Mobile Menu Trigger */}
         <button onClick={toggleMobileMenu} className="lg:hidden absolute top-10 left-6 z-20 flex items-center gap-2 text-[#c8b99a] text-[10px] tracking-[0.2em] uppercase border border-[#c8b99a]/30 px-4 py-2 hover:bg-[#c8b99a]/10 transition-colors">

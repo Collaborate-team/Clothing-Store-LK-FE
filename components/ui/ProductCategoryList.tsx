@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../product/ProductCard';
 import producyImage from '../../public/images/images.jpeg'
+import hoverImage1 from '../../public/images/carousel/carousel-1.jpg'
+import hoverImage2 from '../../public/images/carousel/carousel-2.jpg'
+import hoverImage3 from '../../public/images/carousel/carousel-4.jpg'
+import hoverImage4 from '../../public/images/carousel/carousel-5.jpg'
 
 const ProductCategoryList = () => {
     const [activeTab, setActiveTab] = useState("All Items");
+    const [visibleCount, setVisibleCount] = useState(4);
+
+    useEffect(() => {
+        setVisibleCount(4);
+    }, [activeTab]);
 
     const products = [
         {
@@ -16,6 +25,7 @@ const ProductCategoryList = () => {
             category: "Women",
             badge: undefined,
             imageUrl: producyImage,
+            hoverImageUrl: hoverImage1,
             sizes: ["S", "M", "L", "XL"]
         },
         {
@@ -26,6 +36,7 @@ const ProductCategoryList = () => {
             category: "Women",
             badge: undefined,
             imageUrl: producyImage,
+            hoverImageUrl: hoverImage2,
             sizes: ["XS", "S", "M", "L"]
         },
         {
@@ -36,6 +47,7 @@ const ProductCategoryList = () => {
             category: "Women",
             badge: "NEW" as const,
             imageUrl: producyImage,
+            hoverImageUrl: hoverImage3,
             sizes: ["XS", "S", "M", "L", "XL"]
         },
         {
@@ -46,6 +58,7 @@ const ProductCategoryList = () => {
             category: "Women",
             badge: undefined,
             imageUrl: producyImage,
+            hoverImageUrl: hoverImage4,
             sizes: ["6", "8", "10", "12", "14", "16"]
         },
         {
@@ -117,33 +130,35 @@ const ProductCategoryList = () => {
         ? products 
         : products.filter(p => p.category === activeTab);
 
+    const visibleProducts = filteredProducts.slice(0, visibleCount);
+
     return (
-        <div className="bg-black min-h-screen text-white py-16 px-4 md:px-8 lg:px-12 font-sans">
+        <div className="bg-white min-h-screen text-black py-16 px-4 md:px-8 lg:px-12 font-sans">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 tracking-tight animate-fade-in-down">
                         New Season Collection
                     </h1>
-                    <p className="text-[#A37B5C] italic text-sm md:text-md max-w-lg mx-auto mb-10 opacity-80 animate-fade-in-up">
+                    <p className="text-black italic text-sm md:text-md max-w-lg mx-auto mb-10 opacity-80 animate-fade-in-up">
                         Thoughtfully made pieces for the modern wardrobe — crafted to last
                     </p>
                     
                     {/* Tabs */}
-                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 border-b border-[#A37B5C]/20 pb-4 mb-16 relative">
+                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 border-b border-black/10 pb-4 mb-16 relative">
                         {tabs.map((tab) => (
                             <button 
                                 key={tab} 
                                 onClick={() => setActiveTab(tab)}
                                 className={`text-[12px] font-bold tracking-[0.1em] transition-all duration-300 cursor-pointer uppercase relative pb-4 ${
                                     activeTab === tab 
-                                    ? "text-white" 
-                                    : "text-white/40 hover:text-white"
+                                    ? "text-black" 
+                                    : "text-black/40 hover:text-black"
                                 }`}
                             >
                                 {tab}
                                 {activeTab === tab && (
-                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#A37B5C] animate-grow-x"></span>
+                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black animate-grow-x"></span>
                                 )}
                             </button>
                         ))}
@@ -152,8 +167,8 @@ const ProductCategoryList = () => {
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10 min-h-[400px]">
-                    {filteredProducts.length > 0 ? (
-                        filteredProducts.map((product) => (
+                    {visibleProducts.length > 0 ? (
+                        visibleProducts.map((product) => (
                             <div key={product.id} className="animate-fade-in">
                                 <ProductCard
                                     title={product.title}
@@ -162,23 +177,34 @@ const ProductCategoryList = () => {
                                     originalPrice={product.originalPrice}
                                     badge={product.badge}
                                     imageUrl={product.imageUrl}
+                                    hoverImageUrl={(product as any).hoverImageUrl}
                                     sizes={product.sizes}
                                 />
                             </div>
                         ))
                     ) : (
-                        <div className="col-span-full py-20 text-center text-white/40 italic">
+                        <div className="col-span-full py-20 text-center text-black/40 italic">
                             No items found in this category.
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="mt-20 flex flex-col items-center gap-4 border-t border-[#A37B5C]/10 pt-12 pb-24">
-                    <button className="text-[12px] font-bold text-[#A37B5C] underline underline-offset-[10px] decoration-[#A37B5C]/30 hover:decoration-[#A37B5C] transition-all cursor-pointer tracking-widest uppercase">
-                        Show More
-                    </button>
-                </div>
+                {visibleCount < filteredProducts.length && (
+                    <div className="mt-8 flex flex-col items-center gap-4 border-t border-black/5 pt-8 pb-12">
+                        <button 
+                            onClick={() => setVisibleCount(prev => prev + 4)}
+                            className="group flex flex-col items-center gap-3 cursor-pointer"
+                        >
+                            <span className="text-[12px] font-bold text-black underline underline-offset-[10px] decoration-black/20 group-hover:decoration-black transition-all tracking-widest uppercase">
+                                Show More
+                            </span>
+                            <span className="text-[10px] text-black/50 font-medium">
+                                Showing {visibleProducts.length} of {filteredProducts.length} items
+                            </span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
