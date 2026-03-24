@@ -74,10 +74,10 @@ export default function RevenueChart({ data, labels, height = 200 }: RevenueChar
           transition={{ duration: 2, ease: "easeInOut" }}
         />
 
-        {/* Points */}
+        {/* Points and Values */}
         {points.map((p, i) => (
           <motion.circle
-            key={i}
+            key={`circle-${i}`}
             cx={p.x}
             cy={p.y}
             r="4"
@@ -91,10 +91,30 @@ export default function RevenueChart({ data, labels, height = 200 }: RevenueChar
         ))}
       </svg>
 
+      {/* Absolute positioned HTML Labels for proper aspect ratio rendering */}
+      {points.map((p, i) => {
+        const leftPercent = (p.x / chartWidth) * 100;
+        const topPercent = (p.y / chartHeight) * 100;
+        return (
+          <motion.div
+            key={`val-${i}`}
+            className="absolute pointer-events-none -translate-x-1/2 flex flex-col items-center justify-end z-20"
+            style={{ left: `${leftPercent}%`, top: `calc(${topPercent}% - 20px)` }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 + i * 0.1 }}
+          >
+            <span className="text-[10px] font-bold text-foreground bg-card/80 px-1.5 py-0.5 rounded-sm shadow-sm backdrop-blur-sm whitespace-nowrap">
+              Rs {(data[i] || 0).toLocaleString()}
+            </span>
+          </motion.div>
+        );
+      })}
+
       {/* Tooltip Simulation on labels */}
       <div className="flex justify-between mt-4 px-2">
          {labels.map((label, i) => (
-           <span key={i} className="text-[8px] font-bold uppercase tracking-widest text-black/30 dark:text-white/30">
+           <span key={i} className="text-[9px] font-bold uppercase tracking-widest text-foreground/70">
              {label}
            </span>
          ))}
