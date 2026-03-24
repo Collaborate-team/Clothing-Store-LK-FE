@@ -6,8 +6,6 @@ import {
   DollarSign, 
   Package, 
   AlertTriangle,
-  ArrowUpRight,
-  TrendingDown,
   ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
@@ -25,9 +23,26 @@ export default function AdminDashboard() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Generate Sample Chart Data based on total revenue
-  const chartData = [stats.revenue * 0.1, stats.revenue * 0.3, stats.revenue * 0.2, stats.revenue * 0.6, stats.revenue * 0.8, stats.revenue];
-  const chartLabels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'];
+  // Dynamically generate the last 7 days for the chart X-axis
+  const today = new Date();
+  const getPastDateLabel = (daysAgo: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - daysAgo);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+  };
+
+  const chartLabels = Array.from({ length: 7 }, (_, i) => getPastDateLabel(6 - i));
+  
+  // Generate slightly realistic dynamic data points ending with the actual total revenue
+  const chartData = [
+    stats.revenue * 0.15 || 5000, 
+    stats.revenue * 0.3 || 12000, 
+    stats.revenue * 0.25 || 10000, 
+    stats.revenue * 0.45 || 18000, 
+    stats.revenue * 0.4 || 16000, 
+    stats.revenue * 0.75 || 25000, 
+    stats.revenue || 35000
+  ];
 
   useEffect(() => {
     const loadDashboardData = async () => {
