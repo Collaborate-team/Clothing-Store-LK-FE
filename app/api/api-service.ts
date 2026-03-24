@@ -6,7 +6,7 @@ import {
   AnalyticsDTO 
 } from '../../types/api-types';
 
-const IMAGE_BASE_URL = 'http://localhost:8080/uploads';
+const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:8080/uploads';
 
 export function getProductImageUrl(imageName: string): string {
   if (!imageName) return '';
