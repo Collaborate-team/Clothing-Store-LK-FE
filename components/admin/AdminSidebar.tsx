@@ -94,12 +94,12 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-black/5 h-screen sticky top-0 flex flex-col pt-8">
+    <div className="w-64 bg-card border-r border-black/5 dark:border-white/10 h-screen sticky top-0 flex flex-col pt-8 transition-colors duration-500">
       {/* Brand Logo */}
       <div className="px-8 mb-10">
         <Link href="/admin/dashboard" className="flex flex-col">
-          <span className="text-xl font-bold tracking-[0.2em] text-black">ADMIN</span>
-          <span className="text-[10px] tracking-[0.3em] text-[#c8b99a] uppercase font-bold -mt-1">{adminUser} Panel</span>
+          <span className="text-xl font-bold tracking-[0.2em] text-foreground">ADMIN</span>
+          <span className="text-[10px] tracking-[0.3em] text-brand uppercase font-bold -mt-1">{adminUser} Panel</span>
         </Link>
       </div>
 
@@ -115,8 +115,8 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
                 href={link.href}
                 className={`flex items-center justify-between px-4 py-3 rounded-sm transition-all duration-300 group ${
                   isActive 
-                    ? 'bg-black text-white shadow-lg shadow-black/20' 
-                    : 'text-black/80 hover:text-black hover:bg-black/5'
+                    ? 'bg-foreground text-background shadow-lg shadow-black/20' 
+                    : 'text-foreground/80 hover:text-foreground hover:bg-foreground/5'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -128,13 +128,13 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
 
               {/* Sub-links for Products */}
               {link.subLinks && isActive && (
-                <div className="pl-11 py-1 space-y-1 border-l ml-6 border-black/5 mt-1">
+                <div className="pl-11 py-1 space-y-1 border-l ml-6 border-foreground/5 mt-1">
                   {link.subLinks.map((sub) => (
                     <Link
                       key={sub.title}
                       href={sub.href}
                       className={`block py-1.5 text-[10px] uppercase tracking-widest transition-colors ${
-                        pathname === sub.href ? 'text-[#c8b99a] font-bold' : 'text-black/70 hover:text-black'
+                        pathname === sub.href ? 'text-brand font-bold' : 'text-foreground/70 hover:text-foreground'
                       }`}
                     >
                       {sub.title}
@@ -148,28 +148,28 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
       </nav>
 
       {/* Quick Status / Warnings */}
-      <div className="px-6 py-6 border-t border-black/5">
+      <div className="px-6 py-6 border-t border-black/5 dark:border-white/10">
         {!isLoading && lowStockCount > 0 && (
-          <div className="bg-red-50 p-3 rounded-sm border border-red-100 mb-4 animate-pulse">
+          <div className="bg-red-50 p-3 rounded-sm border border-red-200 mb-4 animate-pulse">
                <div className="flex items-center gap-2 text-red-600 mb-1">
                    <AlertCircle size={14} />
                    <span className="text-[10px] font-bold uppercase tracking-tight">Low Stock Alert</span>
                </div>
-               <p className="text-[9px] text-red-800 leading-normal font-medium">
-                   {lowStockCount} {lowStockCount === 1 ? 'item is' : 'items are'} running out of stock. Update immediately.
+               <p className="text-[9px] text-red-600 leading-normal font-bold">
+                   {lowStockCount} {lowStockCount === 1 ? 'item is' : 'items are'} running out of stock.
                </p>
           </div>
         )}
 
         {isLoading && (
-          <div className="flex items-center justify-center py-4 mb-4 text-black/20">
+          <div className="flex items-center justify-center py-4 mb-4 text-foreground/20">
             <Loader2 size={16} className="animate-spin" />
           </div>
         )}
 
         <button 
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-red-600/20 text-red-600 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-red-600 hover:text-white transition-all duration-500 cursor-pointer rounded-sm"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-red-600/20 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-red-600 dark:hover:bg-red-500 hover:text-white transition-all duration-500 cursor-pointer rounded-sm"
         >
           <LogOut size={14} />
           Sign Out
