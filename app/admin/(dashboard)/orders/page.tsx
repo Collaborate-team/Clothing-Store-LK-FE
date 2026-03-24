@@ -11,10 +11,11 @@ import {
   X,
   CheckCircle2,
   Truck,
-  Loader2
+  Loader2,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
-import { fetchAllOrders, updateOrderStatus, searchOrders } from '@/app/api/api-service';
+import { fetchAllOrders, updateOrderStatus, searchOrders, fetchOrdersByDateRange } from '@/app/api/api-service';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function AdminOrders() {
@@ -22,7 +23,9 @@ export default function AdminOrders() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<'orderId' | 'name' | 'email' | 'mobile'>('orderId');
+  const [searchType, setSearchType] = useState<'orderId' | 'name' | 'email' | 'mobile' | 'date'>('orderId');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState<number | string | null>(null);
   const { showNotification } = useNotification();
@@ -47,6 +50,25 @@ export default function AdminOrders() {
 
   const handleSearch = async (e?: { preventDefault?: () => void }) => {
     if (e?.preventDefault) e.preventDefault();
+    
+    if (searchType === 'date') {
+      if (!startDate || !endDate) {
+        showNotification('Please select both start and end dates.', 'error', 'Missing Dates');
+        return;
+      }
+      setIsSearching(true);
+      try {
+        const results = await fetchOrdersByDateRange(startDate, endDate);
+        setOrders(Array.isArray(results) ? results : []);
+      } catch (err) {
+        console.error('Date search failed', err);
+        showNotification('Date search failed. Please try again.', 'error', 'Error');
+      } finally {
+        setIsSearching(false);
+      }
+      return;
+    }
+
     if (!searchQuery.trim()) { loadOrders(); return; }
     setIsSearching(true);
     try {
@@ -60,7 +82,12 @@ export default function AdminOrders() {
     }
   };
 
-  const clearSearch = () => { setSearchQuery(''); loadOrders(); };
+  const clearSearch = () => { 
+    setSearchQuery(''); 
+    setStartDate('');
+    setEndDate('');
+    loadOrders(); 
+  };
 
   const handleStatusChange = async (id: number | string, newStatus: string) => {
     const previousOrders = [...orders];
@@ -228,33 +255,64 @@ export default function AdminOrders() {
         </div>
 
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-2xl bg-white p-2 border border-black/5 rounded-sm shadow-sm">
-           <div className="relative flex-1 group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-focus-within:text-[#c8b99a] transition-colors" size={16} />
-              <input 
-                type="text" 
-                placeholder={`Search by ${searchType}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-black/[0.02] border border-transparent py-3 pl-11 pr-4 text-xs font-bold text-black outline-none focus:bg-white focus:border-black/5 transition-all rounded-sm uppercase tracking-widest placeholder:text-black/20"
-              />
-              {searchQuery && (
-                <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-black/5 rounded-full text-black/20 hover:text-black transition-all">
-                  <X size={14} />
-                </button>
-              )}
-           </div>
+           
+           {searchType === 'date' ? (
+             <div className="relative flex-1 flex items-center gap-2 px-2">
+                <Calendar className="text-black/20" size={16} />
+                <input 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full bg-black/[0.02] border border-transparent py-2 px-3 text-xs font-bold text-black outline-none focus:bg-white focus:border-black/5 transition-all rounded-sm uppercase tracking-widest"
+                />
+                <span className="text-black/20 text-xs font-bold">TO</span>
+                <input 
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full bg-black/[0.02] border border-transparent py-2 px-3 text-xs font-bold text-black outline-none focus:bg-white focus:border-black/5 transition-all rounded-sm uppercase tracking-widest"
+                />
+                {(startDate || endDate) && (
+                  <button type="button" onClick={clearSearch} className="px-2 hover:bg-black/5 rounded-full text-black/20 hover:text-black transition-all">
+                    <X size={14} />
+                  </button>
+                )}
+             </div>
+           ) : (
+             <div className="relative flex-1 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-focus-within:text-[#c8b99a] transition-colors" size={16} />
+                <input 
+                  type="text" 
+                  placeholder={`Search by ${searchType}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-black/[0.02] border border-transparent py-3 pl-11 pr-4 text-xs font-bold text-black outline-none focus:bg-white focus:border-black/5 transition-all rounded-sm uppercase tracking-widest placeholder:text-black/20"
+                />
+                {searchQuery && (
+                  <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-black/5 rounded-full text-black/20 hover:text-black transition-all">
+                    <X size={14} />
+                  </button>
+                )}
+             </div>
+           )}
 
            <div className="relative min-w-[140px]">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" size={14} />
               <select 
                 value={searchType}
-                onChange={(e) => setSearchType(e.target.value as 'orderId' | 'name' | 'email' | 'mobile')}
+                onChange={(e) => {
+                  setSearchType(e.target.value as any);
+                  setSearchQuery('');
+                  setStartDate('');
+                  setEndDate('');
+                }}
                 className="w-full h-full bg-black/[0.02] border border-transparent py-3 pl-10 pr-8 text-[10px] font-bold uppercase tracking-widest text-black outline-none cursor-pointer hover:bg-black/[0.04] transition-all appearance-none rounded-sm"
               >
                  <option value="orderId">Order ID</option>
                  <option value="name">Customer Name</option>
                  <option value="email">Email</option>
                  <option value="mobile">Mobile No</option>
+                 <option value="date">Date Range</option>
               </select>
            </div>
 
