@@ -24,7 +24,7 @@ const TermsCondition: React.FC = () => {
     { 
       id: 'orders', 
       title: 'Orders & Payment', 
-      content: 'All orders are subject to product availability and acceptance by Noir Atelier. We reserve the right to refuse or cancel any order at our sole discretion, including orders that appear to be placed for commercial resale purposes.', 
+      content: 'All orders are subject to products availability and acceptance by Noir Atelier. We reserve the right to refuse or cancel any order at our sole discretion, including orders that appear to be placed for commercial resale purposes.',
       highlight: 'Prices include applicable taxes where required by law. International customers may be subject to import duties — sole responsibility of purchaser.' 
     },
     { 
@@ -54,7 +54,7 @@ const TermsCondition: React.FC = () => {
       id: 'liability', 
       title: 'Limitation of Liability', 
       content: 'To the fullest extent permitted by law, Noir Atelier shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our products or website.', 
-      highlight: 'Our total liability shall not exceed the amount paid for the product in question. Some jurisdictions may allow greater protections under applicable consumer law.' 
+      highlight: 'Our total liability shall not exceed the amount paid for the products in question. Some jurisdictions may allow greater protections under applicable consumer law.'
     },
     { 
       id: 'governing', 

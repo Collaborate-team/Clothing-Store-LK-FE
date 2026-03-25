@@ -1,136 +1,56 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { fetchAllProducts, fetchProductsByCategory } from '../../app/api/api-service';
 import ProductCard from '../product/ProductCard';
 import producyImage from '../../public/images/images.jpeg'
-import hoverImage1 from '../../public/images/carousel/carousel-1.jpg'
-import hoverImage2 from '../../public/images/carousel/carousel-2.jpg'
-import hoverImage3 from '../../public/images/carousel/carousel-4.jpg'
-import hoverImage4 from '../../public/images/carousel/carousel-5.jpg'
 
 const ProductCategoryList = () => {
     const [activeTab, setActiveTab] = useState("All Items");
     const [visibleCount, setVisibleCount] = useState(4);
+    const [products, setProducts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         setVisibleCount(4);
     }, [activeTab]);
 
-    const products = [
-        {
-            id: 1,
-            title: "Linen Wrap Dress",
-            description: "Natural",
-            price: "128.00",
-            category: "Women",
-            badge: undefined,
-            imageUrl: producyImage,
-            hoverImageUrl: hoverImage1,
-            sizes: ["S", "M", "L", "XL"]
-        },
-        {
-            id: 2,
-            title: "Silk Slip Blouse",
-            description: "Ivory",
-            price: "96.00",
-            category: "Women",
-            badge: undefined,
-            imageUrl: producyImage,
-            hoverImageUrl: hoverImage2,
-            sizes: ["XS", "S", "M", "L"]
-        },
-        {
-            id: 3,
-            title: "Tailored Linen Coat",
-            description: "Sand",
-            price: "245.00",
-            category: "Women",
-            badge: "NEW" as const,
-            imageUrl: producyImage,
-            hoverImageUrl: hoverImage3,
-            sizes: ["XS", "S", "M", "L", "XL"]
-        },
-        {
-            id: 4,
-            title: "Wide Leg Trousers",
-            description: "Ecru",
-            price: "112.00",
-            category: "Women",
-            badge: undefined,
-            imageUrl: producyImage,
-            hoverImageUrl: hoverImage4,
-            sizes: ["6", "8", "10", "12", "14", "16"]
-        },
-        {
-            id: 5,
-            title: "Cotton Knit Cardigan",
-            description: "Oat",
-            price: "74.00",
-            originalPrice: "98.00",
-            category: "Sale",
-            badge: "SALE" as const,
-            imageUrl: producyImage,
-            sizes: ["One Size"]
-        },
-        {
-            id: 6,
-            title: "Merino Turtleneck",
-            description: "Charcoal",
-            price: "135.00",
-            category: "Men",
-            badge: undefined,
-            imageUrl: producyImage,
-            sizes: ["XS", "S", "M", "L"]
-        },
-        {
-            id: 7,
-            title: "Oversized Blazer",
-            description: "Stone",
-            price: "198.00",
-            category: "Women",
-            badge: undefined,
-            imageUrl: producyImage,
-            sizes: ["6", "8", "10", "12", "14"]
-        },
-        {
-            id: 8,
-            title: "Pleated Midi Skirt",
-            description: "Blush",
-            price: "89.00",
-            category: "Women",
-            badge: undefined,
-            imageUrl: producyImage,
-            sizes: ["6", "8", "10", "12", "14", "16"]
-        },
-        {
-            id: 9,
-            title: "Classic Cotton Shirt",
-            description: "White",
-            price: "85.00",
-            category: "Men",
-            badge: undefined,
-            imageUrl: producyImage,
-            sizes: ["M", "L", "XL", "XXL"]
-        },
-        {
-            id: 10,
-            title: "Leather Handbag",
-            description: "Tan",
-            price: "210.00",
-            category: "Accessories",
-            badge: "NEW" as const,
-            imageUrl: producyImage,
-            sizes: ["Genuine Leather"]
-        }
-    ];
+    useEffect(() => {
+        const fetchProducts = async () => {
+            setLoading(true);
+            try {
+                let data;
+                if (activeTab === "All Items") {
+                    data = await fetchAllProducts();
+                } else {
+                    data = await fetchProductsByCategory(activeTab);
+                }
+                
+                const mappedData = data.map((item: any) => ({
+                    id: item.id,
+                    title: item.name,
+                    description: item.description,
+                    price: item.price ? item.price.toFixed(2) : "0.00",
+                    category: item.category,
+                    imageUrl: item.imageUrls?.[0] || producyImage,
+                    hoverImageUrl: item.imageUrls?.[1],
+                    sizes: item.sizes
+                }));
+                setProducts(mappedData);
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+                setProducts([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const tabs = ["All Items", "Men", "Women", "Accessories", "Sale"];
+        fetchProducts();
+    }, [activeTab]);
 
-    const filteredProducts = activeTab === "All Items" 
-        ? products 
-        : products.filter(p => p.category === activeTab);
+    const tabs = ["All Items", "SHIRTS", "PANTS", "DRESSES", "ACCESSORIES"];
 
-    const visibleProducts = filteredProducts.slice(0, visibleCount);
+    const visibleProducts = products.slice(0, visibleCount);
 
     return (
         <div className="bg-white min-h-screen text-black py-16 px-4 md:px-8 lg:px-12 font-sans">
@@ -166,31 +86,36 @@ const ProductCategoryList = () => {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10 min-h-[400px]">
-                    {visibleProducts.length > 0 ? (
-                        visibleProducts.map((product) => (
-                            <div key={product.id} className="animate-fade-in">
-                                <ProductCard
-                                    title={product.title}
-                                    description={product.description}
-                                    price={product.price}
-                                    originalPrice={product.originalPrice}
-                                    badge={product.badge}
-                                    imageUrl={product.imageUrl}
-                                    hoverImageUrl={(product as any).hoverImageUrl}
-                                    sizes={product.sizes}
-                                />
+                {loading ? (
+                    <div className="py-20 text-center text-black/40 italic">Loading...</div>
+                ) : (
+                    <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10 min-h-[400px]">
+                        {visibleProducts.length > 0 ? (
+                            visibleProducts.map((product) => (
+                                <div key={product.id} className="animate-fade-in block">
+                                    <ProductCard
+                                        id={product.id}
+                                        title={product.title}
+                                        description={product.description}
+                                        price={product.price}
+                                        originalPrice={product.originalPrice}
+                                        badge={product.badge}
+                                        imageUrl={product.imageUrl}
+                                        hoverImageUrl={product.hoverImageUrl}
+                                        sizes={product.sizes}
+                                    />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-full py-20 text-center text-black/40 italic">
+                                No items found in this category.
                             </div>
-                        ))
-                    ) : (
-                        <div className="col-span-full py-20 text-center text-black/40 italic">
-                            No items found in this category.
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Footer */}
-                {visibleCount < filteredProducts.length && (
+                {visibleCount < products.length && (
                     <div className="mt-8 flex flex-col items-center gap-4 border-t border-black/5 pt-8 pb-12">
                         <button 
                             onClick={() => setVisibleCount(prev => prev + 4)}
@@ -200,7 +125,7 @@ const ProductCategoryList = () => {
                                 Show More
                             </span>
                             <span className="text-[10px] text-black/50 font-medium">
-                                Showing {visibleProducts.length} of {filteredProducts.length} items
+                                Showing {visibleProducts.length} of {products.length} items
                             </span>
                         </button>
                     </div>
@@ -211,4 +136,3 @@ const ProductCategoryList = () => {
 };
 
 export default ProductCategoryList;
-

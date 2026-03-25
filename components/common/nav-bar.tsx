@@ -236,9 +236,9 @@ export default function NavBar() {
                         </button>
                     </div>
 
-                    <Link href="/order-history" className="text-black/80 hover:text-[#c8a96e] p-2 transition-colors hidden sm:block">
-                        <FiUser size={18} />
-                    </Link>
+                    {/*<Link href="/order-history" className="text-black/80 hover:text-[#c8a96e] p-2 transition-colors hidden sm:block">*/}
+                    {/*    <FiUser size={18} />*/}
+                    {/*</Link>*/}
 
                     <Link href="/cart" className="relative text-black/80 hover:text-[#c8a96e] p-2 transition-colors">
                         <FiShoppingBag size={18} />
@@ -280,7 +280,7 @@ export default function NavBar() {
                             ))}
                         </nav>
                         <div className="mt-auto border-t border-black/10 pt-8 flex gap-8">
-                            <Link href="/order-history" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Profile</Link>
+                            {/*<Link href="/order-history" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Profile</Link>*/}
                             <Link href="/wishlist" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Wishlist</Link>
                             <Link href="/help" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Contact</Link>
                         </div>

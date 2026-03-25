@@ -177,7 +177,7 @@ export default function ViewAllProducts() {
     return MOCK_PRODUCTS.filter(product => {
       // Filter by size
       if (filters.size.length > 0 && !filters.size.some(val => product.size.includes(val))) return false;
-      // Filter by product type
+      // Filter by products type
       if (filters.productType.length > 0 && !filters.productType.includes(product.productType)) return false;
       // Filter by color
       if (filters.color.length > 0 && !filters.color.some(val => product.colors.includes(val))) return false;
@@ -405,6 +405,7 @@ export default function ViewAllProducts() {
             filteredProducts.map((product) => (
               <div key={product.id} className="animate-fade-in">
                 <ProductCard
+                  id={product.id}
                   title={product.title}
                   description={product.description}
                   price={product.price}
