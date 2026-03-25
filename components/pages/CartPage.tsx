@@ -197,7 +197,7 @@ const CartPage = () => {
           <div className="flex items-center justify-between relative">
             {/* Step 1 */}
             <button type="button" className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => setStep(1)}>
-              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 1 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-2xs font-bold transition-all duration-500 ${step >= 1 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
                 01
               </div>
               <div className={`absolute -bottom-7 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-bold transition-colors duration-500 ${step >= 1 ? 'text-black' : 'text-[#b5b1a8]'}`}>
@@ -215,7 +215,7 @@ const CartPage = () => {
 
             {/* Step 2 */}
             <button type="button" className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => items.length > 0 && setStep(2)}>
-              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 2 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-2xs font-bold transition-all duration-500 ${step >= 2 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
                 02
               </div>
               <div className={`absolute -bottom-7 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-bold transition-colors duration-500 ${step >= 2 ? 'text-black' : 'text-[#b5b1a8]'}`}>
@@ -233,7 +233,7 @@ const CartPage = () => {
 
             {/* Step 3 */}
             <div className="flex flex-col items-center relative z-10">
-              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 3 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-2xs font-bold transition-all duration-500 ${step >= 3 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
                 03
               </div>
               <div className={`absolute -bottom-7 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-bold transition-colors duration-500 ${step >= 3 ? 'text-black' : 'text-[#b5b1a8]'}`}>
@@ -269,7 +269,7 @@ const CartPage = () => {
                         </div>
                         <div className="flex flex-col justify-center gap-1">
                           <h3 className="text-[11px] tracking-[0.15em] font-bold uppercase leading-tight">{item.name}</h3>
-                          <div className="text-[10px] text-[#888] uppercase">
+                          <div className="text-2xs text-[#888] uppercase">
                             <p>Size: {item.size} / Color: {item.color}</p>
                           </div>
                           <button onClick={() => removeItem(item.id, item.size, item.color)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
@@ -302,7 +302,7 @@ const CartPage = () => {
                   <div className="p-20 text-center flex flex-col items-center gap-6">
                     <ShoppingBag size={40} className="text-[#e5e1d8]" strokeWidth={1} />
                     <p className="text-[12px] tracking-[0.2em] uppercase text-[#b5b1a8] italic">Your bag is empty</p>
-                    <a href="/shop" className="px-8 py-4 bg-black text-white text-[10px] tracking-[0.2em] font-bold uppercase">Return to shop</a>
+                    <a href="/shop" className="px-8 py-4 bg-black text-white text-2xs tracking-[0.2em] font-bold uppercase">Return to shop</a>
                   </div>
                 )}
               </div>
@@ -314,48 +314,48 @@ const CartPage = () => {
               <div className="bg-white border border-[#e5e1d8] p-8 space-y-10 animate-fade-in">
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">1</span>{' '}
+                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-2xs">1</span>{' '}
                     Contact Information
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label htmlFor="firstName" className="text-[9px] font-bold uppercase text-[#888]">First Name</label>
                       <input id="firstName" type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="John" />
-                      {formErrors.firstName && <p className="text-[10px] text-red-600">{formErrors.firstName}</p>}
+                      {formErrors.firstName && <p className="text-2xs text-red-600">{formErrors.firstName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="lastName" className="text-[9px] font-bold uppercase text-[#888]">Last Name</label>
                       <input id="lastName" type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.lastName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Doe" />
-                      {formErrors.lastName && <p className="text-[10px] text-red-600">{formErrors.lastName}</p>}
+                      {formErrors.lastName && <p className="text-2xs text-red-600">{formErrors.lastName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="email" className="text-[9px] font-bold uppercase text-[#888]">Email Address</label>
                       <input id="email" type="email" name="email" value={formData.email} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="alex@example.com" />
-                      {formErrors.email && <p className="text-[10px] text-red-600">{formErrors.email}</p>}
+                      {formErrors.email && <p className="text-2xs text-red-600">{formErrors.email}</p>}
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="phone" className="text-[9px] font-bold uppercase text-[#888]">Phone Number</label>
                       <input id="phone" type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="+94 77 123 4567" />
-                      {formErrors.phone && <p className="text-[10px] text-red-600">{formErrors.phone}</p>}
+                      {formErrors.phone && <p className="text-2xs text-red-600">{formErrors.phone}</p>}
                     </div>
                   </div>
                 </section>
 
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">2</span>{' '}
+                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-2xs">2</span>{' '}
                     Shipping Address
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 md:col-span-2">
                         <label htmlFor="address" className="text-[9px] font-bold uppercase text-[#888]">Shipping Address</label>
                       <input id="address" type="text" name="address" value={formData.address} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.address ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Street Address, Apartment, etc." />
-                      {formErrors.address && <p className="text-[10px] text-red-600">{formErrors.address}</p>}
+                      {formErrors.address && <p className="text-2xs text-red-600">{formErrors.address}</p>}
                     </div>
                     <div className="space-y-1">
                         <label htmlFor="city" className="text-[9px] font-bold uppercase text-[#888]">City</label>
                       <input id="city" type="text" name="city" value={formData.city} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.city ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Colombo" />
-                      {formErrors.city && <p className="text-[10px] text-red-600">{formErrors.city}</p>}
+                      {formErrors.city && <p className="text-2xs text-red-600">{formErrors.city}</p>}
                     </div>
                     <div className="space-y-1">
                         <label htmlFor="province" className="text-[9px] font-bold uppercase text-[#888]">Province / State</label>
@@ -365,14 +365,14 @@ const CartPage = () => {
                           <option key={province} value={province}>{province}</option>
                         ))}
                       </select>
-                      {formErrors.province && <p className="text-[10px] text-red-600">{formErrors.province}</p>}
+                      {formErrors.province && <p className="text-2xs text-red-600">{formErrors.province}</p>}
                     </div>
                   </div>
                 </section>
 
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">3</span>{' '}
+                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-2xs">3</span>{' '}
                     Payment Method
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -416,7 +416,7 @@ const CartPage = () => {
                         <div className={`${isSelected ? 'text-black' : 'text-[#b5b1a8]'}`}>
                           {icon}
                         </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-black' : 'text-[#888]'}`}>
+                        <span className={`text-2xs font-bold uppercase tracking-wider ${isSelected ? 'text-black' : 'text-[#888]'}`}>
                           {method.label}
                         </span>
                         {isSelected && (
@@ -425,7 +425,7 @@ const CartPage = () => {
                       </button>
                     )})}
                   </div>
-                  <p className="mt-3 text-[10px] text-[#888] uppercase tracking-wider">
+                  <p className="mt-3 text-2xs text-[#888] uppercase tracking-wider">
                     Only Cash on Delivery is available at the moment.
                   </p>
                 </section>
@@ -440,7 +440,7 @@ const CartPage = () => {
                    <div className="absolute inset-0 rounded-full border border-[#c8b99a]/30 animate-ping opacity-20" />
                 </div>
                 <div className="space-y-4">
-                  <p className="text-[10px] tracking-[0.5em] font-bold text-[#c8b99a] uppercase">Transaction Successful</p>
+                  <p className="text-2xs tracking-[0.5em] font-bold text-[#c8b99a] uppercase">Transaction Successful</p>
                   <h2 className="text-4xl font-light tracking-tight" style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}>
                     Your order is <span className="italic text-[#c8b99a]">confirmed.</span>
                   </h2>
@@ -454,7 +454,7 @@ const CartPage = () => {
                       dispatch(clearCart());
                         setStep(1);
                     }} 
-                    className="px-12 py-5 bg-black text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all shadow-xl"
+                    className="px-12 py-5 bg-black text-white text-2xs tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all shadow-xl"
                   >
                     Continue Shopping
                   </button>
@@ -465,7 +465,7 @@ const CartPage = () => {
           </div>
 
           {/* RIGHT COLUMN: Summary */}
-          <div className="lg:w-[380px] shrink-0">
+          <div className="lg:w-95 shrink-0">
             <div className="bg-white border border-[#e5e1d8] p-8 sticky top-36">
               <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-8 pb-4 border-b border-[#e5e1d8]">Order Summary</h2>
               
@@ -517,7 +517,7 @@ const CartPage = () => {
                       </button>
                       <button
                         onClick={() => setStep(1)}
-                        className="w-full py-4 text-[10px] tracking-[0.2em] font-bold uppercase text-[#555] hover:text-black transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-4 text-2xs tracking-[0.2em] font-bold uppercase text-[#555] hover:text-black transition-colors flex items-center justify-center gap-2"
                       >
                         <ArrowLeft size={14} /> Back to Bag
                       </button>
@@ -527,7 +527,7 @@ const CartPage = () => {
 
                 return (
                   <div className="p-4 border border-[#c8b99a]/20 bg-[#fcfbf7] rounded-sm text-center">
-                    <p className="text-[10px] tracking-[0.2em] uppercase font-bold text-[#c8b99a]">Order Finished</p>
+                    <p className="text-2xs tracking-[0.2em] uppercase font-bold text-[#c8b99a]">Order Finished</p>
                   </div>
                 );
               })()}
@@ -538,7 +538,7 @@ const CartPage = () => {
                   <div className="w-10 h-10 rounded-full bg-[#fcfbf7] border border-[#e5e1d8] flex items-center justify-center text-[#c8b99a] group-hover:scale-110 transition-transform">
                     <ShieldCheck size={18} />
                   </div>
-                  <div className="text-[10px]">
+                  <div className="text-2xs">
                     <p className="font-bold uppercase tracking-wider">Secure Checkout</p>
                     <p className="text-[#888] font-light">Your information is protected by 256-bit SSL encryption</p>
                   </div>
@@ -547,7 +547,7 @@ const CartPage = () => {
                   <div className="w-10 h-10 rounded-full bg-[#fcfbf7] border border-[#e5e1d8] flex items-center justify-center text-[#c8b99a] group-hover:scale-110 transition-transform">
                     <Truck size={18} />
                   </div>
-                  <div className="text-[10px]">
+                  <div className="text-2xs">
                     <p className="font-bold uppercase tracking-wider">Guaranteed Delivery</p>
                     <p className="text-[#888] font-light">Ships in 1-2 business days with signature tracking</p>
                   </div>
@@ -562,3 +562,4 @@ const CartPage = () => {
 };
 
 export default CartPage;
+

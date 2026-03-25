@@ -98,19 +98,6 @@ export default function NavBar() {
                             className="relative h-full flex items-center"
                             onMouseEnter={() => link.mega && setOpenDropdown(link.label)}
                             onMouseLeave={() => setOpenDropdown(null)}
-                            onFocus={() => link.mega && setOpenDropdown(link.label)}
-                            onBlur={() => setOpenDropdown(null)}
-                            tabIndex={0}
-                            role="button"
-                            onKeyDown={(event) => {
-                                if (!link.mega) return;
-                                if (event.key === "Enter" || event.key === " ") {
-                                    setOpenDropdown((prev) => prev === link.label ? null : link.label);
-                                }
-                                if (event.key === "Escape") {
-                                    setOpenDropdown(null);
-                                }
-                            }}
                         >
                             <Link
                                 href={link.href}
