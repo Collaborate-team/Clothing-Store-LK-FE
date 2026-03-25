@@ -9,14 +9,14 @@ import {
   Package,
   AlertCircle,
   RefreshCw,
-  ExternalLink,
   Tag,
   Eye,
   ShoppingBag,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { fetchAllProducts, deleteProduct, getProductImageUrl } from '@/app/api/api-service';
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
@@ -29,6 +29,12 @@ export default function AdminProducts() {
   const [error, setError] = useState('');
   const { showNotification } = useNotification();
   const { showConfirm } = useModal();
+  
+  // Image Preview States
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [productName, setProductName] = useState('');
 
   const loadProducts = async () => {
     setIsLoading(true);
@@ -66,6 +72,22 @@ export default function AdminProducts() {
     });
   };
 
+  const openPreview = (images: string[], name: string) => {
+    if (!images || images.length === 0) return;
+    setPreviewImages(images);
+    setProductName(name);
+    setCurrentImageIndex(0);
+    setIsPreviewOpen(true);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % previewImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + previewImages.length) % previewImages.length);
+  };
+
   const filteredProducts = products.filter(p => 
     (p.name || p.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.id?.toString().includes(searchTerm) ||
@@ -81,9 +103,9 @@ export default function AdminProducts() {
              <div className="p-2 bg-black text-white rounded-sm shadow-lg shadow-black/10">
                 <Package size={20} />
              </div>
-             <h1 className="text-2xl font-black tracking-tight text-black uppercase">Product Catalog</h1>
+             <h1 className="text-3xl font-bold tracking-tight text-black uppercase">Product Catalog</h1>
           </div>
-          <p className="text-[10px] text-black/40 font-bold uppercase tracking-[0.2em] ml-1">Total Items: {products.length}</p>
+          <p className="text-[10px] text-black/70 font-bold uppercase tracking-widest mt-1">Manage and Curate your Premium Collection</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -151,28 +173,38 @@ export default function AdminProducts() {
                   <tr key={product.id} className="hover:bg-black/[0.01] transition-all group">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-5">
-                        <div className="w-16 h-20 bg-black/5 rounded-sm flex items-center justify-center overflow-hidden border border-black/5 relative group-hover:scale-105 transition-transform duration-500">
+                        <div 
+                          className="w-16 h-20 bg-black/5 rounded-sm flex items-center justify-center overflow-hidden border border-black/5 relative group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                          onClick={() => openPreview(product.imageUrls, product.name || product.title)}
+                        >
                            {product.imageUrls && product.imageUrls.length > 0 ? (
                              <img src={getProductImageUrl(product.imageUrls[0])} alt="" className="w-full h-full object-cover" />
                            ) : (
                              <Package size={24} className="text-black/5" strokeWidth={1} />
                            )}
                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                              <ExternalLink size={16} className="text-white" />
+                              <Eye size={16} className="text-white" />
                            </div>
                         </div>
                         <div className="flex flex-col space-y-1">
                             <span className="text-[13px] font-bold uppercase tracking-tight text-black leading-none">
                                 {product.name || product.title || 'Unknown Item'}
                             </span>
-                            <span className="text-[10px] text-black/40 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <span className="text-[10px] text-black/70 font-bold uppercase tracking-widest flex items-center gap-2">
                                 <Tag size={10} className="text-[#c8b99a]" /> {product.id}
                             </span>
+                            {product.sizes && product.sizes.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {product.sizes.map((size: string) => (
+                                  <span key={size} className="px-1.5 py-0.5 bg-black/5 text-black text-[8px] font-black rounded-sm border border-black/5 uppercase">{size}</span>
+                                ))}
+                              </div>
+                            )}
                         </div>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                       <span className="px-3 py-1.5 bg-black/5 text-[9px] font-black uppercase tracking-widest text-black/60 rounded-sm">
+                       <span className="px-3 py-1.5 bg-black/5 text-[9px] font-black uppercase tracking-widest text-black/90 rounded-sm">
                           {product.category || 'N/A'}
                        </span>
                     </td>
@@ -220,8 +252,8 @@ export default function AdminProducts() {
                    <ShoppingBag size={48} strokeWidth={0.5} className="text-black/10" />
                 </div>
                 <div className="space-y-2">
-                   <p className="text-[14px] font-black uppercase tracking-[0.3em] text-black">Empty Collection</p>
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-black/30">Your database has no products currently</p>
+                   <p className="text-[14px] font-black uppercase tracking-[0.3em] text-black/90">Empty Collection</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-black/70">Your database has no products currently</p>
                 </div>
                 <button 
                   onClick={loadProducts}
@@ -233,6 +265,80 @@ export default function AdminProducts() {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {isPreviewOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-fade-in">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+            onClick={() => setIsPreviewOpen(false)}
+          ></div>
+          
+          {/* Close Button */}
+          <button 
+            onClick={() => setIsPreviewOpen(false)}
+            className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors z-[110]"
+          >
+            <X size={32} strokeWidth={1} />
+          </button>
+
+          {/* Modal Content */}
+          <div className="relative w-full max-w-5xl aspect-[4/5] md:aspect-video flex flex-col items-center justify-center z-[105]">
+            
+            {/* Main Image Container */}
+            <div className="relative w-full h-full flex items-center justify-center group">
+              {/* Navigation Arrows */}
+              {previewImages.length > 1 && (
+                <>
+                  <button 
+                    onClick={prevImage}
+                    className="absolute left-0 md:-left-16 p-4 text-white/30 hover:text-white transition-all hover:scale-110 z-20"
+                  >
+                    <ChevronLeft size={48} strokeWidth={1} />
+                  </button>
+                  <button 
+                    onClick={nextImage}
+                    className="absolute right-0 md:-right-16 p-4 text-white/30 hover:text-white transition-all hover:scale-110 z-20"
+                  >
+                    <ChevronRight size={48} strokeWidth={1} />
+                  </button>
+                </>
+              )}
+
+              {/* Image Canvas */}
+              <div className="w-full h-full relative border border-white/10 bg-black">
+                <img 
+                  src={getProductImageUrl(previewImages[currentImageIndex])} 
+                  alt={productName}
+                  className="w-full h-full object-contain animate-scale-in"
+                />
+                
+                {/* Image Counter */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-full">
+                  <p className="text-[10px] font-black tracking-[0.3em] uppercase text-white/80">
+                    {currentImageIndex + 1} <span className="text-white/20 px-2">/</span> {previewImages.length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Caption */}
+            <div className="mt-8 text-center space-y-2">
+              <h3 className="text-white text-[12px] font-black tracking-[0.4em] uppercase">{productName}</h3>
+              <div className="flex justify-center gap-2">
+                {previewImages.map((_, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    className={`w-1 h-1 rounded-full transition-all duration-500 ${idx === currentImageIndex ? 'bg-[#c8b99a] w-8' : 'bg-white/20'}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

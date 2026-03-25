@@ -115,8 +115,8 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
                 href={link.href}
                 className={`flex items-center justify-between px-4 py-3 rounded-sm transition-all duration-300 group ${
                   isActive 
-                    ? 'bg-black text-white shadow-lg shadow-black/10' 
-                    : 'text-black/60 hover:text-black hover:bg-black/5'
+                    ? 'bg-black text-white shadow-lg shadow-black/20' 
+                    : 'text-black/80 hover:text-black hover:bg-black/5'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ const AdminSidebar = ({ adminUser = 'Admin' }: { adminUser?: string }) => {
                       key={sub.title}
                       href={sub.href}
                       className={`block py-1.5 text-[10px] uppercase tracking-widest transition-colors ${
-                        pathname === sub.href ? 'text-[#c8b99a] font-bold' : 'text-black/40 hover:text-black'
+                        pathname === sub.href ? 'text-[#c8b99a] font-bold' : 'text-black/70 hover:text-black'
                       }`}
                     >
                       {sub.title}
