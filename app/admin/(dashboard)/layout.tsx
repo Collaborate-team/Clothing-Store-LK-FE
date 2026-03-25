@@ -45,7 +45,7 @@ export default function AdminLayout({
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
               {adminUser} SESSION
             </h1>
-            <p className="text-[10px] text-black/40 font-bold uppercase tracking-widest">
+            <p className="text-[10px] text-black/70 font-bold uppercase tracking-widest">
                 Management Portal Active
             </p>
           </div>
