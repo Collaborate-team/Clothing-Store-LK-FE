@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   Plus, 
   Search, 
@@ -60,14 +61,40 @@ export default function AdminProducts() {
       message: 'This will permanently delete the item from your store database. This action is irreversible.',
       type: 'danger',
       confirmText: 'Delete Permanently',
-      onConfirm: async () => {
-        try {
-          await deleteProduct(id);
-          setProducts(prev => prev.filter(p => p.id !== id));
-          showNotification('Product removed successfully.', 'success', 'Deleted');
-        } catch (err) {
-          showNotification('Operation failed.', 'error', 'Error');
-        }
+      onConfirm: () => {
+        void (async () => {
+          try {
+            await deleteProduct(id);
+            setProducts(prev => prev.filter(p => p.id !== id));
+            showNotification('Product removed successfully.', 'success', 'Deleted');
+          } catch (err) {
+            if (axios.isAxiosError(err)) {
+              const status = err.response?.status;
+              const backendMessage =
+                typeof err.response?.data === 'string'
+                  ? err.response.data
+                  : err.response?.data?.message;
+
+              if (status === 409) {
+                showNotification(
+                  backendMessage || 'This product cannot be deleted because it is already used in existing orders (409 Conflict).',
+                  'error',
+                  'Delete Blocked',
+                );
+                return;
+              }
+
+              showNotification(
+                backendMessage || `Delete failed (HTTP ${status || 'Unknown'}).`,
+                'error',
+                'Error',
+              );
+              return;
+            }
+
+            showNotification('Operation failed.', 'error', 'Error');
+          }
+        })();
       }
     });
   };

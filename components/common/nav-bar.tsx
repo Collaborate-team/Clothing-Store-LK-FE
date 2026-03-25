@@ -212,7 +212,6 @@ export default function NavBar() {
                         className="fixed inset-0 z-[150] bg-white p-10 flex flex-col"
                     >
                         <div className="flex justify-between items-center mb-16">
-                            <span className="font-serif italic text-2xl text-[#c8a96e]">Arienti</span>
                             <button onClick={() => setIsMobileMenuOpen(false)} className="text-black/50 hover:text-black">
                                 <FiX size={32} />
                             </button>
