@@ -9,8 +9,22 @@ export interface ApiError {
   status?: number;
   message: string;
   code?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
+
+type AxiosLikeError = {
+  code?: string;
+  message?: string;
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+      userMessage?: string;
+      code?: string;
+      details?: Record<string, unknown>;
+    };
+  };
+};
 
 export class AppError extends Error {
   constructor(
@@ -18,7 +32,7 @@ export class AppError extends Error {
     public userMessage: string,
     public code: string,
     public status?: number,
-    public details?: Record<string, any>
+    public details?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'AppError';
@@ -72,28 +86,30 @@ export const ERROR_MESSAGES = {
 /**
  * Parse API error and return user-friendly message
  */
-export function parseApiError(error: any): AppError {
-  if (!error.response) {
-    if (error.code === 'ECONNABORTED') {
+export function parseApiError(error: unknown): AppError {
+  const normalizedError = (error ?? {}) as AxiosLikeError;
+
+  if (!normalizedError.response) {
+    if (normalizedError.code === 'ECONNABORTED') {
       return new AppError(
-        error.message,
+        normalizedError.message || 'Timeout error',
         ERROR_MESSAGES.TIMEOUT_ERROR,
         ErrorCode.TIMEOUT_ERROR,
         undefined,
-        { originalError: error }
+        { originalError: normalizedError }
       );
     }
     return new AppError(
-      error.message,
+      normalizedError.message || 'Network error',
       ERROR_MESSAGES.NETWORK_ERROR,
       ErrorCode.NETWORK_ERROR,
       undefined,
-      { originalError: error }
+      { originalError: normalizedError }
     );
   }
 
-  const status = error.response?.status;
-  const data = error.response?.data;
+  const status = normalizedError.response?.status;
+  const data = normalizedError.response?.data;
 
   switch (status) {
     case 400:
@@ -152,7 +168,7 @@ export function parseApiError(error: any): AppError {
       );
     default:
       return new AppError(
-        data?.message || error.message || 'Unknown Error',
+        data?.message || normalizedError.message || 'Unknown Error',
         data?.userMessage || ERROR_MESSAGES.UNKNOWN_ERROR,
         data?.code || ErrorCode.UNKNOWN_ERROR,
         status,
@@ -171,7 +187,7 @@ export async function tryCatch<T>(
   try {
     const data = await fn();
     return { data, error: null };
-  } catch (err: any) {
+  } catch (err: unknown) {
     const appError = err instanceof AppError ? err : parseApiError(err);
     errorHandler?.(appError);
     return { data: null, error: appError };
@@ -181,13 +197,20 @@ export async function tryCatch<T>(
 /**
  * Log error for debugging
  */
-export function logError(error: AppError | Error, context?: Record<string, any>) {
+export function logError(error: AppError | Error, context?: Record<string, unknown>) {
+  const userAgent = globalThis.navigator === undefined
+    ? 'N/A'
+    : globalThis.navigator.userAgent;
+  const currentUrl = globalThis.window === undefined
+    ? 'N/A'
+    : globalThis.window.location.href;
+
   const errorData = {
     timestamp: new Date().toISOString(),
     message: error.message,
     context,
-    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
-    url: typeof window !== 'undefined' ? window.location.href : 'N/A',
+    userAgent,
+    url: currentUrl,
   };
 
   console.error('[AppError]', errorData);

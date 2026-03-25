@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag } from 'lucide-react';
@@ -38,26 +38,28 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
-  const handleAddToBag = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const parsedPrice = useMemo(() => Number(price.toString().replaceAll(',', '')) || 0, [price]);
+  const resolvedSize = useMemo(() => selectedSize || sizes?.[0] || 'M', [selectedSize, sizes]);
+  const resolvedColor = useMemo(() => colors?.[0] || 'BLACK', [colors]);
+  const resolvedImage = useMemo(() => {
+    const fallbackImage = 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop';
+    return typeof imageUrl === 'string' ? imageUrl : imageUrl?.src || fallbackImage;
+  }, [imageUrl]);
+
+  const handleAddToBag = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-
-    const fallbackImage = 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop';
-    const image =
-      typeof imageUrl === 'string'
-        ? imageUrl
-        : imageUrl?.src || fallbackImage;
 
     addToCart({
       id: Number(id) || 0,
       name: title,
-      price: Number(price.toString().replaceAll(',', '')) || 0,
-      size: selectedSize || sizes?.[0] || 'M',
-      color: colors?.[0] || 'BLACK',
-      image,
+      price: parsedPrice,
+      size: resolvedSize,
+      color: resolvedColor,
+      image: resolvedImage,
       stock,
     });
-  };
+  }, [addToCart, id, parsedPrice, resolvedColor, resolvedImage, resolvedSize, stock, title]);
 
   return (
     <div className="bg-white border border-black/5 rounded-sm flex flex-col h-full relative group transition-all duration-500 hover:border-[#c8b99a]/50 overflow-hidden shadow-sm">
@@ -71,7 +73,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       )}
 
       {/* Image Container */}
-      <div className="aspect-[4/5] relative overflow-hidden">
+      <div className="aspect-4/5 relative overflow-hidden">
         <Link href={`/products/${id}`} className="block h-full">
           {imageUrl ? (
             <>
@@ -113,10 +115,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-grow p-4 space-y-3">
+      <div className="flex flex-col grow p-4 space-y-3">
         <Link href={`/products/${id}`}>
           <div>
-            <h3 className="text-[12px] tracking-[0.1em] font-bold text-black uppercase group-hover:text-[#c8b99a] transition-colors line-clamp-1">
+            <h3 className="text-[12px] tracking-widest font-bold text-black uppercase group-hover:text-[#c8b99a] transition-colors line-clamp-1">
               {title}
             </h3>
             <p className="text-[11px] text-[#888] font-light mt-1">

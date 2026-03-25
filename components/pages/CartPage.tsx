@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { 
   Minus, 
@@ -33,6 +33,13 @@ const SRI_LANKA_PROVINCES = [
   'Sabaragamuwa',
 ];
 
+const PAYMENT_METHODS = [
+  { id: 'CREDIT_CARD', label: 'Credit Card' },
+  { id: 'DEBIT_CARD', label: 'Debit Card' },
+  { id: 'ONLINE_TRANSFER', label: 'Bank Transfer' },
+  { id: 'CASH_ON_DELIVERY', label: 'Cash on Delivery' },
+] as const;
+
 const CartPage = () => {
   const dispatch = useAppDispatch();
   const { showNotification } = useNotification();
@@ -54,11 +61,11 @@ const CartPage = () => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderResponse, setOrderResponse] = useState<OrderDTO | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const fieldName = e.target.name as keyof typeof formData;
     setFormData(prev => ({ ...prev, [fieldName]: e.target.value }));
     setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
-  };
+  }, []);
 
   const validateCheckoutForm = () => {
     const errors: Partial<Record<keyof typeof formData, string>> = {};
@@ -140,7 +147,7 @@ const CartPage = () => {
     }
   };
 
-  const updateQuantity = (id: number, size: string, color: string, delta: number) => {
+  const updateQuantity = useCallback((id: number, size: string, color: string, delta: number) => {
     const target = items.find(
       (item) => item.id === id && item.size === size && item.color === color,
     );
@@ -160,15 +167,18 @@ const CartPage = () => {
         quantity: nextQuantity,
       }),
     );
-  };
+  }, [dispatch, items, showNotification]);
 
-  const removeItem = (id: number, size: string, color: string) => {
+  const removeItem = useCallback((id: number, size: string, color: string) => {
     dispatch(removeFromCart({ id, size, color }));
-  };
+  }, [dispatch]);
 
-  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shipping = subtotal > 50000 ? 0 : 1500;
-  const total = subtotal + shipping;
+  const subtotal = useMemo(
+    () => items.reduce((acc, item) => acc + item.price * item.quantity, 0),
+    [items],
+  );
+  const shipping = useMemo(() => (subtotal > 50000 ? 0 : 1500), [subtotal]);
+  const total = useMemo(() => subtotal + shipping, [subtotal, shipping]);
 
   return (
     <div className="min-h-screen bg-[#fcfbf7] text-[#0a0a0a] pb-20" style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }}>
@@ -186,7 +196,7 @@ const CartPage = () => {
         <div className="max-w-xl mx-auto w-full px-4">
           <div className="flex items-center justify-between relative">
             {/* Step 1 */}
-            <div className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => setStep(1)}>
+            <button type="button" className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => setStep(1)}>
               <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 1 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
                 01
               </div>
@@ -194,17 +204,17 @@ const CartPage = () => {
                 Cart
               </div>
               {step === 1 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#c8b99a] rounded-full border-2 border-white animate-pulse" />}
-            </div>
+            </button>
 
             {/* Connector 1-2 */}
-            <div className="flex-1 mx-4 h-[1px] bg-[#e5e1d8] relative overflow-hidden">
+            <div className="flex-1 mx-4 h-px bg-[#e5e1d8] relative overflow-hidden">
               <div 
                 className={`absolute inset-0 bg-black transition-transform duration-700 ease-out ${step >= 2 ? 'translate-x-0' : '-translate-x-full'}`} 
               />
             </div>
 
             {/* Step 2 */}
-            <div className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => items.length > 0 && setStep(2)}>
+            <button type="button" className="flex flex-col items-center relative z-10 group cursor-pointer" onClick={() => items.length > 0 && setStep(2)}>
               <div className={`w-9 h-9 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all duration-500 ${step >= 2 ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-[#e5e1d8] text-[#b5b1a8]'}`}>
                 02
               </div>
@@ -212,10 +222,10 @@ const CartPage = () => {
                 Checkout
               </div>
               {step === 2 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#c8b99a] rounded-full border-2 border-white animate-pulse" />}
-            </div>
+            </button>
 
             {/* Connector 2-3 */}
-            <div className="flex-1 mx-4 h-[1px] bg-[#e5e1d8] relative overflow-hidden">
+            <div className="flex-1 mx-4 h-px bg-[#e5e1d8] relative overflow-hidden">
               <div 
                 className={`absolute inset-0 bg-black transition-transform duration-700 ease-out ${step >= 3 ? 'translate-x-0' : '-translate-x-full'}`} 
               />
@@ -239,7 +249,9 @@ const CartPage = () => {
           
           {/* LEFT COLUMN: Cart Items, Checkout Form, or Completion */}
           <div className="flex-1 space-y-8">
-            {step === 1 ? (
+            {(() => {
+              if (step === 1) {
+                return (
               <div className="bg-white border border-[#e5e1d8] overflow-hidden">
                 <div className="hidden md:grid grid-cols-5 gap-4 p-6 border-b border-[#e5e1d8] text-[9px] tracking-[0.3em] font-bold uppercase text-[#b5b1a8]">
                   <div className="col-span-2">Product</div>
@@ -294,32 +306,36 @@ const CartPage = () => {
                   </div>
                 )}
               </div>
-            ) : step === 2 ? (
+                );
+              }
+
+              if (step === 2) {
+                return (
               <div className="bg-white border border-[#e5e1d8] p-8 space-y-10 animate-fade-in">
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">1</span>
+                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">1</span>{' '}
                     Contact Information
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase text-[#888]">First Name</label>
-                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="John" />
+                      <label htmlFor="firstName" className="text-[9px] font-bold uppercase text-[#888]">First Name</label>
+                      <input id="firstName" type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="John" />
                       {formErrors.firstName && <p className="text-[10px] text-red-600">{formErrors.firstName}</p>}
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase text-[#888]">Last Name</label>
-                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.lastName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Doe" />
+                      <label htmlFor="lastName" className="text-[9px] font-bold uppercase text-[#888]">Last Name</label>
+                      <input id="lastName" type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.lastName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Doe" />
                       {formErrors.lastName && <p className="text-[10px] text-red-600">{formErrors.lastName}</p>}
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase text-[#888]">Email Address</label>
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="alex@example.com" />
+                      <label htmlFor="email" className="text-[9px] font-bold uppercase text-[#888]">Email Address</label>
+                      <input id="email" type="email" name="email" value={formData.email} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="alex@example.com" />
                       {formErrors.email && <p className="text-[10px] text-red-600">{formErrors.email}</p>}
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase text-[#888]">Phone Number</label>
-                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="+94 77 123 4567" />
+                      <label htmlFor="phone" className="text-[9px] font-bold uppercase text-[#888]">Phone Number</label>
+                      <input id="phone" type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="+94 77 123 4567" />
                       {formErrors.phone && <p className="text-[10px] text-red-600">{formErrors.phone}</p>}
                     </div>
                   </div>
@@ -327,23 +343,23 @@ const CartPage = () => {
 
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">2</span>
+                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">2</span>{' '}
                     Shipping Address
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 md:col-span-2">
-                        <label className="text-[9px] font-bold uppercase text-[#888]">Shipping Address</label>
-                      <input type="text" name="address" value={formData.address} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.address ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Street Address, Apartment, etc." />
+                        <label htmlFor="address" className="text-[9px] font-bold uppercase text-[#888]">Shipping Address</label>
+                      <input id="address" type="text" name="address" value={formData.address} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.address ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Street Address, Apartment, etc." />
                       {formErrors.address && <p className="text-[10px] text-red-600">{formErrors.address}</p>}
                     </div>
                     <div className="space-y-1">
-                        <label className="text-[9px] font-bold uppercase text-[#888]">City</label>
-                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.city ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Colombo" />
+                        <label htmlFor="city" className="text-[9px] font-bold uppercase text-[#888]">City</label>
+                      <input id="city" type="text" name="city" value={formData.city} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.city ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Colombo" />
                       {formErrors.city && <p className="text-[10px] text-red-600">{formErrors.city}</p>}
                     </div>
                     <div className="space-y-1">
-                        <label className="text-[9px] font-bold uppercase text-[#888]">Province / State</label>
-                      <select name="province" value={formData.province} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors bg-white ${formErrors.province ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`}>
+                        <label htmlFor="province" className="text-[9px] font-bold uppercase text-[#888]">Province / State</label>
+                      <select id="province" name="province" value={formData.province} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors bg-white ${formErrors.province ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`}>
                         <option value="">Select Province / State</option>
                         {SRI_LANKA_PROVINCES.map((province) => (
                           <option key={province} value={province}>{province}</option>
@@ -356,19 +372,31 @@ const CartPage = () => {
 
                 <section>
                   <h2 className="text-[12px] tracking-[0.3em] font-bold uppercase mb-6 flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">3</span>
+                    <span className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">3</span>{' '}
                     Payment Method
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { id: 'CREDIT_CARD', label: 'Credit Card', icon: <CreditCard size={18} /> },
-                      { id: 'DEBIT_CARD', label: 'Debit Card', icon: <CreditCard size={18} className="rotate-180" /> },
-                      { id: 'ONLINE_TRANSFER', label: 'Bank Transfer', icon: <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_xM7u4YIn9I_7p_p2L8K2N3_7q8o_7p8A4w&s" alt="Transfer" width={20} height={20} className="grayscale" /> },
-                      { id: 'CASH_ON_DELIVERY', label: 'Cash on Delivery', icon: <Truck size={18} /> }
-                    ].map((method) => {
+                    {PAYMENT_METHODS.map((method) => {
                       const isEnabled = method.id === 'CASH_ON_DELIVERY';
                       const isDisabled = method.id !== 'CASH_ON_DELIVERY';
                       const isSelected = selectedPayment === method.id;
+
+                      let icon: React.ReactNode = <Truck size={18} />;
+                      if (method.id === 'CREDIT_CARD') {
+                        icon = <CreditCard size={18} />;
+                      } else if (method.id === 'DEBIT_CARD') {
+                        icon = <CreditCard size={18} className="rotate-180" />;
+                      } else if (method.id === 'ONLINE_TRANSFER') {
+                        icon = (
+                          <Image
+                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_xM7u4YIn9I_7p_p2L8K2N3_7q8o_7p8A4w&s"
+                            alt="Transfer"
+                            width={20}
+                            height={20}
+                            className="grayscale"
+                          />
+                        );
+                      }
 
                       let buttonClassName = 'border-[#e5e1d8] hover:border-[#b5b1a8] bg-white text-[#888] cursor-pointer';
                       if (isSelected) {
@@ -386,7 +414,7 @@ const CartPage = () => {
                         className={`h-16 border p-4 flex items-center gap-4 transition-all duration-300 ${buttonClassName}`}
                       >
                         <div className={`${isSelected ? 'text-black' : 'text-[#b5b1a8]'}`}>
-                          {method.icon}
+                          {icon}
                         </div>
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-black' : 'text-[#888]'}`}>
                           {method.label}
@@ -402,7 +430,10 @@ const CartPage = () => {
                   </p>
                 </section>
               </div>
-            ) : (
+                );
+              }
+
+              return (
               <div className="bg-white border border-[#e5e1d8] p-16 text-center space-y-8 animate-fade-in shadow-sm">
                 <div className="w-24 h-24 rounded-full bg-black text-[#c8b99a] flex items-center justify-center mx-auto mb-8 relative">
                    <CheckCircle2 size={50} strokeWidth={1} />
@@ -429,7 +460,8 @@ const CartPage = () => {
                   </button>
                 </div>
               </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* RIGHT COLUMN: Summary */}
@@ -459,36 +491,46 @@ const CartPage = () => {
                 </div>
               </div>
 
-              {step === 1 ? (
-                <button 
-                  onClick={() => setStep(2)}
-                  disabled={items.length === 0}
-                  className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#1a1a1a] transition-all cursor-pointer flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg"
-                >
-                  Proceed to Checkout
-                  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-              ) : step === 2 ? (
-                <div className="space-y-4">
-                  <button 
-                    onClick={submitOrder}
-                    disabled={isPlacingOrder}
-                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200 disabled:opacity-50"
-                  >
-                    {isPlacingOrder ? 'Processing...' : 'Place Order Now'}
-                  </button>
-                  <button 
-                    onClick={() => setStep(1)}
-                    className="w-full py-4 text-[10px] tracking-[0.2em] font-bold uppercase text-[#555] hover:text-black transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ArrowLeft size={14} /> Back to Bag
-                  </button>
-                </div>
-              ) : (
-                <div className="p-4 border border-[#c8b99a]/20 bg-[#fcfbf7] rounded-sm text-center">
+              {(() => {
+                if (step === 1) {
+                  return (
+                    <button
+                      onClick={() => setStep(2)}
+                      disabled={items.length === 0}
+                      className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#1a1a1a] transition-all cursor-pointer flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg"
+                    >
+                      Proceed to Checkout
+                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  );
+                }
+
+                if (step === 2) {
+                  return (
+                    <div className="space-y-4">
+                      <button
+                        onClick={submitOrder}
+                        disabled={isPlacingOrder}
+                        className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200 disabled:opacity-50"
+                      >
+                        {isPlacingOrder ? 'Processing...' : 'Place Order Now'}
+                      </button>
+                      <button
+                        onClick={() => setStep(1)}
+                        className="w-full py-4 text-[10px] tracking-[0.2em] font-bold uppercase text-[#555] hover:text-black transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ArrowLeft size={14} /> Back to Bag
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="p-4 border border-[#c8b99a]/20 bg-[#fcfbf7] rounded-sm text-center">
                     <p className="text-[10px] tracking-[0.2em] uppercase font-bold text-[#c8b99a]">Order Finished</p>
-                </div>
-              )}
+                  </div>
+                );
+              })()}
 
               {/* Trust Section */}
               <div className="mt-10 space-y-4 pt-6 border-t border-[#e5e1d8]">

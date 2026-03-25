@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { FiUser, FiSearch, FiShoppingBag, FiMenu, FiX } from "react-icons/fi";
+import { FiSearch, FiShoppingBag, FiMenu, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import CartDrawer from "./CartDrawer";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -56,7 +56,7 @@ export default function NavBar() {
     return (
         <>
             <header 
-                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 px-6 md:px-12 h-20 flex items-center justify-between border-b ${
+                className={`fixed top-0 left-0 right-0 z-100 transition-all duration-500 px-6 md:px-12 h-20 flex items-center justify-between border-b ${
                     isScrolled 
                     ? "bg-white/90 backdrop-blur-xl border-black/5 h-16 shadow-lg" 
                     : "bg-transparent border-transparent h-20"
@@ -85,7 +85,7 @@ export default function NavBar() {
                         alt="Iconic Apparel Logo"
                         width={150}
                         height={40}
-                        className="w-[120px] sm:w-[150px] h-auto"
+                        className="w-30 sm:w-37.5 h-auto"
                         />
                     </Link>
                 </div>
@@ -98,6 +98,19 @@ export default function NavBar() {
                             className="relative h-full flex items-center"
                             onMouseEnter={() => link.mega && setOpenDropdown(link.label)}
                             onMouseLeave={() => setOpenDropdown(null)}
+                            onFocus={() => link.mega && setOpenDropdown(link.label)}
+                            onBlur={() => setOpenDropdown(null)}
+                            tabIndex={0}
+                            role="button"
+                            onKeyDown={(event) => {
+                                if (!link.mega) return;
+                                if (event.key === "Enter" || event.key === " ") {
+                                    setOpenDropdown((prev) => prev === link.label ? null : link.label);
+                                }
+                                if (event.key === "Escape") {
+                                    setOpenDropdown(null);
+                                }
+                            }}
                         >
                             <Link
                                 href={link.href}
@@ -107,7 +120,7 @@ export default function NavBar() {
                             >
                                 {link.label}
                                 <motion.div 
-                                    className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#c8a96e]"
+                                    className="absolute bottom-0 left-0 right-0 h-px bg-[#c8a96e]"
                                     initial={{ scaleX: 0 }}
                                     animate={{ scaleX: openDropdown === link.label ? 1 : 0 }}
                                     transition={{ duration: 0.3 }}
@@ -122,7 +135,7 @@ export default function NavBar() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 10 }}
                                         transition={{ duration: 0.3, ease: "easeOut" }}
-                                        className="absolute top-[100%] left-1/2 -translate-x-1/2 pt-4 w-screen max-w-4xl"
+                                        className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-screen max-w-4xl"
                                     >
                                         <div className="bg-white/95 backdrop-blur-2xl border border-black/10 rounded-2xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] flex p-10 gap-16">
                                             {link.mega.map((col) => (
@@ -145,14 +158,16 @@ export default function NavBar() {
                                             ))}
                                             <div className="w-1/4 relative overflow-hidden rounded-xl border border-white/5 group/img">
                                                 <div className="absolute inset-0 bg-[#c8a96e]/20 group-hover/img:bg-transparent transition-colors z-10" />
-                                                <img 
-                                                    src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=400" 
-                                                    alt="Featured" 
+                                                <Image
+                                                    src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=400"
+                                                    alt="Featured"
+                                                    width={400}
+                                                    height={500}
                                                     className="w-full h-full object-cover grayscale transition-all duration-700 group-hover/img:grayscale-0 group-hover/img:scale-110"
                                                 />
                                                 <div className="absolute bottom-4 left-4 z-20">
                                                     <p className="text-[0.5rem] font-bold text-white tracking-widest uppercase mb-1">Featured</p>
-                                                    <p className="text-xs font-serif text-[#c8a96e] italic">Spring '26 Collection</p>
+                                                    <p className="text-xs font-serif text-[#c8a96e] italic">Spring &apos;26 Collection</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -174,7 +189,7 @@ export default function NavBar() {
                                     animate={{ width: 200, opacity: 1 }}
                                     exit={{ width: 0, opacity: 0 }}
                                     placeholder="SEARCH LUXURY..."
-                                    className="bg-black/5 border border-black/10 rounded-full px-4 py-2 text-[10px] tracking-widest text-black outline-none focus:border-[#c8a96e]/50 mr-2"
+                                    className="bg-black/5 border border-black/10 rounded-full px-4 py-2 text-2xs tracking-widest text-black outline-none focus:border-[#c8a96e]/50 mr-2"
                                 />
                             )}
                         </AnimatePresence>
@@ -209,7 +224,7 @@ export default function NavBar() {
                         animate={{ x: 0 }}
                         exit={{ x: "-100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 200 }}
-                        className="fixed inset-0 z-[150] bg-white p-10 flex flex-col"
+                        className="fixed inset-0 z-150 bg-white p-10 flex flex-col"
                     >
                         <div className="flex justify-between items-center mb-16">
                             <button onClick={() => setIsMobileMenuOpen(false)} className="text-black/50 hover:text-black">
@@ -244,7 +259,7 @@ export default function NavBar() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] pointer-events-none"
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-90 pointer-events-none"
                     />
                 )}
             </AnimatePresence>

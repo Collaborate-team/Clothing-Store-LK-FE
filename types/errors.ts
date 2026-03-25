@@ -49,7 +49,7 @@ export interface ApiErrorResponse {
   code: string;
   message: string;
   userMessage: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp?: string;
   path?: string;
 }
