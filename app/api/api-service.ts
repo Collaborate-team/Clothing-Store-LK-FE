@@ -3,7 +3,8 @@ import {
   ProductDto, 
   OrderDTO, 
   CustomerDTO, 
-  AnalyticsDTO 
+  AnalyticsDTO,
+  PlaceOrderRequestDTO
 } from '../../types/api-types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
@@ -120,7 +121,7 @@ export async function checkProductAvailability(id: string | number): Promise<any
 
 export async function fetchProductsByCategory(category: string): Promise<ProductDto[]> {
   const response = await axiosInstance.get(`/api/v1/products/category/${encodeURIComponent(category)}`);
-  return response.data;
+  return (response.data || []).map((product: ProductDto) => normalizeProductImages(product));
 }
 
 export async function searchProducts(keyword: string): Promise<ProductDto[]> {
@@ -159,7 +160,7 @@ export async function updateOrderStatus(id: string | number, status: string): Pr
   return true;
 }
 
-export async function placeOrder(orderData: OrderDTO): Promise<OrderDTO> {
+export async function placeOrder(orderData: PlaceOrderRequestDTO): Promise<OrderDTO> {
   const response = await axiosInstance.post('/api/v1/orders/placeOrder', orderData);
   return response.data;
 }

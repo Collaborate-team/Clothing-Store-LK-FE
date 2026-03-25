@@ -106,6 +106,23 @@ export interface OrderDTO {
   orderStatus?: OrderStatus;
 }
 
+export interface PlaceOrderItemDTO {
+  productId: number;
+  quantity: number;
+  selectedSize: string;
+  selectedColor: string;
+}
+
+export interface PlaceOrderRequestDTO {
+  items: PlaceOrderItemDTO[];
+  paymentMethod: PaymentMethod;
+  customerName: string;
+  email: string;
+  mobileNo: string;
+  address: string;
+  customer: CustomerDTO;
+}
+
 export interface ProductDto {
   id?: number;
   name: string;

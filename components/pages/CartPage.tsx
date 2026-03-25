@@ -15,7 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { placeOrder } from '../../app/api/api-service';
-import { OrderDTO, OrderItemDTO, PaymentMethod } from '../../types/api-types';
+import { OrderDTO, PaymentMethod, PlaceOrderRequestDTO } from '../../types/api-types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearCart, removeFromCart, updateCartQuantity } from '@/store/cartSlice';
 
@@ -46,24 +46,31 @@ const CartPage = () => {
     if (items.length === 0) return;
     setIsPlacingOrder(true);
     try {
-      const orderItems: OrderItemDTO[] = items.map(item => ({
-        productId: item.id,
-        productName: item.name,
-        imageUrl: item.image,
-        color: item.color as any,
-        size: item.size as any,
-        qty: item.quantity,
-        unitPrice: item.price
-      }));
+      const normalizeEnumValue = (value: string) =>
+        value.trim().toUpperCase().replaceAll(' ', '_');
 
-      const orderData: OrderDTO = {
-        items: orderItems,
+      const customerName = `${formData.firstName} ${formData.lastName}`.trim() || 'Guest User';
+      const fullAddress = `${formData.address}, ${formData.city}, ${formData.province}`;
+
+      const orderData: PlaceOrderRequestDTO = {
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          selectedSize: normalizeEnumValue(item.size),
+          selectedColor: normalizeEnumValue(item.color),
+        })),
         paymentMethod: selectedPayment as PaymentMethod,
-        customerName: `${formData.firstName} ${formData.lastName}`.trim() || 'Guest User',
+        customerName,
         email: formData.email,
         mobileNo: formData.phone,
-        address: `${formData.address}, ${formData.city}, ${formData.province}`,
-        total: items.reduce((acc, item) => acc + item.price * item.quantity, 0) + (items.reduce((acc, item) => acc + item.price * item.quantity, 0) > 50000 ? 0 : 1500)
+        address: fullAddress,
+        customer: {
+          id: 0,
+          name: customerName,
+          email: formData.email,
+          mobileNo: formData.phone,
+          address: fullAddress,
+        },
       };
 
       const response = await placeOrder(orderData);
