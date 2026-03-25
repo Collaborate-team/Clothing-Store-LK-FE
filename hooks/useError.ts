@@ -6,22 +6,23 @@
 
 import { useCallback } from 'react';
 import { useNotification } from '@/context/NotificationContext';
-import { AppError, logError } from '@/utils/error-handler';
+import { AppError, ERROR_MESSAGES, logError } from '@/utils/error-handler';
+import { ErrorCode } from '@/types/errors';
 
 export function useErrorHandler() {
   const { showNotification } = useNotification();
 
   const handleError = useCallback(
-    (error: any, context?: Record<string, any>) => {
-      let message = 'Something went wrong. Please try again.';
+    (error: unknown, context?: Record<string, unknown>) => {
+      let message: string = ERROR_MESSAGES.UNKNOWN_ERROR;
 
       if (error instanceof AppError) {
         message = error.userMessage;
         logError(error, context);
-      } else if (error?.message) {
+      } else if (error instanceof Error) {
         message = error.message;
         logError(
-          new AppError(error.message, message, 'UNKNOWN_ERROR'),
+          new AppError(error.message, message, ErrorCode.UNKNOWN_ERROR),
           context
         );
       }

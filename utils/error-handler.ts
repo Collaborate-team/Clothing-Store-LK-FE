@@ -3,6 +3,8 @@
  * Handles all application errors with user-friendly messages
  */
 
+import { ErrorCode } from '@/types/errors';
+
 export interface ApiError {
   status?: number;
   message: string;
@@ -76,7 +78,7 @@ export function parseApiError(error: any): AppError {
       return new AppError(
         error.message,
         ERROR_MESSAGES.TIMEOUT_ERROR,
-        'TIMEOUT',
+        ErrorCode.TIMEOUT_ERROR,
         undefined,
         { originalError: error }
       );
@@ -84,7 +86,7 @@ export function parseApiError(error: any): AppError {
     return new AppError(
       error.message,
       ERROR_MESSAGES.NETWORK_ERROR,
-      'NETWORK_ERROR',
+      ErrorCode.NETWORK_ERROR,
       undefined,
       { originalError: error }
     );
@@ -98,7 +100,7 @@ export function parseApiError(error: any): AppError {
       return new AppError(
         data?.message || 'Bad Request',
         data?.userMessage || data?.message || ERROR_MESSAGES.INVALID_INPUT,
-        data?.code || 'BAD_REQUEST',
+        data?.code || ErrorCode.INVALID_INPUT,
         400,
         data?.details
       );
@@ -106,28 +108,28 @@ export function parseApiError(error: any): AppError {
       return new AppError(
         'Unauthorized',
         ERROR_MESSAGES.UNAUTHORIZED,
-        'UNAUTHORIZED',
+        ErrorCode.UNAUTHORIZED,
         401
       );
     case 403:
       return new AppError(
         'Forbidden',
         ERROR_MESSAGES.FORBIDDEN,
-        'FORBIDDEN',
+        ErrorCode.FORBIDDEN,
         403
       );
     case 404:
       return new AppError(
         'Not Found',
         ERROR_MESSAGES.PRODUCT_NOT_FOUND,
-        'NOT_FOUND',
+        ErrorCode.PRODUCT_NOT_FOUND,
         404
       );
     case 409:
       return new AppError(
         data?.message || 'Conflict',
         data?.userMessage || data?.message || ERROR_MESSAGES.INSUFFICIENT_STOCK,
-        data?.code || 'CONFLICT',
+        data?.code || ErrorCode.INSUFFICIENT_STOCK,
         409,
         data?.details
       );
@@ -135,7 +137,7 @@ export function parseApiError(error: any): AppError {
       return new AppError(
         'Payload Too Large',
         ERROR_MESSAGES.INVALID_IMAGE_SIZE,
-        'FILE_TOO_LARGE',
+        ErrorCode.IMAGE_TOO_LARGE,
         413
       );
     case 500:
@@ -145,14 +147,14 @@ export function parseApiError(error: any): AppError {
       return new AppError(
         data?.message || 'Server Error',
         ERROR_MESSAGES.SERVER_ERROR,
-        'SERVER_ERROR',
+        ErrorCode.SERVER_ERROR,
         status
       );
     default:
       return new AppError(
         data?.message || error.message || 'Unknown Error',
         data?.userMessage || ERROR_MESSAGES.UNKNOWN_ERROR,
-        data?.code || 'UNKNOWN_ERROR',
+        data?.code || ErrorCode.UNKNOWN_ERROR,
         status,
         data?.details
       );

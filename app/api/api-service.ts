@@ -1,4 +1,5 @@
 import axiosInstance from '../api/axios-instance';
+import { validateImageFiles } from '@/utils/validation';
 import { 
   ProductDto, 
   OrderDTO, 
@@ -63,6 +64,13 @@ export async function fetchProductById(id: string | number): Promise<ProductDto>
 }
 
 export async function addProduct(product: Partial<ProductDto>, images?: File[]): Promise<ProductDto> {
+  if (images && images.length > 0) {
+    const validationError = validateImageFiles(images);
+    if (validationError) {
+      throw validationError;
+    }
+  }
+
   const formData = new FormData();
   formData.append('product', new Blob([JSON.stringify(product)], { type: 'application/json' }));
   
@@ -79,6 +87,13 @@ export async function addProduct(product: Partial<ProductDto>, images?: File[]):
 }
 
 export async function updateProduct(id: string | number, product: Partial<ProductDto>, images?: File[]): Promise<ProductDto> {
+  if (images && images.length > 0) {
+    const validationError = validateImageFiles(images);
+    if (validationError) {
+      throw validationError;
+    }
+  }
+
   const formData = new FormData();
   formData.append('product', new Blob([JSON.stringify(product)], { type: 'application/json' }));
   

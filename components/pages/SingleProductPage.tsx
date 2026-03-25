@@ -18,6 +18,7 @@ import {
 import ProductCard from '../product/ProductCard';
 import { useCart } from '@/hooks/useCart';
 import { useNotification } from '@/context/NotificationContext';
+import { ERROR_MESSAGES } from '@/utils/error-handler';
 
 type RelatedProduct = {
   id?: number;
@@ -149,7 +150,7 @@ const SingleProductPage: React.FC = () => {
 
   const increaseQuantity = () => {
     if (productData.quantity <= 0) {
-      showNotification('This product is currently out of stock.', 'error');
+      showNotification(ERROR_MESSAGES.OUT_OF_STOCK, 'error');
       return;
     }
 

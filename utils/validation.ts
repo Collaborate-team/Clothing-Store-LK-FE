@@ -3,6 +3,7 @@
  */
 
 import { AppError, ERROR_MESSAGES } from './error-handler';
+import { ErrorCode } from '@/types/errors';
 
 export const VALIDATION_RULES = {
   MAX_CART_QUANTITY: 3,
@@ -24,7 +25,7 @@ export function validateQuantity(quantity: number, availableStock: number): AppE
     return new AppError(
       'Invalid quantity',
       ERROR_MESSAGES.INVALID_QUANTITY,
-      'INVALID_QUANTITY'
+      ErrorCode.INVALID_INPUT
     );
   }
 
@@ -32,7 +33,7 @@ export function validateQuantity(quantity: number, availableStock: number): AppE
     return new AppError(
       'Insufficient stock',
       `Only ${availableStock} items are available in stock.`,
-      'INSUFFICIENT_STOCK',
+      ErrorCode.INSUFFICIENT_STOCK,
       409,
       { requested: quantity, available: availableStock }
     );
@@ -63,7 +64,7 @@ export function validateImageFile(file: File): AppError | null {
     return new AppError(
       'Invalid image type',
       ERROR_MESSAGES.INVALID_IMAGE_TYPE,
-      'INVALID_IMAGE_TYPE',
+      ErrorCode.INVALID_IMAGE_TYPE,
       undefined,
       { received: file.type, allowed: VALIDATION_RULES.ALLOWED_IMAGE_TYPES }
     );
@@ -75,7 +76,7 @@ export function validateImageFile(file: File): AppError | null {
     return new AppError(
       'Image file too large',
       `Image size is ${sizeMB}MB. Please upload images smaller than ${maxMB}MB.`,
-      'IMAGE_TOO_LARGE',
+      ErrorCode.IMAGE_TOO_LARGE,
       413,
       { size: file.size, maxSize: VALIDATION_RULES.MAX_IMAGE_SIZE_BYTES, sizeInMB: sizeMB }
     );
@@ -91,8 +92,8 @@ export function validateImageFiles(files: File[]): AppError | null {
   if (files.length > VALIDATION_RULES.MAX_IMAGES_PER_PRODUCT) {
     return new AppError(
       'Too many images',
-      `You can upload a maximum of ${VALIDATION_RULES.MAX_IMAGES_PER_PRODUCT} images.`,
-      'MAX_IMAGES_EXCEEDED',
+      ERROR_MESSAGES.MAX_IMAGES_EXCEEDED,
+      ErrorCode.MAX_IMAGES_EXCEEDED,
       undefined,
       { provided: files.length, maxAllowed: VALIDATION_RULES.MAX_IMAGES_PER_PRODUCT }
     );

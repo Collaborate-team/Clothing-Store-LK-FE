@@ -19,7 +19,7 @@ import { OrderDTO, PaymentMethod, PlaceOrderRequestDTO } from '../../types/api-t
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearCart, removeFromCart, updateCartQuantity } from '@/store/cartSlice';
 import { useNotification } from '@/context/NotificationContext';
-import { AppError } from '@/utils/error-handler';
+import { AppError, ERROR_MESSAGES } from '@/utils/error-handler';
 
 const SRI_LANKA_PROVINCES = [
   'Western',
@@ -65,7 +65,7 @@ const CartPage = () => {
 
     (Object.keys(formData) as Array<keyof typeof formData>).forEach((field) => {
       if (!formData[field].trim()) {
-        errors[field] = 'Please fill this field.';
+        errors[field] = ERROR_MESSAGES.REQUIRED_FIELD;
       }
     });
 
@@ -133,7 +133,7 @@ const CartPage = () => {
       console.error('Failed to place order:', err);
       const message = err instanceof AppError
         ? err.userMessage
-        : 'There was an issue placing your order. Please try again.';
+        : ERROR_MESSAGES.UNKNOWN_ERROR;
       showNotification(message, 'error');
     } finally {
       setIsPlacingOrder(false);

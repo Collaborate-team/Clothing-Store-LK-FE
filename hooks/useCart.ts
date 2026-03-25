@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { addToCart as addToCartAction, removeFromCart as removeFromCartAction, updateCartQuantity } from '@/store/cartSlice';
 import { useNotification } from '@/context/NotificationContext';
 import { validateQuantity } from '@/utils/validation';
-import { logError } from '@/utils/error-handler';
+import { ERROR_MESSAGES, logError } from '@/utils/error-handler';
 
 export function useCart() {
   const dispatch = useAppDispatch();
@@ -62,7 +62,7 @@ export function useCart() {
   const removeFromCart = useCallback(
     (itemId: number, size: string, color: string) => {
       dispatch(removeFromCartAction({ id: itemId, size, color }));
-      showNotification('Item removed from cart.', 'info');
+      showNotification('Item removed from cart successfully.', 'info');
       return true;
     },
     [dispatch, showNotification]
@@ -71,7 +71,7 @@ export function useCart() {
   const updateQuantity = useCallback(
     (itemId: number, size: string, color: string, newQuantity: number) => {
       if (newQuantity < 1) {
-        showNotification('Quantity must be at least 1.', 'error');
+        showNotification(ERROR_MESSAGES.INVALID_QUANTITY, 'error');
         return false;
       }
 
