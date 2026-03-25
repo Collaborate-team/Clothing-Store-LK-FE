@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { parseApiError } from '@/utils/error-handler';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,7 +27,7 @@ axiosInstance.interceptors.response.use((response) => {
     data: error.response?.data,
     message: error.message
   });
-  return Promise.reject(error);
+  return Promise.reject(parseApiError(error));
 });
 
 

@@ -16,8 +16,8 @@ import {
   ChevronUp
 } from 'lucide-react';
 import ProductCard from '../product/ProductCard';
-import { useAppDispatch } from '@/store/hooks';
-import { addToCart as addToCartAction } from '@/store/cartSlice';
+import { useCart } from '@/hooks/useCart';
+import { useNotification } from '@/context/NotificationContext';
 
 type RelatedProduct = {
   id?: number;
@@ -44,6 +44,7 @@ type ProductDataType = {
   name: string;
   category: string;
   price: string;
+  quantity: number;
   description: string;
   colors: ProductColor[];
   sizes: string[];
@@ -52,7 +53,8 @@ type ProductDataType = {
 };
 
 const SingleProductPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+  const { addToCart: addToCartWithValidation } = useCart();
+  const { showNotification } = useNotification();
   const params = useParams();
   const searchParams = useSearchParams();
   const productId = (params?.id as string) || searchParams.get('id');
@@ -68,6 +70,7 @@ const SingleProductPage: React.FC = () => {
     name: '',
     category: '',
     price: '0.00',
+    quantity: 0,
     description: '',
     colors: [],
     sizes: [],
@@ -102,6 +105,7 @@ const SingleProductPage: React.FC = () => {
           name: item.name,
           category: item.category,
           price: item.price ? item.price.toFixed(2) : '0.00',
+          quantity: item.quantity ?? 0,
           description: item.description || '',
           colors: mappedColors,
           sizes: item.sizes || [],
@@ -143,18 +147,33 @@ const SingleProductPage: React.FC = () => {
     setOpenDetail(openDetail === index ? null : index);
   };
 
+  const increaseQuantity = () => {
+    if (productData.quantity <= 0) {
+      showNotification('This product is currently out of stock.', 'error');
+      return;
+    }
+
+    const maxAllowedQuantity = productData.quantity;
+
+    if (quantity >= maxAllowedQuantity) {
+      showNotification(`Only ${productData.quantity} items are available in stock.`, 'error');
+      return;
+    }
+
+    setQuantity((q) => q + 1);
+  };
+
   const addToCart = () => {
-    dispatch(
-      addToCartAction({
-        id: Number(productData.id) || 0,
-        name: productData.name,
-        price: Number(String(productData.price).replaceAll(',', '')) || 0,
-        size: selectedSize,
-        color: selectedColor?.name || 'Default',
-        quantity,
-        image: productData.images?.[0] || '',
-      }),
-    );
+    addToCartWithValidation({
+      id: Number(productData.id) || 0,
+      name: productData.name,
+      price: Number(String(productData.price).replaceAll(',', '')) || 0,
+      size: selectedSize,
+      color: selectedColor?.name || 'Default',
+      quantity,
+      image: productData.images?.[0] || '',
+      stock: productData.quantity,
+    });
   };
 
   return (
@@ -266,7 +285,7 @@ const SingleProductPage: React.FC = () => {
                 <div className="flex items-center justify-between border border-[#e5e1d8] h-14 sm:h-12 px-4 bg-white w-full sm:w-32 shrink-0">
                   <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={16} /></button>
                   <span className="text-[14px] sm:text-[13px] font-medium">{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={16} /></button>
+                  <button onClick={increaseQuantity} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={16} /></button>
                 </div>
                 <button 
                   onClick={addToCart}

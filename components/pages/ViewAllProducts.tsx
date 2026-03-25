@@ -366,6 +366,7 @@ export default function ViewAllProducts({ initialCategory = 'ALL ITEMS' }: ViewA
                   title={product.name}
                   description={product.description || ''}
                   price={product.price?.toString()}
+                  stock={product.quantity}
                   imageUrl={product.imageUrls && product.imageUrls[0] ? getProductImageUrl(product.imageUrls[0]) : producyImage.src}
                   badge={product.stockStatus === 'OUTOFSTOCK' ? 'SALE' : undefined}
                   sizes={product.sizes as any}

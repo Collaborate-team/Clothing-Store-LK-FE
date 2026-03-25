@@ -7,6 +7,7 @@ export interface CartItem {
   size: string;
   color: string;
   quantity: number;
+  stock?: number;
   image: string;
 }
 
@@ -18,6 +19,7 @@ interface AddCartItemPayload {
   color: string;
   image: string;
   quantity?: number;
+  stock?: number;
 }
 
 interface CartState {
@@ -41,9 +43,20 @@ const cartSlice = createSlice({
       );
 
       const qty = action.payload.quantity ?? 1;
+      const stockLimit = action.payload.stock;
 
       if (existing) {
-        existing.quantity += qty;
+        const nextQuantity = existing.quantity + qty;
+        const availableStock = stockLimit ?? existing.stock;
+
+        if (availableStock !== undefined && nextQuantity > availableStock) {
+          return;
+        }
+
+        existing.quantity = nextQuantity;
+        if (stockLimit !== undefined) {
+          existing.stock = stockLimit;
+        }
       } else {
         state.items.push({
           id: action.payload.id,
@@ -53,6 +66,7 @@ const cartSlice = createSlice({
           color: action.payload.color,
           image: action.payload.image,
           quantity: qty,
+          stock: stockLimit,
         });
       }
 
@@ -90,7 +104,13 @@ const cartSlice = createSlice({
       );
 
       if (!target) return;
-      target.quantity = Math.max(1, action.payload.quantity);
+
+      const nextQuantity = Math.max(1, action.payload.quantity);
+      if (target.stock !== undefined && nextQuantity > target.stock) {
+        return;
+      }
+
+      target.quantity = nextQuantity;
     },
 
     clearCart: (state) => {

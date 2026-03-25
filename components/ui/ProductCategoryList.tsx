@@ -31,6 +31,7 @@ const ProductCategoryList = () => {
                     title: item.name,
                     description: item.description,
                     price: item.price ? item.price.toFixed(2) : "0.00",
+                    quantity: item.quantity,
                     category: item.category,
                     imageUrl: item.imageUrls?.[0] || producyImage,
                     hoverImageUrl: item.imageUrls?.[1],
@@ -103,6 +104,7 @@ const ProductCategoryList = () => {
                                         badge={product.badge}
                                         imageUrl={product.imageUrl}
                                         hoverImageUrl={product.hoverImageUrl}
+                                        stock={product.quantity}
                                         sizes={product.sizes}
                                         colors={product.colors}
                                     />

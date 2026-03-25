@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag } from 'lucide-react';
-import { useAppDispatch } from '@/store/hooks';
-import { addToCart } from '@/store/cartSlice';
+import { useCart } from '@/hooks/useCart';
 
 interface ProductCardProps {
   id?: string | number;
@@ -19,6 +18,7 @@ interface ProductCardProps {
   isFavorite?: boolean;
   sizes?: string[];
   colors?: string[];
+  stock?: number;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -33,8 +33,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   isFavorite = false,
   sizes,
   colors,
+  stock,
 }) => {
-  const dispatch = useAppDispatch();
+  const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const handleAddToBag = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -47,16 +48,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
         ? imageUrl
         : imageUrl?.src || fallbackImage;
 
-    dispatch(
-      addToCart({
-        id: Number(id) || 0,
-        name: title,
-        price: Number(price.toString().replaceAll(',', '')) || 0,
-        size: selectedSize || sizes?.[0] || 'M',
-        color: colors?.[0] || 'BLACK',
-        image,
-      }),
-    );
+    addToCart({
+      id: Number(id) || 0,
+      name: title,
+      price: Number(price.toString().replaceAll(',', '')) || 0,
+      size: selectedSize || sizes?.[0] || 'M',
+      color: colors?.[0] || 'BLACK',
+      image,
+      stock,
+    });
   };
 
   return (

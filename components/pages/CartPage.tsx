@@ -18,6 +18,8 @@ import { placeOrder } from '../../app/api/api-service';
 import { OrderDTO, PaymentMethod, PlaceOrderRequestDTO } from '../../types/api-types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearCart, removeFromCart, updateCartQuantity } from '@/store/cartSlice';
+import { useNotification } from '@/context/NotificationContext';
+import { AppError } from '@/utils/error-handler';
 
 const SRI_LANKA_PROVINCES = [
   'Western',
@@ -33,9 +35,10 @@ const SRI_LANKA_PROVINCES = [
 
 const CartPage = () => {
   const dispatch = useAppDispatch();
+  const { showNotification } = useNotification();
   const items = useAppSelector((state) => state.cart.items);
   const [step, setStep] = useState(1); // 1: Cart, 2: Checkout, 3: Success
-  const [selectedPayment, setSelectedPayment] = useState('CREDIT_CARD');
+  const [selectedPayment, setSelectedPayment] = useState('CASH_ON_DELIVERY');
   
   // Checkout Form State
   const [formData, setFormData] = useState({
@@ -72,6 +75,22 @@ const CartPage = () => {
 
   const submitOrder = async () => {
     if (items.length === 0) return;
+
+    if (selectedPayment !== 'CASH_ON_DELIVERY') {
+      showNotification('Only Cash on Delivery is available right now.', 'error');
+      return;
+    }
+
+    const stockConflictItem = items.find(
+      (item) => item.stock !== undefined && item.quantity > item.stock,
+    );
+    if (stockConflictItem?.stock !== undefined) {
+      showNotification(
+        `Not enough stock for ${stockConflictItem.name}. Only ${stockConflictItem.stock} items are available.`,
+        'error',
+      );
+      return;
+    }
 
     if (!validateCheckoutForm()) {
       return;
@@ -112,7 +131,10 @@ const CartPage = () => {
       dispatch(clearCart());
     } catch (err) {
       console.error('Failed to place order:', err);
-      alert('There was an issue placing your order. Please try again.');
+      const message = err instanceof AppError
+        ? err.userMessage
+        : 'There was an issue placing your order. Please try again.';
+      showNotification(message, 'error');
     } finally {
       setIsPlacingOrder(false);
     }
@@ -124,12 +146,18 @@ const CartPage = () => {
     );
     if (!target) return;
 
+    const nextQuantity = Math.max(1, target.quantity + delta);
+    if (target.stock !== undefined && nextQuantity > target.stock) {
+      showNotification(`Only ${target.stock} items are available in stock.`, 'error');
+      return;
+    }
+
     dispatch(
       updateCartQuantity({
         id,
         size,
         color,
-        quantity: Math.max(1, target.quantity + delta),
+        quantity: nextQuantity,
       }),
     );
   };
@@ -337,24 +365,41 @@ const CartPage = () => {
                       { id: 'DEBIT_CARD', label: 'Debit Card', icon: <CreditCard size={18} className="rotate-180" /> },
                       { id: 'ONLINE_TRANSFER', label: 'Bank Transfer', icon: <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_xM7u4YIn9I_7p_p2L8K2N3_7q8o_7p8A4w&s" alt="Transfer" width={20} height={20} className="grayscale" /> },
                       { id: 'CASH_ON_DELIVERY', label: 'Cash on Delivery', icon: <Truck size={18} /> }
-                    ].map((method) => (
-                      <button 
+                    ].map((method) => {
+                      const isEnabled = method.id === 'CASH_ON_DELIVERY';
+                      const isDisabled = method.id !== 'CASH_ON_DELIVERY';
+                      const isSelected = selectedPayment === method.id;
+
+                      let buttonClassName = 'border-[#e5e1d8] hover:border-[#b5b1a8] bg-white text-[#888] cursor-pointer';
+                      if (isSelected) {
+                        buttonClassName = 'border-black bg-[#fcfbf7] shadow-sm cursor-pointer';
+                      }
+                      if (isDisabled) {
+                        buttonClassName = 'border-[#e5e1d8] bg-[#f8f8f8] text-[#b5b1a8] cursor-not-allowed opacity-60';
+                      }
+
+                      return (
+                      <button
                         key={method.id}
+                        disabled={!isEnabled}
                         onClick={() => setSelectedPayment(method.id)}
-                        className={`h-16 border p-4 flex items-center gap-4 transition-all duration-300 cursor-pointer ${selectedPayment === method.id ? 'border-black bg-[#fcfbf7] shadow-sm' : 'border-[#e5e1d8] hover:border-[#b5b1a8] bg-white text-[#888]'}`}
+                        className={`h-16 border p-4 flex items-center gap-4 transition-all duration-300 ${buttonClassName}`}
                       >
-                        <div className={`${selectedPayment === method.id ? 'text-black' : 'text-[#b5b1a8]'}`}>
+                        <div className={`${isSelected ? 'text-black' : 'text-[#b5b1a8]'}`}>
                           {method.icon}
                         </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedPayment === method.id ? 'text-black' : 'text-[#888]'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-black' : 'text-[#888]'}`}>
                           {method.label}
                         </span>
-                        {selectedPayment === method.id && (
+                        {isSelected && (
                           <div className="ml-auto w-2 h-2 rounded-full bg-black animate-pulse" />
                         )}
                       </button>
-                    ))}
+                    )})}
                   </div>
+                  <p className="mt-3 text-[10px] text-[#888] uppercase tracking-wider">
+                    Only Cash on Delivery is available at the moment.
+                  </p>
                 </section>
               </div>
             ) : (
