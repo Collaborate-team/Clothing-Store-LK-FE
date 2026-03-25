@@ -14,37 +14,27 @@ import {
   Search
 } from 'lucide-react';
 
-const MOCK_ORDERS = [
-  {
-    orderId: '#NA-2026-9432',
-    date: 'March 14, 2026',
-    status: 'In Transit',
-    total: '42,700.00',
-    itemsCount: 2,
-    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop',
-    deliveryDate: 'Est. March 16',
-  },
-  {
-    orderId: '#NA-2026-8821',
-    date: 'February 28, 2026',
-    status: 'Delivered',
-    total: '12,500.00',
-    itemsCount: 1,
-    image: 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop',
-    deliveryDate: 'March 02, 2026',
-  },
-  {
-    orderId: '#NA-2026-7754',
-    date: 'January 15, 2026',
-    status: 'Delivered',
-    total: '85,200.00',
-    itemsCount: 4,
-    image: 'https://images.unsplash.com/photo-1539109132271-411a19008bc5?q=80&w=1000&auto=format&fit=crop',
-    deliveryDate: 'January 18, 2026',
-  }
-];
+import { getCustomerOrderHistory, getProductImageUrl } from '../../app/api/api-service';
+import { OrderDTO } from '../../types/api-types';
 
 const OrderHistoryPage = () => {
+  const [orders, setOrders] = React.useState<OrderDTO[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const fetchOrders = async (mobile: string) => {
+    if (!mobile) return;
+    setLoading(true);
+    try {
+      const data = await getCustomerOrderHistory(mobile);
+      setOrders(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#fcfbf7] text-[#0a0a0a] pt-32 pb-24" style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }}>
       <main className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -61,7 +51,10 @@ const OrderHistoryPage = () => {
              <div className="relative flex-1 md:w-64">
                 <input 
                   type="text" 
-                  placeholder="SEARCH ARCHIVE" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && fetchOrders(searchQuery)}
+                  placeholder="SEARCH ARCHIVE (By Mobile Number)" 
                   className="w-full bg-white border border-[#e5e1d8] py-4 pl-12 pr-4 text-[9px] tracking-widest outline-none focus:border-black transition-colors rounded-sm shadow-sm"
                 />
                 <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b5b1a8]" />
@@ -71,9 +64,11 @@ const OrderHistoryPage = () => {
 
         {/* Orders List */}
         <div className="space-y-10">
-          {MOCK_ORDERS.map((order) => (
+          {loading && <div className="text-center py-10 uppercase text-xs tracking-widest text-[#888]">Loading orders...</div>}
+          {!loading && orders.length === 0 && <div className="text-center py-10 uppercase text-xs tracking-widest text-[#888]">No orders found for this contact number.</div>}
+          {orders.map((order) => (
             <div 
-              key={order.orderId} 
+              key={order.orderId || order.id} 
               className="bg-white border border-[#e5e1d8] overflow-hidden hover:shadow-2xl transition-all duration-700 animate-fade-in group"
             >
               {/* Top Banner */}
@@ -81,7 +76,7 @@ const OrderHistoryPage = () => {
                 <div className="flex flex-wrap gap-6 md:gap-10">
                   <div className="space-y-1">
                     <p className="text-[8px] md:text-[9px] font-bold uppercase text-[#b5b1a8] tracking-widest">Order Placed</p>
-                    <p className="text-[11px] md:text-[12px] font-medium">{order.date}</p>
+                    <p className="text-[11px] md:text-[12px] font-medium">{order.createdAt || 'N/A'}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[8px] md:text-[9px] font-bold uppercase text-[#b5b1a8] tracking-widest">Total Value</p>
@@ -90,7 +85,7 @@ const OrderHistoryPage = () => {
                   <div className="space-y-1 hidden min-[450px]:block">
                     <p className="text-[8px] md:text-[9px] font-bold uppercase text-[#b5b1a8] tracking-widest">Dispatch to</p>
                     <p className="text-[11px] md:text-[12px] font-medium flex items-center gap-1">
-                      Alex Fernando <ChevronRight size={12} className="text-[#c8b99a]" />
+                      {order.customerName || 'Customer'} <ChevronRight size={12} className="text-[#c8b99a]" />
                     </p>
                   </div>
                 </div>
@@ -106,24 +101,29 @@ const OrderHistoryPage = () => {
               <div className="p-5 md:p-8 flex flex-col lg:flex-row gap-8 md:gap-12">
                 {/* Product Thumbnail and Info */}
                 <div className="flex-1 flex flex-row gap-6 md:gap-8">
-                  <div className="relative w-24 h-32 md:w-32 md:h-40 shrink-0 border border-[#e5e1d8] overflow-hidden">
-                    <Image src={order.image} alt="Product" fill className="object-cover group-hover:scale-110 transition-transform duration-[3s]" />
+                  <div className="relative w-24 h-32 md:w-32 md:h-40 shrink-0 border border-[#e5e1d8] overflow-hidden bg-black/5 flex items-center justify-center">
+                    {order.items && order.items.length > 0 && order.items[0].imageUrl ? (
+                      <Image src={getProductImageUrl(order.items[0].imageUrl)} alt="Product" fill className="object-cover group-hover:scale-110 transition-transform duration-[3s]" />
+                    ) : ( <Package size={30} className="text-black/10" /> )}
                   </div>
                   <div className="space-y-4 md:space-y-6 flex-1">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
-                        {order.status === 'In Transit' ? (
+                        {order.orderStatus !== 'DELIVERED' ? (
                           <div className="flex items-center gap-2 text-blue-800 bg-blue-50 px-3 py-1 rounded-full text-[8px] md:text-[9px] font-bold uppercase tracking-wider w-fit">
-                            <Clock size={10} className="md:w-[12px]" /> {order.status}
+                            <Clock size={10} className="md:w-[12px]" /> {order.orderStatus}
                           </div>
                         ) : (
                           <div className="flex items-center gap-2 text-green-800 bg-green-50 px-3 py-1 rounded-full text-[8px] md:text-[9px] font-bold uppercase tracking-wider w-fit">
-                            <CheckCircle2 size={10} className="md:w-[12px]" /> {order.status}
+                            <CheckCircle2 size={10} className="md:w-[12px]" /> {order.orderStatus}
                           </div>
                         )}
                       </div>
-                      <h3 className="text-xs md:text-sm font-bold uppercase tracking-[0.1em] leading-tight">Luxury Collection Acquisition</h3>
-                      <p className="text-[10px] md:text-[11px] text-[#888] italic">Consolidating {order.itemsCount} curated item{order.itemsCount > 1 ? 's' : ''}</p>
+                      <h3 className="text-xs md:text-sm font-bold uppercase tracking-[0.1em] leading-tight flex flex-col">
+                        <span>Luxury Collection Acquisition</span>
+                        {order.items && order.items.length > 0 && <span className="text-[10px] opacity-70 mt-1 lowercase capitalize-first">{order.items[0].productName} {order.items.length > 1 ? `& ${order.items.length - 1} more items` : ''}</span>}
+                      </h3>
+                      <p className="text-[10px] md:text-[11px] text-[#888] italic">Consolidating {order.items?.length || 0} curated item{(order.items?.length !== 1) ? 's' : ''}</p>
                     </div>
                     
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2">
@@ -145,10 +145,10 @@ const OrderHistoryPage = () => {
                     
                     {/* Event 1 */}
                     <div className="flex gap-4 relative">
-                        <div className={`w-4 h-4 rounded-full border-2 border-white ring-1 shadow-sm shrink-0 z-10 ${order.status === 'Delivered' ? 'bg-black ring-black' : 'bg-[#c8b99a] ring-[#c8b99a] animate-pulse'}`} />
+                        <div className={`w-4 h-4 rounded-full border-2 border-white ring-1 shadow-sm shrink-0 z-10 ${order.orderStatus === 'DELIVERED' ? 'bg-black ring-black' : 'bg-[#c8b99a] ring-[#c8b99a] animate-pulse'}`} />
                         <div className="space-y-1">
-                          <p className="text-[11px] font-bold uppercase tracking-wider">{order.status === 'Delivered' ? 'Delivered' : 'In Transit'}</p>
-                          <p className="text-[10px] text-[#888]">{order.deliveryDate}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wider">{order.orderStatus === 'DELIVERED' ? 'Delivered' : 'In Transit'}</p>
+                          <p className="text-[10px] text-[#888]">{order.updateAt || 'Pending Delivery'}</p>
                         </div>
                     </div>
 
@@ -166,7 +166,7 @@ const OrderHistoryPage = () => {
                         <div className="w-4 h-4 rounded-full bg-black border-2 border-white ring-1 ring-black shadow-sm shrink-0 z-10" />
                         <div className="space-y-1">
                           <p className="text-[11px] font-bold uppercase tracking-wider">Authenticated</p>
-                          <p className="text-[10px] text-[#888]">{order.date}</p>
+                          <p className="text-[10px] text-[#888]">{order.createdAt || 'N/A'}</p>
                         </div>
                     </div>
                   </div>

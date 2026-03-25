@@ -6,7 +6,11 @@ import {
   AnalyticsDTO 
 } from '../../types/api-types';
 
-const IMAGE_BASE_URL = 'http://localhost:8080/uploads';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const IMAGE_BASE_URL = `${API_BASE_URL}/uploads`;
+
+axiosInstance.defaults.baseURL = API_BASE_URL;
+
 
 export function getProductImageUrl(imageName: string): string {
   if (!imageName) return '';

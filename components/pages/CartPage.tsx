@@ -14,6 +14,8 @@ import {
   ShoppingBag,
   CheckCircle2
 } from 'lucide-react';
+import { placeOrder } from '../../app/api/api-service';
+import { OrderDTO, OrderItemDTO, PaymentMethod } from '../../types/api-types';
 
 // Mock data for the cart
 const INITIAL_CART = [
@@ -39,8 +41,61 @@ const INITIAL_CART = [
 
 const CartPage = () => {
   const [items, setItems] = useState(INITIAL_CART);
-  const [step, setStep] = useState(1); // 1: Cart, 2: Checkout
+  const [step, setStep] = useState(1); // 1: Cart, 2: Checkout, 3: Success
   const [selectedPayment, setSelectedPayment] = useState('CREDIT_CARD');
+  
+  // Checkout Form State
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    province: ''
+  });
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderResponse, setOrderResponse] = useState<OrderDTO | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const submitOrder = async () => {
+    if (items.length === 0) return;
+    setIsPlacingOrder(true);
+    try {
+      const orderItems: OrderItemDTO[] = items.map(item => ({
+        productId: 1, // DTO requires number but cart items might be string mock. Using 1 as fallback for demo
+        productName: item.name,
+        imageUrl: item.image,
+        color: item.color as any,
+        size: item.size as any,
+        qty: item.quantity,
+        unitPrice: item.price
+      }));
+
+      const orderData: OrderDTO = {
+        items: orderItems,
+        paymentMethod: selectedPayment as PaymentMethod,
+        customerName: `${formData.firstName} ${formData.lastName}`.trim() || 'Guest User',
+        email: formData.email,
+        mobileNo: formData.phone,
+        address: `${formData.address}, ${formData.city}, ${formData.province}`,
+        total: items.reduce((acc, item) => acc + item.price * item.quantity, 0) + (items.reduce((acc, item) => acc + item.price * item.quantity, 0) > 50000 ? 0 : 1500)
+      };
+
+      const response = await placeOrder(orderData);
+      setOrderResponse(response);
+      setStep(3);
+      setItems([]); // Clear local cart
+    } catch (err) {
+      console.error('Failed to place order:', err);
+      alert('There was an issue placing your order. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
 
   const updateQuantity = (id: string, size: string, delta: number) => {
     setItems(items.map(item => 
@@ -192,19 +247,19 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">First Name</label>
-                      <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="John" />
+                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="John" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Last Name</label>
-                      <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Doe" />
+                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Doe" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Email Address</label>
-                      <input type="email" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="alex@example.com" />
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="alex@example.com" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Phone Number</label>
-                      <input type="tel" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="+94 77 123 4567" />
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="+94 77 123 4567" />
                     </div>
                   </div>
                 </section>
@@ -217,15 +272,15 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 md:col-span-2">
                         <label className="text-[9px] font-bold uppercase text-[#888]">Shipping Address</label>
-                        <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Street Address, Apartment, etc." />
+                        <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Street Address, Apartment, etc." />
                     </div>
                     <div className="space-y-1">
                         <label className="text-[9px] font-bold uppercase text-[#888]">City</label>
-                        <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Colombo" />
+                        <input type="text" name="city" value={formData.city} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Colombo" />
                     </div>
                     <div className="space-y-1">
                         <label className="text-[9px] font-bold uppercase text-[#888]">Province / State</label>
-                        <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Western" />
+                        <input type="text" name="province" value={formData.province} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Western" />
                     </div>
                   </div>
                 </section>
@@ -274,7 +329,7 @@ const CartPage = () => {
                   </h2>
                 </div>
                 <p className="text-[13px] text-[#888] max-w-sm mx-auto font-light leading-relaxed">
-                  Thank you for your purchase. We are preparing your selection <span className="font-bold text-black tracking-widest text-[11px]">#NA-2026-9432</span> with meticulous care.
+                  Thank you for your purchase. We are preparing your selection <span className="font-bold text-black tracking-widest text-[11px]">{orderResponse?.orderId || '#NA-SUCCESS'}</span> with meticulous care.
                 </p>
                 <div className="pt-6">
                   <button 
@@ -330,10 +385,11 @@ const CartPage = () => {
               ) : step === 2 ? (
                 <div className="space-y-4">
                   <button 
-                    onClick={() => setStep(3)}
-                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200"
+                    onClick={submitOrder}
+                    disabled={isPlacingOrder}
+                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200 disabled:opacity-50"
                   >
-                    Place Order Now
+                    {isPlacingOrder ? 'Processing...' : 'Place Order Now'}
                   </button>
                   <button 
                     onClick={() => setStep(1)}

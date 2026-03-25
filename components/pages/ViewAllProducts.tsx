@@ -5,92 +5,8 @@ import { ChevronUp, ChevronDown, Grid, List, Star, Filter, X } from 'lucide-reac
 import ProductCard from '../product/ProductCard';
 import producyImage from '../../public/images/images.jpeg';
 
-const MOCK_PRODUCTS = [
-  {
-    id: 1,
-    title: 'CUTWORK POPLIN DRESS',
-    description: 'A premium cotton blend dress',
-    price: '9,950.00',
-    numericPrice: 9950,
-    colors: ['BLACK', 'BROWN'],
-    productType: 'POLO',
-    rating: 4,
-    size: ['S', 'M'],
-    image: producyImage,
-    width:'200px',
-    heught:"500px",
-    hoverImage: producyImage,
-    badge: 'NEW' as const,
-  },
-  {
-    id: 2,
-    title: 'CLASSIC HENLEY SHIRT',
-    description: 'Comfortable everyday wear',
-    price: '4,500.00',
-    numericPrice: 4500,
-    colors: ['WHITE', 'GREY'],
-    productType: 'HENLEY',
-    rating: 5,
-    size: ['Medium', 'Large'],
-    image: producyImage,
-    width:'200px',
-    heught:"500px",
-    hoverImage: producyImage,
-  },
-  {
-    id: 3,
-    title: 'CASUAL POLO T-SHIRT',
-    description: 'Perfect for summer',
-    price: '3,200.00',
-    numericPrice: 3200,
-    colors: ['RED', 'BLACK'],
-    productType: 'POLO',
-    rating: 3,
-    size: ['Large', 'X Large'],
-    image: producyImage,
-    hoverImage: producyImage,
-    badge: 'SALE' as const,
-  },
-  {
-    id: 4,
-    title: 'PREMIUM LINEN SHIRT',
-    description: 'Elegant look for any occasion',
-    price: '8,900.00',
-    numericPrice: 8900,
-    colors: ['BLACK', 'GREY'],
-    productType: 'HENLEY',
-    rating: 5,
-    size: ['Small', 'Large'],
-    image: producyImage,
-    hoverImage: producyImage,
-  },
-  {
-    id: 5,
-    title: 'SLIM FIT POLO',
-    description: 'Modern slim fit design',
-    price: '5,500.00',
-    numericPrice: 5500,
-    colors: ['WHITE', 'BROWN'],
-    productType: 'POLO',
-    rating: 4,
-    size: ['Small', 'Medium', 'Large'],
-    image: producyImage,
-    hoverImage: producyImage,
-  },
-  {
-    id: 6,
-    title: 'COMFORT HENLEY TEE',
-    description: 'Soft touch fabric',
-    price: '2,800.00',
-    numericPrice: 2800,
-    colors: ['RED', 'WHITE'],
-    productType: 'HENLEY',
-    rating: 2,
-    size: ['Small', 'X Large'],
-    image: producyImage,
-    hoverImage: producyImage, 
-  },
-];
+import { fetchAllProducts, getProductImageUrl } from '../../app/api/api-service';
+import { ProductDto } from '../../types/api-types';
 
 const FILTER_SECTIONS = [
   {
@@ -127,6 +43,18 @@ const FILTER_SECTIONS = [
 const SORT_OPTIONS = ["Featured", "Price: Low to High", "Price: High to Low", "New Arrivals"];
 
 export default function ViewAllProducts() {
+  const [products, setProducts] = React.useState<ProductDto[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchAllProducts().then(data => {
+      setProducts(data);
+    }).catch(err => {
+      console.error(err);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, []);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     'Size': true,
     'Product Type': true,
@@ -174,25 +102,23 @@ export default function ViewAllProducts() {
   };
 
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter(product => {
+    return products.filter(product => {
       // Filter by size
-      if (filters.size.length > 0 && !filters.size.some(val => product.size.includes(val))) return false;
+      if (filters.size.length > 0 && (!product.sizes || !filters.size.some(val => product.sizes.includes(val as any)))) return false;
       // Filter by products type
-      if (filters.productType.length > 0 && !filters.productType.includes(product.productType)) return false;
+      if (filters.productType.length > 0 && !filters.productType.includes(product.category as string)) return false;
       // Filter by color
-      if (filters.color.length > 0 && !filters.color.some(val => product.colors.includes(val))) return false;
-      // Filter by rating
-      if (filters.rating.length > 0 && !filters.rating.includes(product.rating)) return false;
+      if (filters.color.length > 0 && (!product.colors || !filters.color.some(val => product.colors.includes(val as any)))) return false;
       // Filter by price
-      if (product.numericPrice < priceRange.min || product.numericPrice > priceRange.max) return false;
+      if (product.price < priceRange.min || product.price > priceRange.max) return false;
 
       return true;
     }).sort((a, b) => {
-      if (sortOption === "Price: Low to High") return a.numericPrice - b.numericPrice;
-      if (sortOption === "Price: High to Low") return b.numericPrice - a.numericPrice;
+      if (sortOption === "Price: Low to High") return a.price - b.price;
+      if (sortOption === "Price: High to Low") return b.price - a.price;
       return 0; // Featured or New Arrivals (mocked as random/default order)
     });
-  }, [filters, priceRange, sortOption]);
+  }, [products, filters, priceRange, sortOption]);
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-10 lg:py-16 flex flex-col lg:flex-row gap-10">
@@ -401,17 +327,19 @@ export default function ViewAllProducts() {
 
         {/* PRODUCTS GRID */}
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10 min-h-[400px]">
-          {filteredProducts.length > 0 ? (
+          {loading ? (
+            <div className="col-span-full py-20 text-center text-black/40 italic">Loading products...</div>
+          ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <div key={product.id} className="animate-fade-in">
                 <ProductCard
                   id={product.id}
-                  title={product.title}
-                  description={product.description}
-                  price={product.price}
-                  imageUrl={product.image}
-                  badge={product.badge}
-                  sizes={product.size}
+                  title={product.name}
+                  description={product.description || ''}
+                  price={product.price?.toString()}
+                  imageUrl={product.imageUrls && product.imageUrls[0] ? getProductImageUrl(product.imageUrls[0]) : producyImage.src}
+                  badge={product.stockStatus === 'OUTOFSTOCK' ? 'SALE' : undefined}
+                  sizes={product.sizes as any}
                 />
               </div>
             ))

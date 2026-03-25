@@ -110,7 +110,7 @@ export default function AdminProducts() {
             <AlertCircle size={24} className="mt-1" />
             <div>
                <p className="font-bold uppercase tracking-widest text-xs">{error}</p>
-               <p className="text-[9px] mt-1 opacity-70 tracking-widest uppercase">Target API: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}</p>
+               <p className="text-[9px] mt-1 opacity-70 tracking-widest uppercase">Target API: {process.env.NEXT_PUBLIC_API_URL || 'DEFAULT BACKEND SERVER'}</p>
             </div>
         </div>
       )}
