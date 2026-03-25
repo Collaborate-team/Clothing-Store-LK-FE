@@ -5,7 +5,7 @@ import { ChevronUp, ChevronDown, Grid, List, Star, Filter, X } from 'lucide-reac
 import ProductCard from '../product/ProductCard';
 import producyImage from '../../public/images/images.jpeg';
 
-import { fetchAllProducts, getProductImageUrl } from '../../app/api/api-service';
+import { fetchAllProducts, fetchProductsByCategory, getProductImageUrl } from '../../app/api/api-service';
 import { ProductDto } from '../../types/api-types';
 
 const FILTER_SECTIONS = [
@@ -42,19 +42,48 @@ const FILTER_SECTIONS = [
 
 const SORT_OPTIONS = ["Featured", "Price: Low to High", "Price: High to Low", "New Arrivals"];
 
-export default function ViewAllProducts() {
+type ViewAllProductsProps = {
+  initialCategory?: string;
+};
+
+export default function ViewAllProducts({ initialCategory = 'ALL ITEMS' }: ViewAllProductsProps) {
   const [products, setProducts] = React.useState<ProductDto[]>([]);
   const [loading, setLoading] = React.useState(true);
 
+  const selectedCategory = useMemo(() => initialCategory.trim().toUpperCase(), [initialCategory]);
+
   React.useEffect(() => {
-    fetchAllProducts().then(data => {
-      setProducts(data);
-    }).catch(err => {
-      console.error(err);
-    }).finally(() => {
-      setLoading(false);
-    });
-  }, []);
+    let isMounted = true;
+
+    const loadProducts = async () => {
+      setLoading(true);
+
+      try {
+        const data = selectedCategory === 'ALL ITEMS'
+          ? await fetchAllProducts()
+          : await fetchProductsByCategory(selectedCategory);
+
+        if (isMounted) {
+          setProducts(data);
+        }
+      } catch (err) {
+        console.error(err);
+        if (isMounted) {
+          setProducts([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCategory]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     'Size': true,
     'Product Type': true,

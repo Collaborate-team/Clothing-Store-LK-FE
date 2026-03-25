@@ -22,68 +22,11 @@ type NavLink = {
 
 /* ─────────────────────────── Data ──────────────────────────── */
 const navLinks: NavLink[] = [
-    { label: "NEW ARRIVALS", href: "/new-arrivals" },
-    {
-        label: "WOMEN",
-        href: "/women",
-        mega: [
-            {
-                heading: "SHOP BY COLLECTION",
-                links: [
-                    { label: "Pure Linen", href: "/women/edit/pure-linen" },
-                    { label: "Casual Luxury", href: "/women/casual" },
-                    { label: "Executive Workwear", href: "/women/workwear" },
-                    { label: "Essential Tee Bar", href: "/women/tee-bar" },
-                ],
-            },
-            {
-                heading: "SHOP BY CATEGORY",
-                links: [
-                    { label: "Floating Dresses", href: "/women/dresses" },
-                    { label: "Premium Tops", href: "/women/tops" },
-                    { label: "Tailored Pants", href: "/women/pants" },
-                    { label: "Summer Skirts", href: "/women/skirts" },
-                    { label: "Designer Denims", href: "/women/denims" },
-                ],
-            },
-            {
-                heading: "CURATED EDITS",
-                links: [
-                    { label: "The Palms Edit", href: "/women/edit/palms" },
-                    { label: "Arienti Classics", href: "/women/edit/classics" },
-                    { label: "The Girl Edit", href: "/women/edit/girl" },
-                    { label: "Mahali", href: "/women/edit/mahali" },
-                ],
-            },
-        ],
-    },
-    {
-        label: "MEN",
-        href: "/men",
-        mega: [
-            {
-                heading: "COLLECTIONS",
-                links: [
-                    { label: "Heritage Linen", href: "/men/linen" },
-                    { label: "Modern Workwear", href: "/men/workwear" },
-                    { label: "Tailored Formal", href: "/men/formal" },
-                    { label: "Athleisure", href: "/men/activewear" },
-                ],
-            },
-            {
-                heading: "CATEGORIES",
-                links: [
-                    { label: "Signature Shirts", href: "/men/shirts" },
-                    { label: "Premium T-Shirts", href: "/men/tshirts" },
-                    { label: "Precision Trousers", href: "/men/trousers" },
-                    { label: "Summer Shorts", href: "/men/shorts" },
-                    { label: "Outerwear", href: "/men/jackets" },
-                ],
-            },
-        ],
-    },
-    { label: "KIDS", href: "/kids" },
-    { label: "ACCESSORIES", href: "/accessories" },
+    { label: "ALL ITEMS", href: "/shop" },
+    { label: "SHIRTS", href: "/shop?category=SHIRTS" },
+    { label: "PANTS", href: "/shop?category=PANTS" },
+    { label: "DRESSES", href: "/shop?category=DRESSES" },
+    { label: "ACCESSORIES", href: "/shop?category=ACCESSORIES" },
 ];
 
 /* ─────────────────────────── Component ─────────────────────── */
