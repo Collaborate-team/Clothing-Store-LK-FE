@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { addProduct } from '@/app/api/api-service';
 import { useNotification } from '@/context/NotificationContext';
+import { AppError } from '@/utils/error-handler';
+import { ErrorCode } from '@/types/errors';
 
 const CATEGORIES = [
   'SHIRTS', 'PANTS', 'DRESSES', 'SHOES', 'ACCESSORIES', 'OUTERWEAR', 'ACTIVEWEAR', 'UNDERWEAR', 'SWIMWEAR', 'SLEEPWEAR'
@@ -90,8 +92,18 @@ export default function AddProductPage() {
       showNotification(`${formData.name} has been added successfully.`, 'success', 'Product Published');
       setSuccess(true);
       setTimeout(() => router.push('/admin/products'), 2000);
-    } catch (err) {
-      showNotification('Could not save product. Please check your backend connection.', 'error', 'Error');
+    } catch (err: unknown) {
+      let message = 'Could not save product. Please check your backend connection.';
+
+      if (err instanceof AppError) {
+        if (err.code === ErrorCode.IMAGE_TOO_LARGE) {
+          message = 'Image size exceeds 5MB. Please upload files smaller than 5MB.';
+        } else {
+          message = err.userMessage;
+        }
+      }
+
+      showNotification(message, 'error', 'Error');
       console.error(err);
     } finally {
       setIsLoading(false);
