@@ -14,44 +14,128 @@ import {
   ShoppingBag,
   CheckCircle2
 } from 'lucide-react';
+import { placeOrder } from '../../app/api/api-service';
+import { OrderDTO, PaymentMethod, PlaceOrderRequestDTO } from '../../types/api-types';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { clearCart, removeFromCart, updateCartQuantity } from '@/store/cartSlice';
 
-// Mock data for the cart
-const INITIAL_CART = [
-  {
-    id: 'noir-01',
-    name: 'OVERSIZED LINEN BLEND BLAZER',
-    price: 24500,
-    size: 'M',
-    color: 'Noir Black',
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 'noir-02',
-    name: 'SILK MIDI DRESS',
-    price: 18200,
-    size: 'S',
-    color: 'Pure White',
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop'
-  }
+const SRI_LANKA_PROVINCES = [
+  'Western',
+  'Central',
+  'Southern',
+  'Northern',
+  'Eastern',
+  'North Western',
+  'North Central',
+  'Uva',
+  'Sabaragamuwa',
 ];
 
 const CartPage = () => {
-  const [items, setItems] = useState(INITIAL_CART);
-  const [step, setStep] = useState(1); // 1: Cart, 2: Checkout
+  const dispatch = useAppDispatch();
+  const items = useAppSelector((state) => state.cart.items);
+  const [step, setStep] = useState(1); // 1: Cart, 2: Checkout, 3: Success
   const [selectedPayment, setSelectedPayment] = useState('CREDIT_CARD');
+  
+  // Checkout Form State
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    province: ''
+  });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderResponse, setOrderResponse] = useState<OrderDTO | null>(null);
 
-  const updateQuantity = (id: string, size: string, delta: number) => {
-    setItems(items.map(item => 
-      (item.id === id && item.size === size) 
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) } 
-        : item
-    ));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const fieldName = e.target.name as keyof typeof formData;
+    setFormData(prev => ({ ...prev, [fieldName]: e.target.value }));
+    setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
   };
 
-  const removeItem = (id: string, size: string) => {
-    setItems(items.filter(item => !(item.id === id && item.size === size)));
+  const validateCheckoutForm = () => {
+    const errors: Partial<Record<keyof typeof formData, string>> = {};
+
+    (Object.keys(formData) as Array<keyof typeof formData>).forEach((field) => {
+      if (!formData[field].trim()) {
+        errors[field] = 'Please fill this field.';
+      }
+    });
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const submitOrder = async () => {
+    if (items.length === 0) return;
+
+    if (!validateCheckoutForm()) {
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    try {
+      const normalizeEnumValue = (value: string) =>
+        value.trim().toUpperCase().replaceAll(' ', '_');
+
+      const customerName = `${formData.firstName} ${formData.lastName}`.trim() || 'Guest User';
+      const fullAddress = `${formData.address}, ${formData.city}, ${formData.province}`;
+
+      const orderData: PlaceOrderRequestDTO = {
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          selectedSize: normalizeEnumValue(item.size),
+          selectedColor: normalizeEnumValue(item.color),
+        })),
+        paymentMethod: selectedPayment as PaymentMethod,
+        customerName,
+        email: formData.email,
+        mobileNo: formData.phone,
+        address: fullAddress,
+        customer: {
+          id: 0,
+          name: customerName,
+          email: formData.email,
+          mobileNo: formData.phone,
+          address: fullAddress,
+        },
+      };
+
+      const response = await placeOrder(orderData);
+      setOrderResponse(response);
+      setStep(3);
+      dispatch(clearCart());
+    } catch (err) {
+      console.error('Failed to place order:', err);
+      alert('There was an issue placing your order. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
+  const updateQuantity = (id: number, size: string, color: string, delta: number) => {
+    const target = items.find(
+      (item) => item.id === id && item.size === size && item.color === color,
+    );
+    if (!target) return;
+
+    dispatch(
+      updateCartQuantity({
+        id,
+        size,
+        color,
+        quantity: Math.max(1, target.quantity + delta),
+      }),
+    );
+  };
+
+  const removeItem = (id: number, size: string, color: string) => {
+    dispatch(removeFromCart({ id, size, color }));
   };
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -148,7 +232,7 @@ const CartPage = () => {
                           <div className="text-[10px] text-[#888] uppercase">
                             <p>Size: {item.size} / Color: {item.color}</p>
                           </div>
-                          <button onClick={() => removeItem(item.id, item.size)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
+                          <button onClick={() => removeItem(item.id, item.size, item.color)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
                             <Trash2 size={10} /> Remove
                           </button>
                         </div>
@@ -162,9 +246,9 @@ const CartPage = () => {
                       <div className="flex items-center justify-between md:justify-center">
                         <span className="md:hidden text-[9px] font-bold uppercase text-[#b5b1a8]">Quantity</span>
                         <div className="flex items-center border border-[#e5e1d8] h-10 px-3 bg-white">
-                          <button onClick={() => updateQuantity(item.id, item.size, -1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={12} /></button>
+                          <button onClick={() => updateQuantity(item.id, item.size, item.color, -1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={12} /></button>
                           <span className="w-8 text-center text-[12px]">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.size, 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={12} /></button>
+                          <button onClick={() => updateQuantity(item.id, item.size, item.color, 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={12} /></button>
                         </div>
                       </div>
 
@@ -192,19 +276,23 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">First Name</label>
-                      <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="John" />
+                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="John" />
+                      {formErrors.firstName && <p className="text-[10px] text-red-600">{formErrors.firstName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Last Name</label>
-                      <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Doe" />
+                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.lastName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Doe" />
+                      {formErrors.lastName && <p className="text-[10px] text-red-600">{formErrors.lastName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Email Address</label>
-                      <input type="email" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="alex@example.com" />
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="alex@example.com" />
+                      {formErrors.email && <p className="text-[10px] text-red-600">{formErrors.email}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Phone Number</label>
-                      <input type="tel" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="+94 77 123 4567" />
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="+94 77 123 4567" />
+                      {formErrors.phone && <p className="text-[10px] text-red-600">{formErrors.phone}</p>}
                     </div>
                   </div>
                 </section>
@@ -217,15 +305,23 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 md:col-span-2">
                         <label className="text-[9px] font-bold uppercase text-[#888]">Shipping Address</label>
-                        <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Street Address, Apartment, etc." />
+                      <input type="text" name="address" value={formData.address} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.address ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Street Address, Apartment, etc." />
+                      {formErrors.address && <p className="text-[10px] text-red-600">{formErrors.address}</p>}
                     </div>
                     <div className="space-y-1">
                         <label className="text-[9px] font-bold uppercase text-[#888]">City</label>
-                        <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Colombo" />
+                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.city ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Colombo" />
+                      {formErrors.city && <p className="text-[10px] text-red-600">{formErrors.city}</p>}
                     </div>
                     <div className="space-y-1">
                         <label className="text-[9px] font-bold uppercase text-[#888]">Province / State</label>
-                        <input type="text" className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Western" />
+                      <select name="province" value={formData.province} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors bg-white ${formErrors.province ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`}>
+                        <option value="">Select Province / State</option>
+                        {SRI_LANKA_PROVINCES.map((province) => (
+                          <option key={province} value={province}>{province}</option>
+                        ))}
+                      </select>
+                      {formErrors.province && <p className="text-[10px] text-red-600">{formErrors.province}</p>}
                     </div>
                   </div>
                 </section>
@@ -274,12 +370,12 @@ const CartPage = () => {
                   </h2>
                 </div>
                 <p className="text-[13px] text-[#888] max-w-sm mx-auto font-light leading-relaxed">
-                  Thank you for your purchase. We are preparing your selection <span className="font-bold text-black tracking-widest text-[11px]">#NA-2026-9432</span> with meticulous care.
+                  Thank you for your purchase. We are preparing your selection <span className="font-bold text-black tracking-widest text-[11px]">{orderResponse?.orderId || '#NA-SUCCESS'}</span> with meticulous care.
                 </p>
                 <div className="pt-6">
                   <button 
                     onClick={() => {
-                        setItems([]);
+                      dispatch(clearCart());
                         setStep(1);
                     }} 
                     className="px-12 py-5 bg-black text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all shadow-xl"
@@ -330,10 +426,11 @@ const CartPage = () => {
               ) : step === 2 ? (
                 <div className="space-y-4">
                   <button 
-                    onClick={() => setStep(3)}
-                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200"
+                    onClick={submitOrder}
+                    disabled={isPlacingOrder}
+                    className="w-full py-5 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all cursor-pointer shadow-lg active:scale-95 duration-200 disabled:opacity-50"
                   >
-                    Place Order Now
+                    {isPlacingOrder ? 'Processing...' : 'Place Order Now'}
                   </button>
                   <button 
                     onClick={() => setStep(1)}

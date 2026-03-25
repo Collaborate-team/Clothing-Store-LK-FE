@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ModalProvider } from '@/context/ModalContext';
+import ReduxProvider from '@/components/common/ReduxProvider';
 
 export default function RootLayout({
 	children,
@@ -43,11 +44,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${montserrat.variable} antialiased`}
       >
-        <NotificationProvider>
-          <ModalProvider>
-            {children}
-          </ModalProvider>
-        </NotificationProvider>
+        <ReduxProvider>
+          <NotificationProvider>
+            <ModalProvider>
+              {children}
+            </ModalProvider>
+          </NotificationProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

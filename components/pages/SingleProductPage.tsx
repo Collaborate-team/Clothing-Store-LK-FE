@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Heart, 
   ShoppingBag, 
@@ -15,7 +16,8 @@ import {
   ChevronUp
 } from 'lucide-react';
 import ProductCard from '../product/ProductCard';
-import CartDrawer from '../common/CartDrawer';
+import { useAppDispatch } from '@/store/hooks';
+import { addToCart as addToCartAction } from '@/store/cartSlice';
 
 const MOCK_PRODUCT = {
   id: 'noir-01',
@@ -88,68 +90,90 @@ const Related_Products = [
 ];
 
 const SingleProductPage: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const productId = (params?.id as string) || searchParams.get('id');
+
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('M');
   const [selectedColor, setSelectedColor] = useState(MOCK_PRODUCT.colors[1]);
   const [quantity, setQuantity] = useState(1);
   const [openDetail, setOpenDetail] = useState<number | null>(0);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [productData, setProductData] = useState<any>(MOCK_PRODUCT);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const fetchProduct = async () => {
+      if (!productId) {
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const { fetchProductById } = await import('../../app/api/api-service');
+        const item = await fetchProductById(productId as string);
+        if (!active) return;
+        
+        const mappedColors = item.colors && item.colors.length > 0 
+           ? item.colors.map((c: string) => ({ name: c, hex: c.toLowerCase() }))
+           : MOCK_PRODUCT.colors;
+
+        setProductData({
+          id: item.id?.toString() || productId,
+          name: item.name,
+          category: item.category,
+          price: item.price ? item.price.toFixed(2) : "0.00",
+          description: item.description,
+          colors: mappedColors,
+          sizes: item.sizes,
+          images: item.imageUrls || MOCK_PRODUCT.images,
+          details: MOCK_PRODUCT.details
+        });
+        
+        if (mappedColors.length > 0) {
+          setSelectedColor(mappedColors[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products by id", error);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+    fetchProduct();
+    return () => { active = false; };
+  }, [productId]);
 
   const toggleDetail = (index: number) => {
     setOpenDetail(openDetail === index ? null : index);
   };
 
   const addToCart = () => {
-    const newItem = {
-      id: MOCK_PRODUCT.id,
-      name: MOCK_PRODUCT.name,
-      price: MOCK_PRODUCT.price,
-      size: selectedSize,
-      color: selectedColor.name,
-      quantity: quantity,
-      image: MOCK_PRODUCT.images[0]
-    };
-
-    setCartItems(prev => {
-      const existingItemIndex = prev.findIndex(
-        item => item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
-      );
-
-      if (existingItemIndex > -1) {
-        const updatedCart = [...prev];
-        updatedCart[existingItemIndex].quantity += newItem.quantity;
-        return updatedCart;
-      }
-      return [...prev, newItem];
-    });
-
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (id: string, size: string, color: string) => {
-    setCartItems(prev => prev.filter(item => !(item.id === id && item.size === size && item.color === color)));
-  };
-
-  const updateCartQuantity = (id: string, size: string, color: string, newQuantity: number) => {
-    setCartItems(prev => prev.map(item => 
-      (item.id === id && item.size === size && item.color === color) 
-        ? { ...item, quantity: newQuantity } 
-        : item
-    ));
+    dispatch(
+      addToCartAction({
+        id: Number(productData.id) || 0,
+        name: productData.name,
+        price: Number(String(productData.price).replace(/,/g, '')) || 0,
+        size: selectedSize,
+        color: selectedColor.name,
+        quantity,
+        image: productData.images?.[0] || MOCK_PRODUCT.images[0],
+      }),
+    );
   };
 
   return (
     <div className="min-h-screen bg-[#fcfbf7] text-[#0a0a0a]" style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }}>
       {/* Breadcrumbs - Responsive text size */}
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center gap-2 text-[8px] sm:text-[9px] tracking-[0.2em] uppercase text-[#b5b1a8]">
-        <a href="/" className="hover:text-black transition-colors cursor-pointer">Home</a>
-        <ChevronRight size={8} />
-        <a href="/shop" className="hover:text-black transition-colors cursor-pointer">Shop</a>
-        <ChevronRight size={8} />
-        <span className="text-black font-semibold truncate max-w-[150px] sm:max-w-none">{MOCK_PRODUCT.name}</span>
-      </nav>
+        <nav className="flex items-center gap-2 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-black/50 mb-8 sm:mb-12">
+          <a href="/" className="hover:text-black transition-colors cursor-pointer">Home</a>
+          <ChevronRight size={8} />
+          <a href="/shop" className="hover:text-black transition-colors cursor-pointer">Shop</a>
+          <ChevronRight size={8} />
+          <span className="text-black font-semibold truncate max-w-[150px] sm:max-w-none">{productData.name}</span>
+        </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-24">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 xl:gap-24">
@@ -159,8 +183,8 @@ const SingleProductPage: React.FC = () => {
             {/* Main Image View - Aspect ratio maintained, flexible width */}
             <div className="relative w-full aspect-[4/4.8] sm:aspect-[4/5] overflow-hidden bg-white border border-[#e5e1d8]">
               <Image 
-                src={MOCK_PRODUCT.images[activeImage]} 
-                alt={MOCK_PRODUCT.name} 
+                src={productData.images[0] ? productData.images[activeImage] : MOCK_PRODUCT.images[0]} 
+                alt={productData.name} 
                 fill 
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
@@ -173,7 +197,7 @@ const SingleProductPage: React.FC = () => {
 
             {/* Thumbnails - Horizontal scroll on all screens */}
             <div className="flex gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-2">
-              {MOCK_PRODUCT.images.map((img, idx) => (
+              {productData.images.map((img: string, idx: number) => (
                 <button 
                   key={img}
                   onClick={() => setActiveImage(idx)}
@@ -188,25 +212,25 @@ const SingleProductPage: React.FC = () => {
           {/* Right: Product Info */}
           <div className="w-full lg:w-[45%] xl:w-[40%] flex flex-col gap-6 sm:gap-8">
             <div className="space-y-2 sm:space-y-3">
-              <span className="text-[8px] sm:text-[9px] tracking-[0.4em] font-bold text-[#c8b99a] uppercase">{MOCK_PRODUCT.category}</span>
+              <span className="text-[8px] sm:text-[9px] tracking-[0.4em] font-bold text-[#c8b99a] uppercase">{productData.category}</span>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-light tracking-tight text-black leading-tight" style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif" }}>
-                {MOCK_PRODUCT.name}
+                {productData.name}
               </h1>
               <div className="flex items-center gap-4">
-                <span className="text-lg sm:text-xl font-light">Rs {MOCK_PRODUCT.price}</span>
+                <span className="text-lg sm:text-xl font-light">Rs {productData.price}</span>
                 <span className="px-1.5 py-0.5 border border-[#e5e1d8] text-[7px] sm:text-[8px] tracking-[0.15em] font-bold uppercase rounded-sm">In Stock</span>
               </div>
             </div>
 
             <p className="text-[13px] sm:text-[14px] leading-[1.7] text-[#555] font-light">
-              {MOCK_PRODUCT.description}
+              {productData.description}
             </p>
 
             {/* Color Selection */}
             <div className="space-y-3">
               <h3 className="text-[8px] sm:text-[9px] tracking-[0.3em] font-bold uppercase">Color: {selectedColor.name}</h3>
               <div className="flex gap-3">
-                {MOCK_PRODUCT.colors.map((color) => (
+                {productData.colors?.map((color: any) => (
                   <button
                     key={color.name}
                     onClick={() => setSelectedColor(color)}
@@ -224,7 +248,7 @@ const SingleProductPage: React.FC = () => {
                 <button className="text-[8px] tracking-[0.1em] uppercase border-b border-black font-semibold cursor-pointer">Size Guide</button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {MOCK_PRODUCT.sizes.map((size) => (
+                {productData.sizes?.map((size: string) => (
                   <button 
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -276,7 +300,7 @@ const SingleProductPage: React.FC = () => {
 
             {/* Accordion Details */}
             <div className="pt-2 border-t border-[#e5e1d8]">
-              {MOCK_PRODUCT.details.map((detail, idx) => (
+              {productData.details?.map((detail: any, idx: number) => (
                 <div key={detail.title} className="border-b border-[#e5e1d8] last:border-0">
                   <button 
                     onClick={() => toggleDetail(idx)}
@@ -309,6 +333,7 @@ const SingleProductPage: React.FC = () => {
             {Related_Products.map((product) => (
               <div key={product.id}>
                 <ProductCard
+                  id={product.id}
                   title={product.title}
                   description={product.description}
                   price={product.price}
@@ -320,15 +345,6 @@ const SingleProductPage: React.FC = () => {
           </div>
         </section>
       </main>
-
-      {/* Cart Drawer Component */}
-      <CartDrawer 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-        items={cartItems} 
-        onRemove={removeFromCart}
-        onUpdateQuantity={updateCartQuantity}
-      />
     </div>
   );
 };

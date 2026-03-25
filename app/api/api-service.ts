@@ -3,27 +3,63 @@ import {
   ProductDto, 
   OrderDTO, 
   CustomerDTO, 
-  AnalyticsDTO 
+  AnalyticsDTO,
+  PlaceOrderRequestDTO
 } from '../../types/api-types';
 
-const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:8080/uploads';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const IMAGE_BASE_URL = `${API_BASE_URL}/uploads`;
+
+axiosInstance.defaults.baseURL = API_BASE_URL;
+
+function encodePathSegments(path: string): string {
+  return path
+    .split('/')
+    .map((segment) => {
+      if (!segment) return segment;
+      try {
+        return encodeURIComponent(decodeURIComponent(segment));
+      } catch {
+        return encodeURIComponent(segment);
+      }
+    })
+    .join('/');
+}
+
+function normalizeProductImages(product: ProductDto): ProductDto {
+  return {
+    ...product,
+    imageUrls: (product.imageUrls || []).map((image) => getProductImageUrl(image)),
+  };
+}
 
 export function getProductImageUrl(imageName: string): string {
   if (!imageName) return '';
-  if (imageName.startsWith('http')) return imageName;
-  return `${IMAGE_BASE_URL}/${imageName}`;
+
+  if (imageName.startsWith('http')) {
+    try {
+      const url = new URL(imageName);
+      url.pathname = encodePathSegments(url.pathname);
+      return url.toString();
+    } catch {
+      return imageName.replaceAll(' ', '%20');
+    }
+  }
+
+  const normalizedFileName = imageName.replace(/^\/+/, '');
+  return `${IMAGE_BASE_URL}/${encodePathSegments(normalizedFileName)}`;
 }
 
 // --- PRODUCTS ---
 export async function fetchAllProducts(): Promise<ProductDto[]> {
 
   const response = await axiosInstance.get('/api/v1/products/all');
-  return response.data;
+  return (response.data || []).map((product: ProductDto) => normalizeProductImages(product));
 }
 
 export async function fetchProductById(id: string | number): Promise<ProductDto> {
   const response = await axiosInstance.get(`/api/v1/products/retrieve/by/id/${id}`);
-  return response.data;
+  return normalizeProductImages(response.data);
 }
 
 export async function addProduct(product: Partial<ProductDto>, images?: File[]): Promise<ProductDto> {
@@ -83,8 +119,8 @@ export async function checkProductAvailability(id: string | number): Promise<any
 }
 
 export async function fetchProductsByCategory(category: string): Promise<ProductDto[]> {
-  const response = await axiosInstance.get(`/api/v1/products/category/${category}`);
-  return response.data;
+  const response = await axiosInstance.get(`/api/v1/products/category/${encodeURIComponent(category)}`);
+  return (response.data || []).map((product: ProductDto) => normalizeProductImages(product));
 }
 
 export async function searchProducts(keyword: string): Promise<ProductDto[]> {
@@ -123,7 +159,7 @@ export async function updateOrderStatus(id: string | number, status: string): Pr
   return true;
 }
 
-export async function placeOrder(orderData: OrderDTO): Promise<OrderDTO> {
+export async function placeOrder(orderData: PlaceOrderRequestDTO): Promise<OrderDTO> {
   const response = await axiosInstance.post('/api/v1/orders/placeOrder', orderData);
   return response.data;
 }

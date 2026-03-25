@@ -5,6 +5,9 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { FiUser, FiSearch, FiShoppingBag, FiMenu, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import CartDrawer from "./CartDrawer";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { closeCartDrawer, removeFromCart, updateCartQuantity, openCartDrawer } from "@/store/cartSlice";
 import LOGO from '../../public/images/Logo.jpeg'
 
 
@@ -22,77 +25,24 @@ type NavLink = {
 
 /* ─────────────────────────── Data ──────────────────────────── */
 const navLinks: NavLink[] = [
-    { label: "NEW ARRIVALS", href: "/new-arrivals" },
-    {
-        label: "WOMEN",
-        href: "/women",
-        mega: [
-            {
-                heading: "SHOP BY COLLECTION",
-                links: [
-                    { label: "Pure Linen", href: "/women/edit/pure-linen" },
-                    { label: "Casual Luxury", href: "/women/casual" },
-                    { label: "Executive Workwear", href: "/women/workwear" },
-                    { label: "Essential Tee Bar", href: "/women/tee-bar" },
-                ],
-            },
-            {
-                heading: "SHOP BY CATEGORY",
-                links: [
-                    { label: "Floating Dresses", href: "/women/dresses" },
-                    { label: "Premium Tops", href: "/women/tops" },
-                    { label: "Tailored Pants", href: "/women/pants" },
-                    { label: "Summer Skirts", href: "/women/skirts" },
-                    { label: "Designer Denims", href: "/women/denims" },
-                ],
-            },
-            {
-                heading: "CURATED EDITS",
-                links: [
-                    { label: "The Palms Edit", href: "/women/edit/palms" },
-                    { label: "Arienti Classics", href: "/women/edit/classics" },
-                    { label: "The Girl Edit", href: "/women/edit/girl" },
-                    { label: "Mahali", href: "/women/edit/mahali" },
-                ],
-            },
-        ],
-    },
-    {
-        label: "MEN",
-        href: "/men",
-        mega: [
-            {
-                heading: "COLLECTIONS",
-                links: [
-                    { label: "Heritage Linen", href: "/men/linen" },
-                    { label: "Modern Workwear", href: "/men/workwear" },
-                    { label: "Tailored Formal", href: "/men/formal" },
-                    { label: "Athleisure", href: "/men/activewear" },
-                ],
-            },
-            {
-                heading: "CATEGORIES",
-                links: [
-                    { label: "Signature Shirts", href: "/men/shirts" },
-                    { label: "Premium T-Shirts", href: "/men/tshirts" },
-                    { label: "Precision Trousers", href: "/men/trousers" },
-                    { label: "Summer Shorts", href: "/men/shorts" },
-                    { label: "Outerwear", href: "/men/jackets" },
-                ],
-            },
-        ],
-    },
-    { label: "KIDS", href: "/kids" },
-    { label: "ACCESSORIES", href: "/accessories" },
+    { label: "ALL ITEMS", href: "/shop" },
+    { label: "SHIRTS", href: "/shop?category=SHIRTS" },
+    { label: "PANTS", href: "/shop?category=PANTS" },
+    { label: "DRESSES", href: "/shop?category=DRESSES" },
+    { label: "ACCESSORIES", href: "/shop?category=ACCESSORIES" },
 ];
 
 /* ─────────────────────────── Component ─────────────────────── */
 export default function NavBar() {
+    const dispatch = useAppDispatch();
+    const cartItems = useAppSelector((state) => state.cart.items);
+    const isCartOpen = useAppSelector((state) => state.cart.isDrawerOpen);
+    const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
     const [isScrolled, setIsScrolled] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [cartCount] = useState(0);
 
     // Scroll Detection
     useEffect(() => {
@@ -236,18 +186,18 @@ export default function NavBar() {
                         </button>
                     </div>
 
-                    <Link href="/order-history" className="text-black/80 hover:text-[#c8a96e] p-2 transition-colors hidden sm:block">
-                        <FiUser size={18} />
-                    </Link>
+                    {/*<Link href="/order-history" className="text-black/80 hover:text-[#c8a96e] p-2 transition-colors hidden sm:block">*/}
+                    {/*    <FiUser size={18} />*/}
+                    {/*</Link>*/}
 
-                    <Link href="/cart" className="relative text-black/80 hover:text-[#c8a96e] p-2 transition-colors">
+                    <button onClick={() => dispatch(openCartDrawer())} className="relative text-black/80 hover:text-[#c8a96e] p-2 transition-colors">
                         <FiShoppingBag size={18} />
                         {cartCount > 0 && (
                             <span className="absolute top-1 right-1 bg-[#c8a96e] text-black text-[0.55rem] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
                                 {cartCount}
                             </span>
                         )}
-                    </Link>
+                    </button>
                 </div>
             </header>
 
@@ -280,7 +230,7 @@ export default function NavBar() {
                             ))}
                         </nav>
                         <div className="mt-auto border-t border-black/10 pt-8 flex gap-8">
-                            <Link href="/order-history" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Profile</Link>
+                            {/*<Link href="/order-history" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Profile</Link>*/}
                             <Link href="/wishlist" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Wishlist</Link>
                             <Link href="/help" className="text-xs tracking-widest text-black/40 hover:text-black uppercase font-bold">Contact</Link>
                         </div>
@@ -299,6 +249,14 @@ export default function NavBar() {
                     />
                 )}
             </AnimatePresence>
+
+            <CartDrawer
+                isOpen={isCartOpen}
+                onClose={() => dispatch(closeCartDrawer())}
+                items={cartItems}
+                onRemove={(id, size, color) => dispatch(removeFromCart({ id, size, color }))}
+                onUpdateQuantity={(id, size, color, quantity) => dispatch(updateCartQuantity({ id, size, color, quantity }))}
+            />
         </>
     );
 }
