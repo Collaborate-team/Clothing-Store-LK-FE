@@ -33,7 +33,6 @@ function normalizeProductImages(product: ProductDto): ProductDto {
   };
 }
 
-
 export function getProductImageUrl(imageName: string): string {
   if (!imageName) return '';
 
