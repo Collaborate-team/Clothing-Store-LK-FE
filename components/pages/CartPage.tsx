@@ -19,6 +19,18 @@ import { OrderDTO, PaymentMethod, PlaceOrderRequestDTO } from '../../types/api-t
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearCart, removeFromCart, updateCartQuantity } from '@/store/cartSlice';
 
+const SRI_LANKA_PROVINCES = [
+  'Western',
+  'Central',
+  'Southern',
+  'Northern',
+  'Eastern',
+  'North Western',
+  'North Central',
+  'Uva',
+  'Sabaragamuwa',
+];
+
 const CartPage = () => {
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.cart.items);
@@ -35,15 +47,36 @@ const CartPage = () => {
     city: '',
     province: ''
   });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderResponse, setOrderResponse] = useState<OrderDTO | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const fieldName = e.target.name as keyof typeof formData;
+    setFormData(prev => ({ ...prev, [fieldName]: e.target.value }));
+    setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
+  };
+
+  const validateCheckoutForm = () => {
+    const errors: Partial<Record<keyof typeof formData, string>> = {};
+
+    (Object.keys(formData) as Array<keyof typeof formData>).forEach((field) => {
+      if (!formData[field].trim()) {
+        errors[field] = 'Please fill this field.';
+      }
+    });
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const submitOrder = async () => {
     if (items.length === 0) return;
+
+    if (!validateCheckoutForm()) {
+      return;
+    }
+
     setIsPlacingOrder(true);
     try {
       const normalizeEnumValue = (value: string) =>
@@ -243,19 +276,23 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">First Name</label>
-                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="John" />
+                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="John" />
+                      {formErrors.firstName && <p className="text-[10px] text-red-600">{formErrors.firstName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Last Name</label>
-                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Doe" />
+                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.lastName ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Doe" />
+                      {formErrors.lastName && <p className="text-[10px] text-red-600">{formErrors.lastName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Email Address</label>
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="alex@example.com" />
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="alex@example.com" />
+                      {formErrors.email && <p className="text-[10px] text-red-600">{formErrors.email}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold uppercase text-[#888]">Phone Number</label>
-                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="+94 77 123 4567" />
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="+94 77 123 4567" />
+                      {formErrors.phone && <p className="text-[10px] text-red-600">{formErrors.phone}</p>}
                     </div>
                   </div>
                 </section>
@@ -268,15 +305,23 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 md:col-span-2">
                         <label className="text-[9px] font-bold uppercase text-[#888]">Shipping Address</label>
-                        <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Street Address, Apartment, etc." />
+                      <input type="text" name="address" value={formData.address} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.address ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Street Address, Apartment, etc." />
+                      {formErrors.address && <p className="text-[10px] text-red-600">{formErrors.address}</p>}
                     </div>
                     <div className="space-y-1">
                         <label className="text-[9px] font-bold uppercase text-[#888]">City</label>
-                        <input type="text" name="city" value={formData.city} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Colombo" />
+                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors ${formErrors.city ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`} placeholder="Colombo" />
+                      {formErrors.city && <p className="text-[10px] text-red-600">{formErrors.city}</p>}
                     </div>
                     <div className="space-y-1">
                         <label className="text-[9px] font-bold uppercase text-[#888]">Province / State</label>
-                        <input type="text" name="province" value={formData.province} onChange={handleInputChange} className="w-full h-12 border border-[#e5e1d8] px-4 text-xs outline-none focus:border-black transition-colors" placeholder="Western" />
+                      <select name="province" value={formData.province} onChange={handleInputChange} className={`w-full h-12 border px-4 text-xs outline-none transition-colors bg-white ${formErrors.province ? 'border-red-500 focus:border-red-500' : 'border-[#e5e1d8] focus:border-black'}`}>
+                        <option value="">Select Province / State</option>
+                        {SRI_LANKA_PROVINCES.map((province) => (
+                          <option key={province} value={province}>{province}</option>
+                        ))}
+                      </select>
+                      {formErrors.province && <p className="text-[10px] text-red-600">{formErrors.province}</p>}
                     </div>
                   </div>
                 </section>
