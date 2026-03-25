@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag } from 'lucide-react';
+import { useAppDispatch } from '@/store/hooks';
+import { addToCart } from '@/store/cartSlice';
 
 interface ProductCardProps {
   id?: string | number;
@@ -16,6 +18,7 @@ interface ProductCardProps {
   badge?: 'NEW' | 'SALE';
   isFavorite?: boolean;
   sizes?: string[];
+  colors?: string[];
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -29,8 +32,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
   badge,
   isFavorite = false,
   sizes,
+  colors,
 }) => {
+  const dispatch = useAppDispatch();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
+  const handleAddToBag = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const fallbackImage = 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop';
+    const image =
+      typeof imageUrl === 'string'
+        ? imageUrl
+        : imageUrl?.src || fallbackImage;
+
+    dispatch(
+      addToCart({
+        id: Number(id) || 0,
+        name: title,
+        price: Number(price.toString().replaceAll(',', '')) || 0,
+        size: selectedSize || sizes?.[0] || 'M',
+        color: colors?.[0] || 'BLACK',
+        image,
+      }),
+    );
+  };
 
   return (
     <div className="bg-white border border-black/5 rounded-sm flex flex-col h-full relative group transition-all duration-500 hover:border-[#c8b99a]/50 overflow-hidden shadow-sm">
@@ -44,8 +71,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       )}
 
       {/* Image Container */}
-      <Link href={`/products/${id}`} className="block">
-        <div className="aspect-[4/5] relative overflow-hidden">
+      <div className="aspect-[4/5] relative overflow-hidden">
+        <Link href={`/products/${id}`} className="block h-full">
           {imageUrl ? (
             <>
               <Image
@@ -69,13 +96,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           )}
 
-          {/* Quick Actions Overlay (Stopped from bubbling Link if needed, but for now okay) */}
-          <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-10">
-            <button className="w-full py-3 bg-[#c8b99a] text-black text-[9px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-2 hover:bg-white transition-all cursor-pointer">
-                Add to Bag
-            </button>
-          </div>
-
           {/* Favorite Button */}
           <button 
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
@@ -83,8 +103,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
           </button>
+        </Link>
+
+        <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-10">
+          <button onClick={handleAddToBag} className="w-full py-3 bg-[#c8b99a] text-black text-[9px] tracking-[0.2em] font-bold uppercase flex items-center justify-center gap-2 hover:bg-white transition-all cursor-pointer">
+              Add to Bag
+          </button>
         </div>
-      </Link>
+      </div>
 
       {/* Content */}
       <div className="flex flex-col flex-grow p-4 space-y-3">

@@ -42,9 +42,9 @@ const FILTER_SECTIONS = [
 
 const SORT_OPTIONS = ["Featured", "Price: Low to High", "Price: High to Low", "New Arrivals"];
 
-type ViewAllProductsProps = {
+type ViewAllProductsProps = Readonly<{
   initialCategory?: string;
-};
+}>;
 
 export default function ViewAllProducts({ initialCategory = 'ALL ITEMS' }: ViewAllProductsProps) {
   const [products, setProducts] = React.useState<ProductDto[]>([]);
@@ -369,6 +369,7 @@ export default function ViewAllProducts({ initialCategory = 'ALL ITEMS' }: ViewA
                   imageUrl={product.imageUrls && product.imageUrls[0] ? getProductImageUrl(product.imageUrls[0]) : producyImage.src}
                   badge={product.stockStatus === 'OUTOFSTOCK' ? 'SALE' : undefined}
                   sizes={product.sizes as any}
+                  colors={product.colors as any}
                 />
               </div>
             ))

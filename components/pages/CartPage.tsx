@@ -16,31 +16,12 @@ import {
 } from 'lucide-react';
 import { placeOrder } from '../../app/api/api-service';
 import { OrderDTO, OrderItemDTO, PaymentMethod } from '../../types/api-types';
-
-// Mock data for the cart
-const INITIAL_CART = [
-  {
-    id: 'noir-01',
-    name: 'OVERSIZED LINEN BLEND BLAZER',
-    price: 24500,
-    size: 'M',
-    color: 'Noir Black',
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 'noir-02',
-    name: 'SILK MIDI DRESS',
-    price: 18200,
-    size: 'S',
-    color: 'Pure White',
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop'
-  }
-];
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { clearCart, removeFromCart, updateCartQuantity } from '@/store/cartSlice';
 
 const CartPage = () => {
-  const [items, setItems] = useState(INITIAL_CART);
+  const dispatch = useAppDispatch();
+  const items = useAppSelector((state) => state.cart.items);
   const [step, setStep] = useState(1); // 1: Cart, 2: Checkout, 3: Success
   const [selectedPayment, setSelectedPayment] = useState('CREDIT_CARD');
   
@@ -66,7 +47,7 @@ const CartPage = () => {
     setIsPlacingOrder(true);
     try {
       const orderItems: OrderItemDTO[] = items.map(item => ({
-        productId: 1, // DTO requires number but cart items might be string mock. Using 1 as fallback for demo
+        productId: item.id,
         productName: item.name,
         imageUrl: item.image,
         color: item.color as any,
@@ -88,7 +69,7 @@ const CartPage = () => {
       const response = await placeOrder(orderData);
       setOrderResponse(response);
       setStep(3);
-      setItems([]); // Clear local cart
+      dispatch(clearCart());
     } catch (err) {
       console.error('Failed to place order:', err);
       alert('There was an issue placing your order. Please try again.');
@@ -97,16 +78,24 @@ const CartPage = () => {
     }
   };
 
-  const updateQuantity = (id: string, size: string, delta: number) => {
-    setItems(items.map(item => 
-      (item.id === id && item.size === size) 
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) } 
-        : item
-    ));
+  const updateQuantity = (id: number, size: string, color: string, delta: number) => {
+    const target = items.find(
+      (item) => item.id === id && item.size === size && item.color === color,
+    );
+    if (!target) return;
+
+    dispatch(
+      updateCartQuantity({
+        id,
+        size,
+        color,
+        quantity: Math.max(1, target.quantity + delta),
+      }),
+    );
   };
 
-  const removeItem = (id: string, size: string) => {
-    setItems(items.filter(item => !(item.id === id && item.size === size)));
+  const removeItem = (id: number, size: string, color: string) => {
+    dispatch(removeFromCart({ id, size, color }));
   };
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -203,7 +192,7 @@ const CartPage = () => {
                           <div className="text-[10px] text-[#888] uppercase">
                             <p>Size: {item.size} / Color: {item.color}</p>
                           </div>
-                          <button onClick={() => removeItem(item.id, item.size)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
+                          <button onClick={() => removeItem(item.id, item.size, item.color)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
                             <Trash2 size={10} /> Remove
                           </button>
                         </div>
@@ -217,9 +206,9 @@ const CartPage = () => {
                       <div className="flex items-center justify-between md:justify-center">
                         <span className="md:hidden text-[9px] font-bold uppercase text-[#b5b1a8]">Quantity</span>
                         <div className="flex items-center border border-[#e5e1d8] h-10 px-3 bg-white">
-                          <button onClick={() => updateQuantity(item.id, item.size, -1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={12} /></button>
+                          <button onClick={() => updateQuantity(item.id, item.size, item.color, -1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={12} /></button>
                           <span className="w-8 text-center text-[12px]">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.size, 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={12} /></button>
+                          <button onClick={() => updateQuantity(item.id, item.size, item.color, 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={12} /></button>
                         </div>
                       </div>
 
@@ -334,7 +323,7 @@ const CartPage = () => {
                 <div className="pt-6">
                   <button 
                     onClick={() => {
-                        setItems([]);
+                      dispatch(clearCart());
                         setStep(1);
                     }} 
                     className="px-12 py-5 bg-black text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-[#111] transition-all shadow-xl"

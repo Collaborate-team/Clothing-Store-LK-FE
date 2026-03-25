@@ -5,6 +5,9 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { FiUser, FiSearch, FiShoppingBag, FiMenu, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import CartDrawer from "./CartDrawer";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { closeCartDrawer, removeFromCart, updateCartQuantity, openCartDrawer } from "@/store/cartSlice";
 import LOGO from '../../public/images/Logo.jpeg'
 
 
@@ -31,11 +34,15 @@ const navLinks: NavLink[] = [
 
 /* ─────────────────────────── Component ─────────────────────── */
 export default function NavBar() {
+    const dispatch = useAppDispatch();
+    const cartItems = useAppSelector((state) => state.cart.items);
+    const isCartOpen = useAppSelector((state) => state.cart.isDrawerOpen);
+    const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
     const [isScrolled, setIsScrolled] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [cartCount] = useState(0);
 
     // Scroll Detection
     useEffect(() => {
@@ -183,14 +190,14 @@ export default function NavBar() {
                     {/*    <FiUser size={18} />*/}
                     {/*</Link>*/}
 
-                    <Link href="/cart" className="relative text-black/80 hover:text-[#c8a96e] p-2 transition-colors">
+                    <button onClick={() => dispatch(openCartDrawer())} className="relative text-black/80 hover:text-[#c8a96e] p-2 transition-colors">
                         <FiShoppingBag size={18} />
                         {cartCount > 0 && (
                             <span className="absolute top-1 right-1 bg-[#c8a96e] text-black text-[0.55rem] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
                                 {cartCount}
                             </span>
                         )}
-                    </Link>
+                    </button>
                 </div>
             </header>
 
@@ -242,6 +249,14 @@ export default function NavBar() {
                     />
                 )}
             </AnimatePresence>
+
+            <CartDrawer
+                isOpen={isCartOpen}
+                onClose={() => dispatch(closeCartDrawer())}
+                items={cartItems}
+                onRemove={(id, size, color) => dispatch(removeFromCart({ id, size, color }))}
+                onUpdateQuantity={(id, size, color, quantity) => dispatch(updateCartQuantity({ id, size, color, quantity }))}
+            />
         </>
     );
 }

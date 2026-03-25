@@ -16,7 +16,8 @@ import {
   ChevronUp
 } from 'lucide-react';
 import ProductCard from '../product/ProductCard';
-import CartDrawer from '../common/CartDrawer';
+import { useAppDispatch } from '@/store/hooks';
+import { addToCart as addToCartAction } from '@/store/cartSlice';
 
 const MOCK_PRODUCT = {
   id: 'noir-01',
@@ -89,6 +90,7 @@ const Related_Products = [
 ];
 
 const SingleProductPage: React.FC = () => {
+  const dispatch = useAppDispatch();
   const params = useParams();
   const searchParams = useSearchParams();
   const productId = (params?.id as string) || searchParams.get('id');
@@ -98,9 +100,6 @@ const SingleProductPage: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState(MOCK_PRODUCT.colors[1]);
   const [quantity, setQuantity] = useState(1);
   const [openDetail, setOpenDetail] = useState<number | null>(0);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  const [cartItems, setCartItems] = useState<any[]>([]);
 
   const [productData, setProductData] = useState<any>(MOCK_PRODUCT);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,43 +150,18 @@ const SingleProductPage: React.FC = () => {
     setOpenDetail(openDetail === index ? null : index);
   };
 
-    const addToCart = () => {
-      const newItem = {
-        id: productData.id,
+  const addToCart = () => {
+    dispatch(
+      addToCartAction({
+        id: Number(productData.id) || 0,
         name: productData.name,
-        price: productData.price,
+        price: Number(String(productData.price).replace(/,/g, '')) || 0,
         size: selectedSize,
         color: selectedColor.name,
-        quantity: quantity,
-        image: productData.images[0]
-      };
-
-    setCartItems(prev => {
-      const existingItemIndex = prev.findIndex(
-        item => item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
-      );
-
-      if (existingItemIndex > -1) {
-        const updatedCart = [...prev];
-        updatedCart[existingItemIndex].quantity += newItem.quantity;
-        return updatedCart;
-      }
-      return [...prev, newItem];
-    });
-
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (id: string, size: string, color: string) => {
-    setCartItems(prev => prev.filter(item => !(item.id === id && item.size === size && item.color === color)));
-  };
-
-  const updateCartQuantity = (id: string, size: string, color: string, newQuantity: number) => {
-    setCartItems(prev => prev.map(item => 
-      (item.id === id && item.size === size && item.color === color) 
-        ? { ...item, quantity: newQuantity } 
-        : item
-    ));
+        quantity,
+        image: productData.images?.[0] || MOCK_PRODUCT.images[0],
+      }),
+    );
   };
 
   return (
@@ -371,15 +345,6 @@ const SingleProductPage: React.FC = () => {
           </div>
         </section>
       </main>
-
-      {/* Cart Drawer Component */}
-      <CartDrawer 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-        items={cartItems} 
-        onRemove={removeFromCart}
-        onUpdateQuantity={updateCartQuantity}
-      />
     </div>
   );
 };

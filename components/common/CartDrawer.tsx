@@ -2,12 +2,13 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
 
 interface CartItem {
-  id: string;
+  id: number;
   name: string;
-  price: string;
+  price: number;
   size: string;
   color: string;
   quantity: number;
@@ -18,8 +19,8 @@ interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   items: CartItem[];
-  onRemove: (id: string, size: string, color: string) => void;
-  onUpdateQuantity: (id: string, size: string, color: string, newQuantity: number) => void;
+  onRemove: (id: number, size: string, color: string) => void;
+  onUpdateQuantity: (id: number, size: string, color: string, newQuantity: number) => void;
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemove, onUpdateQuantity }) => {
@@ -32,10 +33,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
-  const subtotal = items.reduce((acc, item) => {
-    const price = parseFloat(item.price.replace(/,/g, ''));
-    return acc + price * item.quantity;
-  }, 0);
+  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   return (
     <>
@@ -79,7 +77,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                 <div className="flex-1 flex flex-col py-1">
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="text-[10px] tracking-[0.15em] font-bold uppercase leading-tight max-w-[180px]">{item.name}</h3>
-                    <span className="text-[12px] font-medium">Rs {item.price}</span>
+                    <span className="text-[12px] font-medium">Rs {item.price.toLocaleString()}</span>
                   </div>
                   
                   <div className="text-[9px] tracking-[0.1em] text-[#888] uppercase space-y-1 mb-4">
@@ -132,10 +130,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
           </div>
 
           <div className="space-y-3">
-            <button className="w-full h-14 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase flex items-center justify-center gap-3 hover:bg-[#1a1a1a] transition-all group cursor-pointer">
+            <Link href="/cart" onClick={onClose} className="w-full h-14 bg-black text-white text-[11px] tracking-[0.3em] font-bold uppercase flex items-center justify-center gap-3 hover:bg-[#1a1a1a] transition-all group cursor-pointer">
               Checkout Now
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
             <button 
               onClick={onClose}
               className="w-full h-14 border border-black text-black text-[11px] tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all cursor-pointer"

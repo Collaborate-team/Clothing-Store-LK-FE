@@ -34,7 +34,8 @@ const ProductCategoryList = () => {
                     category: item.category,
                     imageUrl: item.imageUrls?.[0] || producyImage,
                     hoverImageUrl: item.imageUrls?.[1],
-                    sizes: item.sizes
+                    sizes: item.sizes,
+                    colors: item.colors
                 }));
                 setProducts(mappedData);
             } catch (error) {
@@ -103,6 +104,7 @@ const ProductCategoryList = () => {
                                         imageUrl={product.imageUrl}
                                         hoverImageUrl={product.hoverImageUrl}
                                         sizes={product.sizes}
+                                        colors={product.colors}
                                     />
                                 </div>
                             ))
