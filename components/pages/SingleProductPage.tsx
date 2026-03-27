@@ -110,7 +110,7 @@ const SingleProductPage: React.FC = () => {
           description: item.description || '',
           colors: mappedColors,
           sizes: item.sizes || [],
-          images: item.imageUrls || [],
+          images: (item.imageUrls || []).filter((url: string) => url && url.trim() !== ''),
           details: [],
         });
 
@@ -201,14 +201,20 @@ const SingleProductPage: React.FC = () => {
             <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
               {/* Main Image */}
               <div className="relative flex-1 aspect-3/4 sm:aspect-4/5 overflow-hidden bg-white border border-[#e5e1d8]">
-                <Image 
-                  src={productData.images[activeImage] || ''} 
-                  alt={productData.name} 
-                  fill 
-                  priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 35vw"
-                  className="object-cover transition-transform duration-700 hover:scale-105" 
-                />
+                {productData.images[activeImage] ? (
+                  <Image 
+                    src={productData.images[activeImage]} 
+                    alt={productData.name} 
+                    fill 
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 35vw"
+                    className="object-cover transition-transform duration-700 hover:scale-105" 
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-[#c8b99a]/20 border-t-[#c8b99a] rounded-full animate-spin" />
+                  </div>
+                )}
                 <button className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2.5 sm:p-3 bg-white/80 backdrop-blur-md rounded-full text-black hover:bg-black hover:text-white transition-all shadow-sm z-10 cursor-pointer">
                   <Heart size={16} />
                 </button>
@@ -218,7 +224,7 @@ const SingleProductPage: React.FC = () => {
               <div className="flex lg:flex-col gap-2 sm:gap-3 overflow-x-auto lg:overflow-x-visible lg:w-24 no-scrollbar py-2 lg:py-0">
                 {productData.images.map((img: string, idx: number) => (
                   <button 
-                    key={img}
+                    key={`${img}-${idx}`}
                     onClick={() => setActiveImage(idx)}
                     className={`relative w-16 h-20 sm:w-20 sm:h-28 lg:w-20 lg:h-24 shrink-0 border transition-all duration-300 cursor-pointer ${activeImage === idx ? 'border-black' : 'border-[#e5e1d8] grayscale-110 opacity-70 hover:opacity-100 hover:grayscale-0'}`}
                   >

@@ -75,7 +75,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Image Container */}
       <div className="aspect-4/5 relative overflow-hidden">
         <Link href={`/products/${id}`} className="block h-full">
-          {imageUrl ? (
+          {imageUrl && imageUrl !== '' ? (
             <>
               <Image
                 src={imageUrl}
@@ -83,7 +83,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 fill
                 className={`object-cover transition-all duration-700 ease-in-out cursor-pointer ${hoverImageUrl ? 'group-hover:opacity-0 group-hover:scale-105' : 'group-hover:scale-110'}`}
               />
-              {hoverImageUrl && (
+              {hoverImageUrl && hoverImageUrl !== '' && (
                 <Image
                   src={hoverImageUrl}
                   alt={`${title} - alternative view`}
