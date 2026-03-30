@@ -105,8 +105,8 @@ const CartPage = () => {
 
     setIsPlacingOrder(true);
     try {
-      const normalizeEnumValue = (value: string) =>
-        value.trim().toUpperCase().replaceAll(' ', '_');
+      const normalizeEnumValue = (value: string | null) =>
+        value ? value.trim().toUpperCase().replaceAll(' ', '_') : null;
 
       const customerName = `${formData.firstName} ${formData.lastName}`.trim() || 'Guest User';
       const fullAddress = `${formData.address}, ${formData.city}, ${formData.province}`;
@@ -147,7 +147,7 @@ const CartPage = () => {
     }
   };
 
-  const updateQuantity = useCallback((id: number, size: string, color: string, delta: number) => {
+  const updateQuantity = useCallback((id: number, size: string | null, color: string | null, delta: number) => {
     const target = items.find(
       (item) => item.id === id && item.size === size && item.color === color,
     );
@@ -169,7 +169,7 @@ const CartPage = () => {
     );
   }, [dispatch, items, showNotification]);
 
-  const removeItem = useCallback((id: number, size: string, color: string) => {
+  const removeItem = useCallback((id: number, size: string | null, color: string | null) => {
     dispatch(removeFromCart({ id, size, color }));
   }, [dispatch]);
 
@@ -270,7 +270,7 @@ const CartPage = () => {
                         <div className="flex flex-col justify-center gap-1">
                           <h3 className="text-[11px] tracking-[0.15em] font-bold uppercase leading-tight">{item.name}</h3>
                           <div className="text-2xs text-[#888] uppercase">
-                            <p>Size: {item.size} / Color: {item.color}</p>
+                            <p>{item.size ? `Size: ${item.size}` : ''} {item.size && item.color ? '/' : ''} {item.color ? `Color: ${item.color}` : ''}</p>
                           </div>
                           <button onClick={() => removeItem(item.id, item.size, item.color)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
                             <Trash2 size={10} /> Remove

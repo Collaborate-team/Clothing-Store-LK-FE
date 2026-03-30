@@ -9,8 +9,8 @@ interface CartItem {
   id: number;
   name: string;
   price: number;
-  size: string;
-  color: string;
+  size: string | null;
+  color: string | null;
   quantity: number;
   image: string;
 }
@@ -19,8 +19,8 @@ interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   items: CartItem[];
-  onRemove: (id: number, size: string, color: string) => void;
-  onUpdateQuantity: (id: number, size: string, color: string, newQuantity: number) => void;
+  onRemove: (id: number, size: string | null, color: string | null) => void;
+  onUpdateQuantity: (id: number, size: string | null, color: string | null, newQuantity: number) => void;
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemove, onUpdateQuantity }) => {
@@ -81,8 +81,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                   </div>
                   
                   <div className="text-[9px] tracking-[0.1em] text-[#888] uppercase space-y-1 mb-4">
-                    <p>Color: {item.color}</p>
-                    <p>Size: {item.size}</p>
+                    {item.color && <p>Color: {item.color}</p>}
+                    {item.size && <p>Size: {item.size}</p>}
                   </div>
 
                   <div className="mt-auto flex items-center justify-between">

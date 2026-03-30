@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { 
   Heart, 
   ShoppingBag, 
@@ -61,7 +61,7 @@ const SingleProductPage: React.FC = () => {
   const productId = (params?.id as string) || searchParams.get('id');
 
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [openDetail, setOpenDetail] = useState<number | null>(0);
@@ -115,7 +115,15 @@ const SingleProductPage: React.FC = () => {
         });
 
         if (mappedColors.length > 0) {
-          setSelectedColor(mappedColors[0]);
+          // No auto-selection
+        } else {
+          setSelectedColor(null);
+        }
+
+        if (item.sizes && item.sizes.length > 0) {
+          // No auto-selection
+        } else {
+          setSelectedSize(null);
         }
 
         if (item.category) {
@@ -164,17 +172,44 @@ const SingleProductPage: React.FC = () => {
     setQuantity((q) => q + 1);
   };
 
+  const router = useRouter();
+
   const addToCart = () => {
+    if (productData.sizes.length > 0 && !selectedSize) {
+      showNotification('Please select a size first.', 'error');
+      return;
+    }
+
+    if (productData.colors?.length > 0 && !selectedColor) {
+      showNotification('Please select a color first.', 'error');
+      return;
+    }
+
     addToCartWithValidation({
       id: Number(productData.id) || 0,
       name: productData.name,
       price: Number(String(productData.price).replaceAll(',', '')) || 0,
       size: selectedSize,
-      color: selectedColor?.name || 'Default',
+      color: selectedColor?.name || null,
       quantity,
       image: productData.images?.[0] || '',
       stock: productData.quantity,
     });
+  };
+
+  const handleQuickCheckout = () => {
+    if (productData.sizes.length > 0 && !selectedSize) {
+      showNotification('Please select a size first.', 'error');
+      return;
+    }
+
+    if (productData.colors?.length > 0 && !selectedColor) {
+      showNotification('Please select a color first.', 'error');
+      return;
+    }
+
+    addToCart();
+    router.push('/cart'); // Direct to cart/checkout
   };
 
   return (
@@ -303,7 +338,7 @@ const SingleProductPage: React.FC = () => {
                 </button>
               </div>
               
-              <button className="w-full h-14 sm:h-12 border border-black text-black text-[11px] sm:text-[10px] tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all cursor-pointer">
+              <button onClick={handleQuickCheckout} className="w-full h-14 sm:h-12 border border-black text-black text-[11px] sm:text-[10px] tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all cursor-pointer">
                 Quick Checkout
               </button>
             </div>

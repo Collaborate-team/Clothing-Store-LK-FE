@@ -23,8 +23,8 @@ export function useCart() {
       id: number;
       name: string;
       price: number;
-      size: string;
-      color: string;
+      size: string | null;
+      color: string | null;
       image: string;
       quantity?: number;
       stock?: number;
@@ -60,7 +60,7 @@ export function useCart() {
   );
 
   const removeFromCart = useCallback(
-    (itemId: number, size: string, color: string) => {
+    (itemId: number, size: string | null, color: string | null) => {
       dispatch(removeFromCartAction({ id: itemId, size, color }));
       showNotification('Item removed from cart successfully.', 'info');
       return true;
@@ -69,7 +69,7 @@ export function useCart() {
   );
 
   const updateQuantity = useCallback(
-    (itemId: number, size: string, color: string, newQuantity: number) => {
+    (itemId: number, size: string | null, color: string | null, newQuantity: number) => {
       if (newQuantity < 1) {
         showNotification(ERROR_MESSAGES.INVALID_QUANTITY, 'error');
         return false;

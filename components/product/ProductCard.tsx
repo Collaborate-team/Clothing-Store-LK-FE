@@ -5,6 +5,7 @@ import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
+import { useNotification } from '@/context/NotificationContext';
 
 interface ProductCardProps {
   id?: string | number;
@@ -36,11 +37,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   stock,
 }) => {
   const { addToCart } = useCart();
+  const { showNotification } = useNotification();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
   const parsedPrice = useMemo(() => Number(price.toString().replaceAll(',', '')) || 0, [price]);
-  const resolvedSize = useMemo(() => selectedSize || sizes?.[0] || 'M', [selectedSize, sizes]);
-  const resolvedColor = useMemo(() => colors?.[0] || 'BLACK', [colors]);
   const resolvedImage = useMemo(() => {
     const fallbackImage = 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=1000&auto=format&fit=crop';
     return typeof imageUrl === 'string' ? imageUrl : imageUrl?.src || fallbackImage;
@@ -50,16 +51,26 @@ const ProductCard: React.FC<ProductCardProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
+    if (sizes && sizes.length > 0 && !selectedSize) {
+      showNotification('Please select a size first.', 'error');
+      return;
+    }
+
+    if (colors && colors.length > 0 && !selectedColor) {
+      showNotification('Please select a color first.', 'error');
+      return;
+    }
+
     addToCart({
       id: Number(id) || 0,
       name: title,
       price: parsedPrice,
-      size: resolvedSize,
-      color: resolvedColor,
+      size: selectedSize,
+      color: selectedColor,
       image: resolvedImage,
       stock,
     });
-  }, [addToCart, id, parsedPrice, resolvedColor, resolvedImage, resolvedSize, stock, title]);
+  }, [addToCart, id, parsedPrice, resolvedImage, selectedSize, selectedColor, sizes, colors, stock, title, showNotification]);
 
   return (
     <div className="bg-white border border-black/5 rounded-sm flex flex-col h-full relative group transition-all duration-500 hover:border-[#c8b99a]/50 overflow-hidden shadow-sm">
@@ -141,6 +152,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
               >
                 {size}
               </button>
+            ))}
+          </div>
+        )}
+
+        {colors && colors.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {colors.map((color) => (
+              <button
+                key={color}
+                onClick={() => setSelectedColor(color === selectedColor ? null : color)}
+                className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 cursor-pointer ${
+                  selectedColor === color 
+                    ? 'border-black scale-110' 
+                    : 'border-black/5 hover:border-black/20 font-bold uppercase'
+                }`}
+                style={{ backgroundColor: color.toLowerCase() }}
+                title={color}
+              />
             ))}
           </div>
         )}

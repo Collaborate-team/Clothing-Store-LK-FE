@@ -4,8 +4,8 @@ export interface CartItem {
   id: number;
   name: string;
   price: number;
-  size: string;
-  color: string;
+  size: string | null;
+  color: string | null;
   quantity: number;
   stock?: number;
   image: string;
@@ -15,8 +15,8 @@ interface AddCartItemPayload {
   id: number;
   name: string;
   price: number;
-  size: string;
-  color: string;
+  size: string | null;
+  color: string | null;
   image: string;
   quantity?: number;
   stock?: number;
@@ -75,7 +75,7 @@ const cartSlice = createSlice({
 
     removeFromCart: (
       state,
-      action: PayloadAction<{ id: number; size: string; color: string }>,
+      action: PayloadAction<{ id: number; size: string | null; color: string | null }>,
     ) => {
       state.items = state.items.filter(
         (item) =>
@@ -91,8 +91,8 @@ const cartSlice = createSlice({
       state,
       action: PayloadAction<{
         id: number;
-        size: string;
-        color: string;
+        size: string | null;
+        color: string | null;
         quantity: number;
       }>,
     ) => {

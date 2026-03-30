@@ -109,8 +109,8 @@ export interface OrderDTO {
 export interface PlaceOrderItemDTO {
   productId: number;
   quantity: number;
-  selectedSize: string;
-  selectedColor: string;
+  selectedSize: string | null;
+  selectedColor: string | null;
 }
 
 export interface PlaceOrderRequestDTO {
