@@ -183,6 +183,31 @@ const SingleProductPage: React.FC = () => {
   const router = useRouter();
   const effectiveSelectedDesign = selectedDesign || (productData.designs.length === 1 ? productData.designs[0] : null);
 
+  const getSelectedProductImage = (): string => {
+    let imageToDisplay: string | null = null;
+
+    if (selectedColor && effectiveSelectedDesign) {
+      const comboKey = `${selectedColor.name}-${effectiveSelectedDesign}`;
+      if (productData.variationImages[comboKey]) {
+        imageToDisplay = productData.variationImages[comboKey];
+      }
+    }
+
+    if (!imageToDisplay && effectiveSelectedDesign && productData.variationImages[effectiveSelectedDesign]) {
+      imageToDisplay = productData.variationImages[effectiveSelectedDesign];
+    }
+
+    if (!imageToDisplay && selectedColor && productData.variationImages[selectedColor.name]) {
+      imageToDisplay = productData.variationImages[selectedColor.name];
+    }
+
+    if (!imageToDisplay) {
+      imageToDisplay = productData.images[activeImage] || productData.images[0] || '';
+    }
+
+    return imageToDisplay;
+  };
+
   const addToCart = () => {
     if (productData.sizes.length > 0 && !selectedSize) {
       showNotification('Please select a size first.', 'error');
@@ -207,7 +232,7 @@ const SingleProductPage: React.FC = () => {
       color: selectedColor?.name || null,
       design: effectiveSelectedDesign,
       quantity,
-      image: productData.images?.[0] || '',
+      image: getSelectedProductImage(),
       stock: productData.quantity,
     });
   };
@@ -257,30 +282,7 @@ const SingleProductPage: React.FC = () => {
               {/* Main Image */}
               <div className="relative flex-1 aspect-3/4 sm:aspect-4/5 overflow-hidden bg-white border border-[#e5e1d8]">
                 {(() => {
-                  let imageToDisplay: string | null = null;
-                  
-                  // 1. Check for specific Color-Design combination (highest precision)
-                  if (selectedColor && effectiveSelectedDesign) {
-                    const comboKey = `${selectedColor.name}-${effectiveSelectedDesign}`;
-                    if (productData.variationImages[comboKey]) {
-                      imageToDisplay = productData.variationImages[comboKey];
-                    }
-                  }
-
-                  // 2. Check for specific design match 
-                  if (!imageToDisplay && effectiveSelectedDesign && productData.variationImages[effectiveSelectedDesign]) {
-                    imageToDisplay = productData.variationImages[effectiveSelectedDesign];
-                  } 
-                  
-                  // 3. Check for specific color match
-                  if (!imageToDisplay && selectedColor && productData.variationImages[selectedColor.name]) {
-                    imageToDisplay = productData.variationImages[selectedColor.name];
-                  }
-
-                  // 4. Fallback to default gallery image
-                  if (!imageToDisplay) {
-                    imageToDisplay = productData.images[activeImage];
-                  }
+                  const imageToDisplay = getSelectedProductImage();
 
                   return imageToDisplay ? (
                     <Image 
