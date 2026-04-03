@@ -4,8 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { 
   Package, 
-  ChevronRight, 
-  MapPin, 
+  ChevronRight,
   Clock, 
   CheckCircle2, 
   Truck,
@@ -121,7 +120,14 @@ const OrderHistoryPage = () => {
                       </div>
                       <h3 className="text-xs md:text-sm font-bold uppercase tracking-[0.1em] leading-tight flex flex-col">
                         <span>Luxury Collection Acquisition</span>
-                        {order.items && order.items.length > 0 && <span className="text-[10px] opacity-70 mt-1 lowercase capitalize-first">{order.items[0].productName} {order.items.length > 1 ? `& ${order.items.length - 1} more items` : ''}</span>}
+                        {order.items && order.items.length > 0 && (
+                          <span className="text-[10px] opacity-70 mt-1 lowercase capitalize-first">
+                            {order.items[0].productName}
+                            {order.items[0].size || order.items[0].color || order.items[0].design ? ' ' : ''}
+                            {[order.items[0].size, order.items[0].color, order.items[0].design].filter(Boolean).map(v => `(${v})`).join(' ')}
+                            {order.items.length > 1 ? ` & ${order.items.length - 1} more items` : ''}
+                          </span>
+                        )}
                       </h3>
                       <p className="text-[10px] md:text-[11px] text-[#888] italic">Consolidating {order.items?.length || 0} curated item{(order.items?.length !== 1) ? 's' : ''}</p>
                     </div>

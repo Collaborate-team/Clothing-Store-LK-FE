@@ -255,8 +255,8 @@ export default function NavBar() {
                 isOpen={isCartOpen}
                 onClose={() => dispatch(closeCartDrawer())}
                 items={cartItems}
-                onRemove={(id, size, color) => dispatch(removeFromCart({ id, size, color }))}
-                onUpdateQuantity={(id, size, color, quantity) => dispatch(updateCartQuantity({ id, size, color, quantity }))}
+                onRemove={(id, size, color, design) => dispatch(removeFromCart({ id, size, color, design }))}
+                onUpdateQuantity={(id, size, color, design, quantity) => dispatch(updateCartQuantity({ id, size, color, design, quantity }))}
             />
         </>
     );

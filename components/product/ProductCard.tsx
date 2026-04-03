@@ -19,6 +19,7 @@ interface ProductCardProps {
   isFavorite?: boolean;
   sizes?: string[];
   colors?: string[];
+  designs?: string[];
   stock?: number;
 }
 
@@ -34,12 +35,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
   isFavorite = false,
   sizes,
   colors,
+  designs,
   stock,
 }) => {
   const { addToCart } = useCart();
   const { showNotification } = useNotification();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
 
   const parsedPrice = useMemo(() => Number(price.toString().replaceAll(',', '')) || 0, [price]);
   const resolvedImage = useMemo(() => {
@@ -61,16 +64,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
       return;
     }
 
+    if (designs && designs.length > 0 && !selectedDesign) {
+      showNotification('Please select a design first.', 'error');
+      return;
+    }
+
     addToCart({
       id: Number(id) || 0,
       name: title,
       price: parsedPrice,
       size: selectedSize,
       color: selectedColor,
+      design: selectedDesign,
       image: resolvedImage,
       stock,
     });
-  }, [addToCart, id, parsedPrice, resolvedImage, selectedSize, selectedColor, sizes, colors, stock, title, showNotification]);
+  }, [addToCart, id, parsedPrice, resolvedImage, selectedSize, selectedColor, selectedDesign, sizes, colors, designs, stock, title, showNotification]);
 
   return (
     <div className="bg-white border border-black/5 rounded-sm flex flex-col h-full relative group transition-all duration-500 hover:border-[#c8b99a]/50 overflow-hidden shadow-sm">
@@ -170,6 +179,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 style={{ backgroundColor: color.toLowerCase() }}
                 title={color}
               />
+            ))}
+          </div>
+        )}
+
+        {designs && designs.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {designs.map((design) => (
+              <button
+                key={design}
+                onClick={() => setSelectedDesign(design === selectedDesign ? null : design)}
+                className={`text-[9px] px-2 py-0.5 border transition-all duration-300 cursor-pointer uppercase font-bold ${
+                  selectedDesign === design 
+                    ? 'bg-[#c8b99a] text-black border-[#c8b99a]' 
+                    : 'bg-transparent text-black/50 border-black/5 hover:border-black/20 hover:text-black'
+                }`}
+              >
+                {design}
+              </button>
             ))}
           </div>
         )}

@@ -439,6 +439,7 @@ export default function OrderDetailsPage() {
           const variation = [];
           if (item.size) variation.push(item.size);
           if (item.color) variation.push(item.color);
+          if (item.design) variation.push(item.design);
           
           return '<tr>' +
             '<td>' +
@@ -655,7 +656,7 @@ export default function OrderDetailsPage() {
                                     </div>
                                  </td>
                                  <td className="px-8 py-6">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center flex-wrap gap-2">
                                        {item.size && (
                                           <span className="px-2 py-1 bg-black/5 text-[9px] font-bold text-black border border-black/5 rounded-sm">
                                              {item.size}
@@ -669,6 +670,11 @@ export default function OrderDetailsPage() {
                                              />
                                              <span className="text-[9px] font-bold text-black uppercase">{item.color}</span>
                                           </div>
+                                       )}
+                                       {item.design && (
+                                          <span className="px-2 py-1 bg-black/5 text-[9px] font-bold text-black border border-black/5 rounded-sm">
+                                             {item.design}
+                                          </span>
                                        )}
                                     </div>
                                  </td>

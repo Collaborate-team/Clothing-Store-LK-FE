@@ -25,6 +25,7 @@ export function useCart() {
       price: number;
       size: string | null;
       color: string | null;
+      design: string | null;
       image: string;
       quantity?: number;
       stock?: number;
@@ -36,7 +37,8 @@ export function useCart() {
           (item) =>
             item.id === payload.id &&
             item.size === payload.size &&
-            item.color === payload.color,
+            item.color === payload.color &&
+            item.design === payload.design,
         );
         const requestedTotalQuantity = (existingItem?.quantity ?? 0) + qty;
         const error = validateQuantity(requestedTotalQuantity, payload.stock);
@@ -60,8 +62,8 @@ export function useCart() {
   );
 
   const removeFromCart = useCallback(
-    (itemId: number, size: string | null, color: string | null) => {
-      dispatch(removeFromCartAction({ id: itemId, size, color }));
+    (itemId: number, size: string | null, color: string | null, design: string | null) => {
+      dispatch(removeFromCartAction({ id: itemId, size, color, design }));
       showNotification('Item removed from cart successfully.', 'info');
       return true;
     },
@@ -69,21 +71,21 @@ export function useCart() {
   );
 
   const updateQuantity = useCallback(
-    (itemId: number, size: string | null, color: string | null, newQuantity: number) => {
+    (itemId: number, size: string | null, color: string | null, design: string | null, newQuantity: number) => {
       if (newQuantity < 1) {
         showNotification(ERROR_MESSAGES.INVALID_QUANTITY, 'error');
         return false;
       }
 
       const item = items.find(
-        (cartItem) => cartItem.id === itemId && cartItem.size === size && cartItem.color === color,
+        (cartItem) => cartItem.id === itemId && cartItem.size === size && cartItem.color === color && cartItem.design === design,
       );
       if (item?.stock !== undefined && newQuantity > item.stock) {
         showNotification(`Only ${item.stock} items are available in stock.`, 'error');
         return false;
       }
 
-      dispatch(updateCartQuantity({ id: itemId, size, color, quantity: newQuantity }));
+      dispatch(updateCartQuantity({ id: itemId, size, color, design, quantity: newQuantity }));
       return true;
     },
     [dispatch, items, showNotification]

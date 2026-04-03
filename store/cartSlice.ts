@@ -6,6 +6,7 @@ export interface CartItem {
   price: number;
   size: string | null;
   color: string | null;
+  design: string | null;
   quantity: number;
   stock?: number;
   image: string;
@@ -17,6 +18,7 @@ interface AddCartItemPayload {
   price: number;
   size: string | null;
   color: string | null;
+  design: string | null;
   image: string;
   quantity?: number;
   stock?: number;
@@ -37,9 +39,9 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action: PayloadAction<AddCartItemPayload>) => {
-      const { id, size, color } = action.payload;
+      const { id, size, color, design } = action.payload;
       const existing = state.items.find(
-        (item) => item.id === id && item.size === size && item.color === color,
+        (item) => item.id === id && item.size === size && item.color === color && item.design === design,
       );
 
       const qty = action.payload.quantity ?? 1;
@@ -64,6 +66,7 @@ const cartSlice = createSlice({
           price: action.payload.price,
           size: action.payload.size,
           color: action.payload.color,
+          design: action.payload.design,
           image: action.payload.image,
           quantity: qty,
           stock: stockLimit,
@@ -75,14 +78,15 @@ const cartSlice = createSlice({
 
     removeFromCart: (
       state,
-      action: PayloadAction<{ id: number; size: string | null; color: string | null }>,
+      action: PayloadAction<{ id: number; size: string | null; color: string | null; design: string | null }>,
     ) => {
       state.items = state.items.filter(
         (item) =>
           !(
             item.id === action.payload.id &&
             item.size === action.payload.size &&
-            item.color === action.payload.color
+            item.color === action.payload.color &&
+            item.design === action.payload.design
           ),
       );
     },
@@ -93,6 +97,7 @@ const cartSlice = createSlice({
         id: number;
         size: string | null;
         color: string | null;
+        design: string | null;
         quantity: number;
       }>,
     ) => {
@@ -100,7 +105,8 @@ const cartSlice = createSlice({
         (item) =>
           item.id === action.payload.id &&
           item.size === action.payload.size &&
-          item.color === action.payload.color,
+          item.color === action.payload.color &&
+          item.design === action.payload.design,
       );
 
       if (!target) return;

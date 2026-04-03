@@ -27,6 +27,7 @@ type RelatedProduct = {
   price: number;
   sizes?: string[];
   colors?: string[];
+  designs?: string[];
   imageUrls?: string[];
 };
 
@@ -49,7 +50,9 @@ type ProductDataType = {
   description: string;
   colors: ProductColor[];
   sizes: string[];
+  designs: string[];
   images: string[];
+  variationImages: Record<string, string>;
   details: ProductDetail[];
 };
 
@@ -63,6 +66,7 @@ const SingleProductPage: React.FC = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
+  const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [openDetail, setOpenDetail] = useState<number | null>(0);
 
@@ -75,7 +79,9 @@ const SingleProductPage: React.FC = () => {
     description: '',
     colors: [],
     sizes: [],
+    designs: [],
     images: [],
+    variationImages: {},
     details: [],
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +116,9 @@ const SingleProductPage: React.FC = () => {
           description: item.description || '',
           colors: mappedColors,
           sizes: item.sizes || [],
+          designs: item.designs || [],
           images: (item.imageUrls || []).filter((url: string) => url && url.trim() !== ''),
+          variationImages: item.variationImages || {},
           details: [],
         });
 
@@ -185,12 +193,18 @@ const SingleProductPage: React.FC = () => {
       return;
     }
 
+    if (productData.designs?.length > 0 && !selectedDesign) {
+      showNotification('Please select a design first.', 'error');
+      return;
+    }
+
     addToCartWithValidation({
       id: Number(productData.id) || 0,
       name: productData.name,
       price: Number(String(productData.price).replaceAll(',', '')) || 0,
       size: selectedSize,
       color: selectedColor?.name || null,
+      design: selectedDesign,
       quantity,
       image: productData.images?.[0] || '',
       stock: productData.quantity,
@@ -205,6 +219,11 @@ const SingleProductPage: React.FC = () => {
 
     if (productData.colors?.length > 0 && !selectedColor) {
       showNotification('Please select a color first.', 'error');
+      return;
+    }
+
+    if (productData.designs?.length > 0 && !selectedDesign) {
+      showNotification('Please select a design first.', 'error');
       return;
     }
 
@@ -236,20 +255,47 @@ const SingleProductPage: React.FC = () => {
             <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
               {/* Main Image */}
               <div className="relative flex-1 aspect-3/4 sm:aspect-4/5 overflow-hidden bg-white border border-[#e5e1d8]">
-                {productData.images[activeImage] ? (
-                  <Image 
-                    src={productData.images[activeImage]} 
-                    alt={productData.name} 
-                    fill 
-                    priority
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 35vw"
-                    className="object-cover transition-transform duration-700 hover:scale-105" 
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                    <div className="w-8 h-8 border-2 border-[#c8b99a]/20 border-t-[#c8b99a] rounded-full animate-spin" />
-                  </div>
-                )}
+                {(() => {
+                  let imageToDisplay: string | null = null;
+                  
+                  // 1. Check for specific Color-Design combination (highest precision)
+                  if (selectedColor && selectedDesign) {
+                    const comboKey = `${selectedColor.name}-${selectedDesign}`;
+                    if (productData.variationImages[comboKey]) {
+                      imageToDisplay = productData.variationImages[comboKey];
+                    }
+                  }
+
+                  // 2. Check for specific design match 
+                  if (!imageToDisplay && selectedDesign && productData.variationImages[selectedDesign]) {
+                    imageToDisplay = productData.variationImages[selectedDesign];
+                  } 
+                  
+                  // 3. Check for specific color match
+                  if (!imageToDisplay && selectedColor && productData.variationImages[selectedColor.name]) {
+                    imageToDisplay = productData.variationImages[selectedColor.name];
+                  }
+
+                  // 4. Fallback to default gallery image
+                  if (!imageToDisplay) {
+                    imageToDisplay = productData.images[activeImage];
+                  }
+
+                  return imageToDisplay ? (
+                    <Image 
+                      src={imageToDisplay} 
+                      alt={productData.name} 
+                      fill 
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 35vw"
+                      className="object-cover transition-transform duration-700 hover:scale-105" 
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-[#c8b99a]/20 border-t-[#c8b99a] rounded-full animate-spin" />
+                    </div>
+                  );
+                })()}
                 <button className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2.5 sm:p-3 bg-white/80 backdrop-blur-md rounded-full text-black hover:bg-black hover:text-white transition-all shadow-sm z-10 cursor-pointer">
                   <Heart size={16} />
                 </button>
@@ -320,6 +366,26 @@ const SingleProductPage: React.FC = () => {
                 ))}
               </div>
             </div>
+
+            {/* Design Selection */}
+            {productData.designs && productData.designs.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-[8px] sm:text-[9px] tracking-[0.3em] font-bold uppercase">Select Design</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {productData.designs.map((design: string) => (
+                    <button 
+                      key={design}
+                      onClick={() => setSelectedDesign(design)}
+                      className={`px-4 h-10 sm:h-12 flex items-center justify-center text-[10px] sm:text-[11px] font-medium border transition-all duration-300 cursor-pointer ${selectedDesign === design ? 'bg-black text-white border-black' : 'bg-white text-black border-[#e5e1d8] hover:border-black'}`}
+                    >
+                      {design}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quantity & Add to Cart */}
             <div className="space-y-3 sm:space-y-4 pt-2">
@@ -400,6 +466,7 @@ const SingleProductPage: React.FC = () => {
                   price={product.price?.toFixed(2) || '0.00'}
                   sizes={product.sizes}
                   colors={product.colors}
+                  designs={product.designs}
                   imageUrl={product.imageUrls?.[0]}
                 />
               </div>

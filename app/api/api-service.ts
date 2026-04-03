@@ -28,27 +28,28 @@ function encodePathSegments(path: string): string {
 }
 
 function normalizeProductImages(product: ProductDto): ProductDto {
+  const variationImages: Record<string, string> = {};
+  if (product.variationImages) {
+    Object.entries(product.variationImages).forEach(([key, value]) => {
+      if (value) variationImages[key] = getProductImageUrl(value as string);
+    });
+  }
+
   return {
     ...product,
     imageUrls: (product.imageUrls || []).map((image) => getProductImageUrl(image)),
+    variationImages
   };
 }
 
 export function getProductImageUrl(imageName: string): string {
   if (!imageName) return '';
 
-  if (imageName.startsWith('http')) {
-    try {
-      const url = new URL(imageName);
-      url.pathname = encodePathSegments(url.pathname);
-      return url.toString();
-    } catch {
-      return imageName.replaceAll(' ', '%20');
-    }
-  }
+  if (imageName.startsWith('http')) return imageName;
 
-  const normalizedFileName = imageName.replace(/^\/+/, '');
-  return `${IMAGE_BASE_URL}/${encodePathSegments(normalizedFileName)}`;
+  const normalizedFileName = imageName.replace(/^\/+/, '').replace(/^uploads\/+/, '');
+  // Using simple space encoding as standard browsers and Spring Boot handle other chars fine
+  return `${IMAGE_BASE_URL}/${normalizedFileName.replaceAll(' ', '%20')}`;
 }
 
 // --- PRODUCTS ---

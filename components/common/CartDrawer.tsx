@@ -11,6 +11,7 @@ interface CartItem {
   price: number;
   size: string | null;
   color: string | null;
+  design: string | null;
   quantity: number;
   image: string;
 }
@@ -19,8 +20,8 @@ interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   items: CartItem[];
-  onRemove: (id: number, size: string | null, color: string | null) => void;
-  onUpdateQuantity: (id: number, size: string | null, color: string | null, newQuantity: number) => void;
+  onRemove: (id: number, size: string | null, color: string | null, design: string | null) => void;
+  onUpdateQuantity: (id: number, size: string | null, color: string | null, design: string | null, newQuantity: number) => void;
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemove, onUpdateQuantity }) => {
@@ -67,7 +68,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
         <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
           {items.length > 0 ? (
             items.map((item) => (
-              <div key={`${item.id}-${item.size}-${item.color}`} className="flex gap-6 animate-fade-in">
+              <div key={`${item.id}-${item.size}-${item.color}-${item.design}`} className="flex gap-6 animate-fade-in">
                 {/* Product Image */}
                 <div className="relative w-24 h-32 bg-white border border-[#e5e1d8] overflow-hidden shrink-0">
                   <Image src={item.image} alt={item.name} fill className="object-cover" />
@@ -83,26 +84,27 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                   <div className="text-[9px] tracking-[0.1em] text-[#888] uppercase space-y-1 mb-4">
                     {item.color && <p>Color: {item.color}</p>}
                     {item.size && <p>Size: {item.size}</p>}
+                    {item.design && <p>Design: {item.design}</p>}
                   </div>
 
                   <div className="mt-auto flex items-center justify-between">
                     <div className="flex items-center border border-[#e5e1d8] h-10 px-3 bg-white">
                       <button 
-                        onClick={() => onUpdateQuantity(item.id, item.size, item.color, Math.max(1, item.quantity - 1))}
+                        onClick={() => onUpdateQuantity(item.id, item.size, item.color, item.design, Math.max(1, item.quantity - 1))}
                         className="p-1 hover:text-[#c8b99a] cursor-pointer"
                       >
                         <Minus size={12} />
                       </button>
                       <span className="w-8 text-center text-[11px]">{item.quantity}</span>
                       <button 
-                        onClick={() => onUpdateQuantity(item.id, item.size, item.color, item.quantity + 1)}
+                        onClick={() => onUpdateQuantity(item.id, item.size, item.color, item.design, item.quantity + 1)}
                         className="p-1 hover:text-[#c8b99a] cursor-pointer"
                       >
                         <Plus size={12} />
                       </button>
                     </div>
                     <button 
-                      onClick={() => onRemove(item.id, item.size, item.color)}
+                      onClick={() => onRemove(item.id, item.size, item.color, item.design)}
                       className="text-[9px] tracking-[0.2em] font-bold text-[#b5b1a8] border-b border-[#b5b1a8] hover:text-black hover:border-black transition-colors uppercase cursor-pointer"
                     >
                       Remove

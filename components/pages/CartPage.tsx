@@ -117,6 +117,7 @@ const CartPage = () => {
           quantity: item.quantity,
           selectedSize: normalizeEnumValue(item.size),
           selectedColor: normalizeEnumValue(item.color),
+          selectedDesign: normalizeEnumValue(item.design),
         })),
         paymentMethod: selectedPayment as PaymentMethod,
         customerName,
@@ -147,9 +148,9 @@ const CartPage = () => {
     }
   };
 
-  const updateQuantity = useCallback((id: number, size: string | null, color: string | null, delta: number) => {
+  const updateQuantity = useCallback((id: number, size: string | null, color: string | null, design: string | null, delta: number) => {
     const target = items.find(
-      (item) => item.id === id && item.size === size && item.color === color,
+      (item) => item.id === id && item.size === size && item.color === color && item.design === design,
     );
     if (!target) return;
 
@@ -164,13 +165,14 @@ const CartPage = () => {
         id,
         size,
         color,
+        design,
         quantity: nextQuantity,
       }),
     );
   }, [dispatch, items, showNotification]);
 
-  const removeItem = useCallback((id: number, size: string | null, color: string | null) => {
-    dispatch(removeFromCart({ id, size, color }));
+  const removeItem = useCallback((id: number, size: string | null, color: string | null, design: string | null) => {
+    dispatch(removeFromCart({ id, size, color, design }));
   }, [dispatch]);
 
   const subtotal = useMemo(
@@ -262,17 +264,19 @@ const CartPage = () => {
 
                 {items.length > 0 ? (
                   items.map((item) => (
-                    <div key={`${item.id}-${item.size}`} className="grid grid-cols-1 md:grid-cols-5 gap-6 p-6 border-b border-[#e5e1d8] last:border-0 hover:bg-[#fcfbf7] transition-colors group">
+                    <div key={`${item.id}-${item.size}-${item.color}-${item.design}`} className="grid grid-cols-1 md:grid-cols-5 gap-6 p-6 border-b border-[#e5e1d8] last:border-0 hover:bg-[#fcfbf7] transition-colors group">
                       <div className="col-span-1 md:col-span-2 flex gap-6">
                         <div className="relative w-24 h-32 shrink-0 overflow-hidden border border-[#e5e1d8]">
                           <Image src={item.image} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         </div>
                         <div className="flex flex-col justify-center gap-1">
                           <h3 className="text-[11px] tracking-[0.15em] font-bold uppercase leading-tight">{item.name}</h3>
-                          <div className="text-2xs text-[#888] uppercase">
-                            <p>{item.size ? `Size: ${item.size}` : ''} {item.size && item.color ? '/' : ''} {item.color ? `Color: ${item.color}` : ''}</p>
+                          <div className="text-2xs text-[#888] uppercase space-y-1">
+                            {item.size && <p>Size: {item.size}</p>}
+                            {item.color && <p>Color: {item.color}</p>}
+                            {item.design && <p>Design: {item.design}</p>}
                           </div>
-                          <button onClick={() => removeItem(item.id, item.size, item.color)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
+                          <button onClick={() => removeItem(item.id, item.size, item.color, item.design)} className="mt-2 text-[9px] text-red-800 border-b border-transparent hover:border-red-800 transition-all uppercase w-fit cursor-pointer flex items-center gap-1">
                             <Trash2 size={10} /> Remove
                           </button>
                         </div>
@@ -286,9 +290,9 @@ const CartPage = () => {
                       <div className="flex items-center justify-between md:justify-center">
                         <span className="md:hidden text-[9px] font-bold uppercase text-[#b5b1a8]">Quantity</span>
                         <div className="flex items-center border border-[#e5e1d8] h-10 px-3 bg-white">
-                          <button onClick={() => updateQuantity(item.id, item.size, item.color, -1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={12} /></button>
+                          <button onClick={() => updateQuantity(item.id, item.size, item.color, item.design, -1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Minus size={12} /></button>
                           <span className="w-8 text-center text-[12px]">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.size, item.color, 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={12} /></button>
+                          <button onClick={() => updateQuantity(item.id, item.size, item.color, item.design, 1)} className="p-1 hover:text-[#c8b99a] cursor-pointer"><Plus size={12} /></button>
                         </div>
                       </div>
 

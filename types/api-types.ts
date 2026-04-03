@@ -61,6 +61,17 @@ export enum StockStatus {
   OUTOFSTOCK = 'OUTOFSTOCK'
 }
 
+export enum Design {
+  CUSTOM = 'CUSTOM',
+  PLAIN = 'PLAIN',
+  PRINTED = 'PRINTED',
+  STRIPED = 'STRIPED',
+  CHECKERED = 'CHECKERED',
+  FLORAL = 'FLORAL',
+  GRAPHIC = 'GRAPHIC',
+  POLKA_DOT = 'POLKA_DOT'
+}
+
 // --- DTOs ---
 
 export interface AnalyticsDTO {
@@ -87,6 +98,7 @@ export interface OrderItemDTO {
   imageUrl: string;
   color: Color;
   size: Size;
+  design?: Design;
   qty: number;
   unitPrice: number;
 }
@@ -111,6 +123,7 @@ export interface PlaceOrderItemDTO {
   quantity: number;
   selectedSize: string | null;
   selectedColor: string | null;
+  selectedDesign: string | null;
 }
 
 export interface PlaceOrderRequestDTO {
@@ -131,7 +144,9 @@ export interface ProductDto {
   quantity?: number;
   sizes: Size[];
   colors: Color[];
+  designs: string[];
   description?: string;
   imageUrls: string[];
+  variationImages: Record<string, string>;
   stockStatus: StockStatus;
 }

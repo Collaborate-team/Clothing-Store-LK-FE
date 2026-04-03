@@ -6,14 +6,14 @@ import { AppError, ERROR_MESSAGES } from './error-handler';
 import { ErrorCode } from '@/types/errors';
 
 export const VALIDATION_RULES = {
-  MAX_CART_QUANTITY: 3,
-  MAX_QUANTITY_PER_PRODUCT: 3,
+  MAX_CART_QUANTITY: 100,
+  MAX_QUANTITY_PER_PRODUCT: 100,
   MIN_QUANTITY: 1,
-  MAX_IMAGE_SIZE_MB: 5,
-  MAX_IMAGE_SIZE_BYTES: 5 * 1024 * 1024,
-  ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
-  ALLOWED_IMAGE_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.webp'],
-  MAX_IMAGES_PER_PRODUCT: 5,
+  MAX_IMAGE_SIZE_MB: 1024, // 1GB
+  MAX_IMAGE_SIZE_BYTES: 1024 * 1024 * 1024,
+  ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
+  ALLOWED_IMAGE_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'],
+  MAX_IMAGES_PER_PRODUCT: 1000,
   STOCK_THRESHOLD: 1000,
 };
 
