@@ -118,6 +118,7 @@ const CartPage = () => {
           selectedSize: normalizeEnumValue(item.size),
           selectedColor: normalizeEnumValue(item.color),
           selectedDesign: normalizeEnumValue(item.design),
+          imageUrl: item.image,
         })),
         paymentMethod: selectedPayment as PaymentMethod,
         customerName,
