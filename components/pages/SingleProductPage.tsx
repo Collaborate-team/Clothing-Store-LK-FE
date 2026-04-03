@@ -181,6 +181,7 @@ const SingleProductPage: React.FC = () => {
   };
 
   const router = useRouter();
+  const effectiveSelectedDesign = selectedDesign || (productData.designs.length === 1 ? productData.designs[0] : null);
 
   const addToCart = () => {
     if (productData.sizes.length > 0 && !selectedSize) {
@@ -193,7 +194,7 @@ const SingleProductPage: React.FC = () => {
       return;
     }
 
-    if (productData.designs?.length > 0 && !selectedDesign) {
+    if (productData.designs?.length > 1 && !selectedDesign) {
       showNotification('Please select a design first.', 'error');
       return;
     }
@@ -204,7 +205,7 @@ const SingleProductPage: React.FC = () => {
       price: Number(String(productData.price).replaceAll(',', '')) || 0,
       size: selectedSize,
       color: selectedColor?.name || null,
-      design: selectedDesign,
+      design: effectiveSelectedDesign,
       quantity,
       image: productData.images?.[0] || '',
       stock: productData.quantity,
@@ -222,7 +223,7 @@ const SingleProductPage: React.FC = () => {
       return;
     }
 
-    if (productData.designs?.length > 0 && !selectedDesign) {
+    if (productData.designs?.length > 1 && !selectedDesign) {
       showNotification('Please select a design first.', 'error');
       return;
     }
@@ -259,16 +260,16 @@ const SingleProductPage: React.FC = () => {
                   let imageToDisplay: string | null = null;
                   
                   // 1. Check for specific Color-Design combination (highest precision)
-                  if (selectedColor && selectedDesign) {
-                    const comboKey = `${selectedColor.name}-${selectedDesign}`;
+                  if (selectedColor && effectiveSelectedDesign) {
+                    const comboKey = `${selectedColor.name}-${effectiveSelectedDesign}`;
                     if (productData.variationImages[comboKey]) {
                       imageToDisplay = productData.variationImages[comboKey];
                     }
                   }
 
                   // 2. Check for specific design match 
-                  if (!imageToDisplay && selectedDesign && productData.variationImages[selectedDesign]) {
-                    imageToDisplay = productData.variationImages[selectedDesign];
+                  if (!imageToDisplay && effectiveSelectedDesign && productData.variationImages[effectiveSelectedDesign]) {
+                    imageToDisplay = productData.variationImages[effectiveSelectedDesign];
                   } 
                   
                   // 3. Check for specific color match
@@ -368,7 +369,7 @@ const SingleProductPage: React.FC = () => {
             </div>
 
             {/* Design Selection */}
-            {productData.designs && productData.designs.length > 0 && (
+            {productData.designs && productData.designs.length > 1 && (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="text-[8px] sm:text-[9px] tracking-[0.3em] font-bold uppercase">Select Design</h3>

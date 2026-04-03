@@ -57,6 +57,33 @@ export default function EditProductPage() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [variationMapping, setVariationMapping] = useState<{combo: string; imageName: string}[]>([]);
 
+  const getRequiredVariationKeys = (): string[] => {
+    if (formData.colors.length > 0 && formData.designs.length > 0) {
+      return formData.colors.flatMap((color) => formData.designs.map((design) => `${color}-${design}`));
+    }
+
+    if (formData.colors.length > 0) {
+      return [...formData.colors];
+    }
+
+    if (formData.designs.length > 0) {
+      return [...formData.designs];
+    }
+
+    return [];
+  };
+
+  const getVariationKeysForColor = (color: string): { key: string; label: string }[] => {
+    if (formData.designs.length === 0) {
+      return [{ key: color, label: 'Color Default' }];
+    }
+
+    return formData.designs.map((design) => ({
+      key: `${color}-${design}`,
+      label: design,
+    }));
+  };
+
   const handleDesignImageUpload = (design: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -170,16 +197,99 @@ export default function EditProductPage() {
     }
   };
 
+  const getDetailedErrorMessage = (error: AppError): string => {
+    if (typeof error.details?.message === 'string' && error.details.message.trim()) {
+      return error.details.message;
+    }
+
+    const detailValues = Object.values(error.details || {}).find((value) => typeof value === 'string' && value.trim());
+    if (typeof detailValues === 'string') {
+      return detailValues;
+    }
+
+    return error.userMessage;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      if (!formData.name.trim()) {
+        showNotification('Product name is required.', 'error', 'Missing Information');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.description.trim()) {
+        showNotification('Description is required.', 'error', 'Missing Information');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!Number(formData.price) || Number(formData.price) <= 0) {
+        showNotification('Please enter a valid price greater than 0.', 'error', 'Invalid Price');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!Number(formData.quantity) || Number(formData.quantity) < 0) {
+        showNotification('Please enter a valid quantity.', 'error', 'Invalid Quantity');
+        setIsLoading(false);
+        return;
+      }
+
+      if (formData.sizes.length === 0) {
+        showNotification('Please select at least one size.', 'error', 'Missing Variants');
+        setIsLoading(false);
+        return;
+      }
+
+      if (formData.colors.length === 0) {
+        showNotification('Please select at least one color.', 'error', 'Missing Variants');
+        setIsLoading(false);
+        return;
+      }
+
+      if (existingImages.length === 0 && imageFiles.length === 0) {
+        showNotification('Please keep at least one product image or upload a new one.', 'error', 'Missing Images');
+        setIsLoading(false);
+        return;
+      }
+
       const mappedImages: Record<string, string> = {};
       variationMapping.forEach(m => {
         if (m.combo && m.imageName) mappedImages[m.combo] = m.imageName;
       });
-      const finalData = { ...formData, variationImages: mappedImages };
+
+      const fallbackDesign = 'PLAIN';
+      const useColorOnlyCompatibility = formData.designs.length === 0 && Object.keys(mappedImages).length > 0;
+      const normalizedMappedImages = useColorOnlyCompatibility
+        ? Object.fromEntries(
+            Object.entries(mappedImages).map(([colorKey, imageName]) => [`${colorKey}-${fallbackDesign}`, imageName])
+          )
+        : mappedImages;
+
+      const normalizedDesigns = useColorOnlyCompatibility
+        ? [fallbackDesign]
+        : formData.designs;
+
+      const requiredKeys = getRequiredVariationKeys();
+      const missingKeys = requiredKeys.filter((key) => !mappedImages[key]);
+
+      if (requiredKeys.length > 0 && missingKeys.length > 0) {
+        showNotification(
+          `Please map images for all selected variants. Missing: ${missingKeys.slice(0, 3).join(', ')}${missingKeys.length > 3 ? '...' : ''}`,
+          'error',
+          'Missing Variant Images'
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      const finalData = Object.keys(normalizedMappedImages).length > 0
+        ? { ...formData, designs: normalizedDesigns, variationImages: normalizedMappedImages }
+        : { ...formData };
 
       await updateProduct(productId, finalData as any, imageFiles);
       
@@ -190,7 +300,7 @@ export default function EditProductPage() {
       let message = 'Could not save product. Please check your backend connection.';
 
       if (err instanceof AppError) {
-        message = err.userMessage;
+        message = getDetailedErrorMessage(err);
       }
 
       showNotification(message, 'error', 'Error');
@@ -371,12 +481,12 @@ export default function EditProductPage() {
                     </div>
                   </div>
                   
-                  {formData.colors.length === 0 || formData.designs.length === 0 ? (
+                  {formData.colors.length === 0 ? (
                     <div className="py-12 border-2 border-dashed border-black/5 rounded-sm flex flex-col items-center justify-center space-y-3 bg-black/[0.01]">
                       <div className="p-3 bg-black/5 rounded-full">
                         <PlusCircle size={20} className="text-black/20" />
                       </div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/30">Please select at least one Color and one Design above</p>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/30">Please select at least one Color above</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -388,10 +498,8 @@ export default function EditProductPage() {
                           </div>
                           
                           <div className="space-y-3 pl-3 border-l-2 border-black/5">
-                            {formData.designs.map(design => {
-                              const comboKey = `${color}-${design}`;
+                            {getVariationKeysForColor(color).map(({ key: comboKey, label }) => {
                               const preview = getDesignImagePreview(comboKey);
-                              const mapping = variationMapping.find(m => m.combo === comboKey);
                               
                               return (
                                 <div 
@@ -400,7 +508,7 @@ export default function EditProductPage() {
                                 >
                                   <div className="flex items-center justify-between mb-3 relative z-10">
                                     <span className="text-[9px] font-black uppercase tracking-widest text-black/60 group-hover:text-black transition-colors">
-                                      {design}
+                                      {label}
                                     </span>
                                     {preview && (
                                       <span className="flex items-center gap-1.5 px-2 py-1 text-[7px] font-bold uppercase bg-green-50 text-green-600 rounded-[2px] border border-green-100">

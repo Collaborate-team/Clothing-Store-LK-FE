@@ -74,12 +74,20 @@ export async function addProduct(product: Partial<ProductDto>, images?: File[]):
 
   const formData = new FormData();
   formData.append('product', new Blob([JSON.stringify(product)], { type: 'application/json' }));
+
+  console.log('[addProduct] payload.product', product);
   
   if (images && images.length > 0) {
     images.forEach(image => {
       formData.append('images', image);
     });
   }
+
+  console.log('[addProduct] payload.images', (images || []).map((img) => ({
+    name: img.name,
+    size: img.size,
+    type: img.type,
+  })));
 
   const response = await axiosInstance.post('/api/v1/products/add', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -97,12 +105,20 @@ export async function updateProduct(id: string | number, product: Partial<Produc
 
   const formData = new FormData();
   formData.append('product', new Blob([JSON.stringify(product)], { type: 'application/json' }));
+
+  console.log('[updateProduct] payload.product', { id, ...product });
   
   if (images && images.length > 0) {
     images.forEach(image => {
       formData.append('images', image);
     });
   }
+
+  console.log('[updateProduct] payload.images', (images || []).map((img) => ({
+    name: img.name,
+    size: img.size,
+    type: img.type,
+  })));
 
   const response = await axiosInstance.put(`/api/v1/products/update/${id}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }

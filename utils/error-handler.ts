@@ -118,7 +118,7 @@ export function parseApiError(error: unknown): AppError {
         data?.userMessage || data?.message || ERROR_MESSAGES.INVALID_INPUT,
         data?.code || ErrorCode.INVALID_INPUT,
         400,
-        data?.details
+        data?.details || (data as unknown as Record<string, unknown>)
       );
     case 401:
       return new AppError(
