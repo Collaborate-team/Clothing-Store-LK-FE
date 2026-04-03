@@ -124,6 +124,7 @@ export interface PlaceOrderItemDTO {
   selectedSize: string | null;
   selectedColor: string | null;
   selectedDesign: string | null;
+  imageUrl?: string;
 }
 
 export interface PlaceOrderRequestDTO {
