@@ -19,7 +19,7 @@ import {
   Printer
 } from 'lucide-react';
 import Link from 'next/link';
-import { fetchOrderById, updateOrderStatus, getProductImageUrl } from '@/app/api/api-service';
+import { fetchOrderById, updateOrderStatus, getProductImageUrl, fetchProductById } from '@/app/api/api-service';
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
@@ -27,6 +27,21 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [resolvedOrderItemImages, setResolvedOrderItemImages] = useState<Record<string, string>>({});
+
+  const normalizeVariantToken = (value?: string | null): string => {
+    if (!value) return '';
+    return value.trim().toUpperCase().replaceAll(' ', '_');
+  };
+
+  const buildItemImageKey = (item: any): string => {
+    return `${item.productId}-${normalizeVariantToken(item.color)}-${normalizeVariantToken(item.design)}`;
+  };
+
+  const getItemResolvedImage = (item: any): string => {
+    const key = buildItemImageKey(item);
+    return resolvedOrderItemImages[key] || item.imageUrl || '';
+  };
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -42,6 +57,69 @@ export default function OrderDetailsPage() {
     };
     if (id) loadOrder();
   }, [id]);
+
+  useEffect(() => {
+    const resolveOrderItemImages = async () => {
+      if (!order?.items?.length) {
+        setResolvedOrderItemImages({});
+        return;
+      }
+
+      const uniqueProductIds = [...new Set(order.items.map((item: any) => item.productId))];
+      const productsById: Record<string, any> = {};
+
+      await Promise.all(
+        uniqueProductIds.map(async (productId) => {
+          try {
+            const product = await fetchProductById(productId as string | number);
+            productsById[String(productId)] = product;
+          } catch {
+            productsById[String(productId)] = null;
+          }
+        })
+      );
+
+      const nextResolvedMap: Record<string, string> = {};
+
+      order.items.forEach((item: any) => {
+        const itemKey = buildItemImageKey(item);
+        const product = productsById[String(item.productId)];
+
+        if (!product) {
+          return;
+        }
+
+        const variationImages = product.variationImages || {};
+        const color = normalizeVariantToken(item.color);
+        const design = normalizeVariantToken(item.design);
+
+        let resolvedImage = '';
+        if (color && design) {
+          resolvedImage = variationImages[`${color}-${design}`] || '';
+        }
+
+        if (!resolvedImage && design) {
+          resolvedImage = variationImages[design] || '';
+        }
+
+        if (!resolvedImage && color) {
+          resolvedImage = variationImages[color] || '';
+        }
+
+        if (!resolvedImage && product.imageUrls?.length) {
+          resolvedImage = product.imageUrls[0];
+        }
+
+        if (resolvedImage) {
+          nextResolvedMap[itemKey] = resolvedImage;
+        }
+      });
+
+      setResolvedOrderItemImages(nextResolvedMap);
+    };
+
+    void resolveOrderItemImages();
+  }, [order]);
 
   const handleStatusUpdate = async (newStatus: string) => {
     try {
@@ -639,9 +717,9 @@ export default function OrderDetailsPage() {
                                  <td className="px-8 py-6">
                                     <div className="flex items-center gap-4">
                                        <div className="w-16 h-16 bg-black/[0.02] border border-black/5 rounded-sm overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                                          {item.imageUrl ? (
+                                          {getItemResolvedImage(item) ? (
                                              <img 
-                                                src={getProductImageUrl(item.imageUrl)} 
+                                              src={getProductImageUrl(getItemResolvedImage(item))} 
                                                 alt={item.productName}
                                                 className="w-full h-full object-cover"
                                              />
